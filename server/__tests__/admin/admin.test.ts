@@ -33,8 +33,10 @@ describe('Admin Dashboard API', () => {
         const stats = response.body.syncStats[syncType];
         expect(stats).toHaveProperty('successRate');
         expect(stats).toHaveProperty('averageSyncTime');
+        expect(stats).toHaveProperty('totalRuns');
         expect(typeof stats.successRate).toBe('number');
         expect(typeof stats.averageSyncTime).toBe('number');
+        expect(typeof stats.totalRuns).toBe('number');
         
         // lastSync can be null if no syncs have been run
         if (stats.lastSync !== null) {

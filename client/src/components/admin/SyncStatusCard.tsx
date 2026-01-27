@@ -8,6 +8,7 @@ interface SyncStatusCardProps {
   title: string;
   successRate: number;
   averageSyncTime: number;
+  totalRuns: number;
   lastSyncItemsCount: number;
   lastSyncDuration: number;
   lastSyncStatus: 'success' | 'failed';
@@ -19,6 +20,7 @@ export default function SyncStatusCard({
   title,
   successRate,
   averageSyncTime,
+  totalRuns,
   lastSyncItemsCount,
   lastSyncDuration,
   lastSyncStatus,
@@ -117,13 +119,24 @@ export default function SyncStatusCard({
                 </Box>
               </Box>
 
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Average Sync Time
-                </Typography>
-                <Typography variant="h5">
-                  {averageSyncTime.toFixed(1)}s
-                </Typography>
+              <Box sx={{ mt: 2, display: 'flex', gap: 4 }}>
+                <Box sx={{ borderRight: '1px solid', borderColor: 'divider', pr: 4 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Average Sync Time
+                  </Typography>
+                  <Typography variant="h5">
+                    {averageSyncTime.toFixed(1)}s
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Runs
+                  </Typography>
+                  <Typography variant="h5">
+                    {totalRuns.toLocaleString()}
+                  </Typography>
+                </Box>
               </Box>
             </Grid>
           </Grid>

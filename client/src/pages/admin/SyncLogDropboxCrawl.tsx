@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useRef } from 'react';
 import {
   Container,
   Typography,
@@ -16,8 +17,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import SyncLogTable from '../../components/admin/SyncLogTable';
 import PaginationControls from '../../components/PaginationControls';
-import DropboxTokenDialog from '../../components/admin/DropboxTokenDialog';
-import { useState } from 'react';
+import SyncTriggerButton from '../../components/admin/SyncTriggerButton';
+import StatusMessage from '../../components/StatusMessage';
 
 export default function SyncLogDropboxCrawl() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,7 +29,18 @@ export default function SyncLogDropboxCrawl() {
   const endDate = searchParams.get('end_date') || '';
   const limit = 25;
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'info' | 'success' | 'error'; message: string } | null>(null);
+  const syncStartedByUser = useRef(false);
+  const wasRunning = useRef(false);
+  const syncStartTime = useRef<string | null>(null);
+
+  // Check if sync is running
+  const { data: syncStatusData } = useQuery({
+    queryKey: ['sync-status', 'dropbox_crawl'],
+    queryFn: () => api.getSyncStatus('dropbox_crawl'),
+  });
+
+  const isRunning = syncStatusData?.isRunning || false;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-sync-log', 'dropbox_crawl', page, status, startDate, endDate],
@@ -44,14 +56,76 @@ export default function SyncLogDropboxCrawl() {
       ),
   });
 
-  const crawlMutation = useMutation({
-    mutationFn: (token: string) => api.triggerDropboxCrawl('Dennis', token),
-    onSuccess: () => {
-      setDialogOpen(false);
+  // Show running message on initial load if sync is running
+  useEffect(() => {
+    if (isRunning && !statusMessage) {
+      setStatusMessage({ type: 'info', message: 'Dropbox crawl is running...' });
+      wasRunning.current = true;
+    }
+  }, [isRunning, statusMessage]);
+
+  // Auto-dismiss success messages after 10 seconds
+  useEffect(() => {
+    if (statusMessage?.type === 'success') {
+      const timer = setTimeout(() => {
+        setStatusMessage(null);
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [statusMessage]);
+
+  // Poll for status updates if sync is running
+  useEffect(() => {
+    if (!isRunning) {
+      return;
+    }
+
+    wasRunning.current = true;
+
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['sync-status', 'dropbox_crawl'] });
       queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'dropbox_crawl'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-    },
-  });
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [isRunning, queryClient]);
+
+  // Detect completion: was running, now stopped, and we have a REAL completed entry
+  useEffect(() => {
+    if (!wasRunning.current || isRunning) {
+      return;
+    }
+
+    const realEntries = data?.items?.filter((item: any) => !String(item.id).startsWith('temp-')) || [];
+    const mostRecentEntry = realEntries[0];
+    
+    if (!mostRecentEntry || !mostRecentEntry.completed_at) {
+      return;
+    }
+    
+    // Only show success for entries that started AFTER we began watching
+    // If syncStartTime is null, we loaded into a running sync, so accept any completed entry
+    if (syncStartTime.current && mostRecentEntry.started_at < syncStartTime.current) {
+      return;
+    }
+    
+    wasRunning.current = false;
+    syncStartTime.current = null;
+    
+    if (mostRecentEntry.status === 'success') {
+      setStatusMessage({ 
+        type: 'success', 
+        message: `Crawl Dropbox completed successfully (${mostRecentEntry.items_synced || 0} items)` 
+      });
+    } else if (mostRecentEntry.status === 'failed') {
+      setStatusMessage({ 
+        type: 'error', 
+        message: mostRecentEntry.error_message || 'Sync failed' 
+      });
+    }
+    
+    syncStartedByUser.current = false;
+  }, [isRunning, data]);
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;
 
@@ -95,8 +169,45 @@ export default function SyncLogDropboxCrawl() {
     setSearchParams(params);
   };
 
-  const handleRunSync = (token: string) => {
-    crawlMutation.mutate(token);
+  const handleSyncStatusChange = (statusUpdate: { type: 'info' | 'success' | 'error'; message: string } | null) => {
+    if (statusUpdate) {
+      setStatusMessage(statusUpdate);
+      
+      // Mark that user started this sync
+      if (statusUpdate.type === 'info') {
+        syncStartedByUser.current = true;
+        wasRunning.current = true;
+        syncStartTime.current = new Date().toISOString();
+      }
+      
+      // If starting a sync (info), add optimistic "running" entry to the table
+      if (statusUpdate.type === 'info') {
+        queryClient.setQueryData(
+          ['admin-sync-log', 'dropbox_crawl', page, status, startDate, endDate],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+            
+            const optimisticEntry = {
+              id: 'temp-' + Date.now(),
+              sync_type: 'dropbox_crawl',
+              user_name: 'Dennis',
+              started_at: new Date().toISOString(),
+              completed_at: null,
+              duration_seconds: null,
+              items_synced: null,
+              status: 'running',
+              error_message: null,
+            };
+            
+            return {
+              ...oldData,
+              items: [optimisticEntry, ...oldData.items],
+              total: oldData.total + 1,
+            };
+          }
+        );
+      }
+    }
   };
 
   if (isLoading) {
@@ -128,14 +239,28 @@ export default function SyncLogDropboxCrawl() {
           <Typography variant="h4">Crawl Dropbox Log</Typography>
         </Box>
 
-        <Button
-          variant="contained"
-          onClick={() => setDialogOpen(true)}
-          disabled={crawlMutation.isPending}
-        >
-          {crawlMutation.isPending ? 'Running...' : 'Crawl Dropbox'}
-        </Button>
+        <SyncTriggerButton
+          title="Crawl Dropbox"
+          buttonText="Crawl Dropbox"
+          requiresToken={true}
+          apiCall={(token) => api.triggerDropboxCrawl('Dennis', token!)}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'dropbox_crawl'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+            queryClient.invalidateQueries({ queryKey: ['sync-status', 'dropbox_crawl'] });
+          }}
+          onStatusChange={handleSyncStatusChange}
+          disabled={isRunning}
+        />
       </Box>
+
+      {statusMessage && (
+        <StatusMessage
+          type={statusMessage.type}
+          message={statusMessage.message}
+          onClose={statusMessage.type !== 'info' ? () => setStatusMessage(null) : undefined}
+        />
+      )}
 
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <FormControl size="small" sx={{ minWidth: 150 }}>
@@ -178,14 +303,6 @@ export default function SyncLogDropboxCrawl() {
         totalPages={totalPages}
         totalItems={data?.total || 0}
         onPageChange={handlePageChange}
-      />
-
-      <DropboxTokenDialog
-        open={dialogOpen}
-        title="Run Crawl Dropbox"
-        onClose={() => setDialogOpen(false)}
-        onConfirm={handleRunSync}
-        isLoading={crawlMutation.isPending}
       />
     </Container>
   );

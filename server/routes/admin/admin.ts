@@ -17,6 +17,13 @@ router.get('/dashboard', async (req: Request, res: Response) => {
         WHERE started_at >= NOW() - INTERVAL '30 days'
         GROUP BY sync_type
       ),
+      total_runs AS (
+        SELECT 
+          sync_type,
+          COUNT(*) as total_runs
+        FROM sync_log
+        GROUP BY sync_type
+      ),
       last_syncs AS (
         SELECT DISTINCT ON (sync_type)
           sync_type,
@@ -31,11 +38,13 @@ router.get('/dashboard', async (req: Request, res: Response) => {
         ss.sync_type,
         COALESCE(ss.success_rate, 0) as success_rate,
         COALESCE(ss.avg_duration, 0) as avg_duration,
+        COALESCE(tr.total_runs, 0) as total_runs,
         ls.items_synced as last_items_synced,
         ls.duration_seconds as last_duration,
         ls.status as last_status,
         ls.started_at as last_started_at
       FROM sync_stats ss
+      LEFT JOIN total_runs tr ON ss.sync_type = tr.sync_type
       LEFT JOIN last_syncs ls ON ss.sync_type = ls.sync_type
     `;
 
@@ -166,6 +175,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
       const stats = {
         successRate: parseFloat(row.success_rate) || 0,
         averageSyncTime: parseFloat(row.avg_duration) || 0,
+        totalRuns: parseInt(row.total_runs) || 0,
         lastSync: row.last_started_at ? {
           itemsCount: parseInt(row.last_items_synced) || 0,
           duration: parseFloat(row.last_duration) || 0,

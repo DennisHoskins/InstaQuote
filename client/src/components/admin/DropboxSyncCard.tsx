@@ -14,6 +14,7 @@ interface DropboxSyncCardProps {
     timestamp: string;
   } | null;
   lastSyncTime: string;
+  totalRuns: number;
 }
 
 export default function DropboxSyncCard({
@@ -21,6 +22,7 @@ export default function DropboxSyncCard({
   syncType,
   lastSync,
   lastSyncTime,
+  totalRuns,
 }: DropboxSyncCardProps) {
   const statusColor = lastSync?.status === 'success' ? 'success.main' : 'error.main';
 
@@ -63,6 +65,12 @@ export default function DropboxSyncCard({
               )}
             </Box>
           )}
+
+          <Box sx={{ mt: 1 }}>
+            <Typography variant="caption" color="text.secondary">
+              Total Runs: {totalRuns.toLocaleString()}
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
     </Link>

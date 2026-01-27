@@ -42,6 +42,12 @@ export const api = {
     return response.json();
   },
 
+  getSyncStatus: async (syncType: string) => {
+    const response = await fetch(`${API_BASE_URL}/admin/sync/status/${syncType}`);
+    if (!response.ok) throw new Error('Failed to fetch sync status');
+    return response.json();
+  },
+
   getMetalsPrices: async (days: number = 30) => {
     const params = new URLSearchParams({
       days: days.toString(),
@@ -136,6 +142,12 @@ export const api = {
     if (!response.ok) throw new Error('Failed to fetch SKU image mapping');
     return response.json();
   },  
+
+  getMissingLinksCount: async () => {
+    const response = await fetch(`${API_BASE_URL}/admin/sync/missing-links-count`);
+    if (!response.ok) throw new Error('Failed to fetch missing links count');
+    return response.json();
+  },
 
   getSkus: async (page: number, limit: number, search?: string, hasImage?: boolean) => {
     const params = new URLSearchParams({

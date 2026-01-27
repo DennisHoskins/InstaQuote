@@ -112,6 +112,7 @@ export default function Admin() {
                 title="Access Data Sync"
                 successRate={syncStats.access.successRate}
                 averageSyncTime={syncStats.access.averageSyncTime}
+                totalRuns={syncStats.access.totalRuns}  // Add this
                 lastSyncItemsCount={syncStats.access.lastSync?.itemsCount || 0}
                 lastSyncDuration={syncStats.access.lastSync?.duration || 0}
                 lastSyncStatus={syncStats.access.lastSync?.status === 'success' ? 'success' : 'failed'}
@@ -128,6 +129,7 @@ export default function Admin() {
                     syncType="dropbox_crawl"
                     lastSync={syncStats.dropbox_crawl.lastSync}
                     lastSyncTime={syncStats.dropbox_crawl.lastSync ? getRelativeTime(syncStats.dropbox_crawl.lastSync.timestamp) : 'Never'}
+                    totalRuns={syncStats.dropbox_crawl.totalRuns}
                   />
                 </Grid>
 
@@ -137,6 +139,7 @@ export default function Admin() {
                     syncType="sku_mapping"
                     lastSync={syncStats.sku_mapping.lastSync}
                     lastSyncTime={syncStats.sku_mapping.lastSync ? getRelativeTime(syncStats.sku_mapping.lastSync.timestamp) : 'Never'}
+                    totalRuns={syncStats.sku_mapping.totalRuns}
                   />
                 </Grid>
 
@@ -146,6 +149,7 @@ export default function Admin() {
                     syncType="dropbox_links"
                     lastSync={syncStats.dropbox_links.lastSync}
                     lastSyncTime={syncStats.dropbox_links.lastSync ? getRelativeTime(syncStats.dropbox_links.lastSync.timestamp) : 'Never'}
+                    totalRuns={syncStats.dropbox_links.totalRuns}
                   />
                 </Grid>
               </Grid>
