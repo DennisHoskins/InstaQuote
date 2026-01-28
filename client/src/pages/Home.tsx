@@ -1,8 +1,17 @@
 import { Box, Button, Container, Typography } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
+import SearchBar from '../components/SearchBar';
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  const handleSearch = (value: string) => {
+    if (value.trim()) {
+      navigate(`/search?q=${encodeURIComponent(value)}`);
+    }
+  };
+
   return (
     <Container maxWidth="md">
       <Box
@@ -18,10 +27,10 @@ export default function Home() {
 
         <NavBar />
 
-        <Typography variant="h2" component="h1" gutterBottom>
+        <Typography variant="h2" component="h1">
           New! InstaQuote Ordering
         </Typography>
-        
+
         <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', maxWidth: 800 }}>
           InstaQuote makes browsing and ordering from our full product catalog faster and easier than ever. 
           Search, filter, and view real-time pricing across thousands of items, build a quote in minutes, 
@@ -29,7 +38,7 @@ export default function Home() {
           up-to-date availability, accurate pricing, and a streamlined ordering experience from start to finish.
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 3, mt: 4 }}>
+        <Box sx={{ display: 'flex', gap: 3 }}>
           <Button
             variant="contained"
             size="large"
@@ -49,6 +58,13 @@ export default function Home() {
           >
             Choose Destination
           </Button>
+        </Box>
+
+        <Box sx={{ width: '100%', maxWidth: 600 }}>
+          <SearchBar
+            onSearch={handleSearch}
+            placeholder="Search by SKU, item code, description, or destination..."
+          />
         </Box>
       </Box>
     </Container>

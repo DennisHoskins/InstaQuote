@@ -24,13 +24,24 @@ router.get('/', [
     const offset = (page - 1) * limit;
 
     let queryText = `
+      WITH item_primary_images AS (
+        SELECT DISTINCT ON (ii.item_code)
+          ii.item_code as item_code_key,
+          df.shared_link
+        FROM inventory_items ii
+        JOIN sku_images si ON si.sku = ii.sku AND si.is_primary = true
+        JOIN dropbox_files df ON df.id = si.image_id
+        ORDER BY ii.item_code
+      )
       SELECT 
-        ci.*,
-        EXISTS (
-          SELECT 1 FROM dropbox_files 
-          WHERE file_name_no_ext = ci.item_code
-        ) as has_image
+      ci.*,
+      EXISTS (
+        SELECT 1 FROM dropbox_files 
+        WHERE file_name_no_ext = ci.item_code
+      ) as has_image,
+      ipi.shared_link as primary_image_url
       FROM inventory_items ci
+      LEFT JOIN item_primary_images ipi ON ipi.item_code_key = ci.item_code
       WHERE 1=1
     `;
     const queryParams: any[] = [];

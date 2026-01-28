@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
+import SearchResults from './pages/SearchResults';
 import Catalog from './pages/Catalog';
 import Destinations from './pages/Destinations';
 import DestinationItems from './pages/DestinationItems';
@@ -23,6 +24,7 @@ export default function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/search" element={<SearchResults />} />
         <Route path="/catalog" element={<Catalog />} />
         <Route path="/destinations/:destination" element={<DestinationItems />} />
         <Route path="/destinations" element={<Destinations />} />

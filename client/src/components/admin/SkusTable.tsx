@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import Table from '../Table';
 import type { Column } from '../Table';
+import { Box } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
@@ -16,6 +17,45 @@ interface SkusTableProps {
 }
 
 const columns: Column[] = [
+  {
+    key: 'primary_image_url',
+    label: 'Preview',
+    format: (value) => {
+      if (value) {
+        return (
+          <Box
+            component="img"
+            src={value.replace(/(\?dl=0|\?dl=1)$/, '?raw=1').replace(/&dl=0|&dl=1/, '&raw=1')}
+            alt="SKU preview"
+            sx={{
+              width: 60,
+              height: 60,
+              bgcolor: 'white',
+              objectFit: 'contain',
+              borderRadius: 1,
+            }}
+          />
+        );
+      }
+      return (
+        <Box
+          sx={{
+            width: 60,
+            height: 60,
+            bgcolor: 'grey.200',
+            borderRadius: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '10px',
+            color: 'text.secondary',
+          }}
+        >
+          No Preview
+        </Box>
+      );
+    },
+  },
   { key: 'sku', label: 'SKU' },
   { 
     key: 'item_count', 

@@ -18,6 +18,7 @@ describe('Admin SKUs API', () => {
         expect(sku).toHaveProperty('item_count');
         expect(sku).toHaveProperty('image_count');
         expect(sku).toHaveProperty('has_primary_image');
+        expect(sku).toHaveProperty('primary_image_url');
         expect(typeof sku.item_count).toBe('number');
         expect(typeof sku.image_count).toBe('number');
         expect(typeof sku.has_primary_image).toBe('boolean');

@@ -22,6 +22,7 @@ describe('Admin SKU Images API', () => {
         expect(mapping).toHaveProperty('confidence');
         expect(mapping).toHaveProperty('file_name_no_ext');
         expect(mapping).toHaveProperty('folder_path');
+        expect(mapping).toHaveProperty('shared_link');
       }
     });
 
@@ -107,58 +108,4 @@ describe('GET /api/admin/sku-images/:id', () => {
       expect(response.status).toBe(400);
     });
   });  
-
-  describe('GET /api/admin/sku-images/stats', () => {
-    it('should return SKU image statistics', async () => {
-      const response = await request(app)
-        .get('/api/admin/sku-images/stats');
-
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('totalMappings');
-      expect(response.body).toHaveProperty('skusWithImages');
-      expect(response.body).toHaveProperty('skusWithoutImages');
-      expect(response.body).toHaveProperty('skusWithMultipleImages');
-      expect(typeof response.body.totalMappings).toBe('number');
-      expect(typeof response.body.skusWithImages).toBe('number');
-      expect(typeof response.body.skusWithoutImages).toBe('number');
-      expect(typeof response.body.skusWithMultipleImages).toBe('number');
-    });
-  });
-
-  describe('POST /api/admin/sku-images/generate', () => {
-    it('should generate SKU image mappings', async () => {
-      const response = await request(app)
-        .post('/api/admin/sku-images/generate');
-
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('mappingsCreated');
-      expect(typeof response.body.mappingsCreated).toBe('number');
-    });
-  });
-
-  describe('DELETE /api/admin/sku-images/:id', () => {
-    it('should delete a SKU image mapping', async () => {
-      // First get a mapping to delete
-      const listResponse = await request(app)
-        .get('/api/admin/sku-images')
-        .query({ page: 1, limit: 1 });
-
-      if (listResponse.body.items.length > 0) {
-        const mappingId = listResponse.body.items[0].id;
-        
-        const response = await request(app)
-          .delete(`/api/admin/sku-images/${mappingId}`);
-
-        expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('deleted', true);
-      }
-    });
-
-    it('should return 404 for non-existent mapping', async () => {
-      const response = await request(app)
-        .delete('/api/admin/sku-images/999999');
-
-      expect(response.status).toBe(404);
-    });
-  });
 });

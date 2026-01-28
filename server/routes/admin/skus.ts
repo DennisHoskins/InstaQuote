@@ -31,14 +31,25 @@ router.get('/', [
           BOOL_OR(is_primary) as has_primary_image
         FROM sku_images
         GROUP BY sku
+      ),
+      sku_primary_images AS (
+        SELECT DISTINCT ON (si.sku)
+          si.sku,
+          df.shared_link
+        FROM sku_images si
+        JOIN dropbox_files df ON df.id = si.image_id
+        WHERE si.is_primary = true
+        ORDER BY si.sku, si.confidence DESC
       )
       SELECT 
         i.sku,
         COUNT(DISTINCT i.item_code) as item_count,
         COALESCE(sic.image_count, 0) as image_count,
-        COALESCE(sic.has_primary_image, false) as has_primary_image
+        COALESCE(sic.has_primary_image, false) as has_primary_image,
+        spi.shared_link as primary_image_url
       FROM inventory_items i
       LEFT JOIN sku_image_counts sic ON sic.sku = i.sku
+      LEFT JOIN sku_primary_images spi ON spi.sku = i.sku
       WHERE i.sku IS NOT NULL AND i.sku != ''
     `;
     const queryParams: any[] = [];
@@ -65,7 +76,7 @@ router.get('/', [
       queryText += ` AND (sic.image_count IS NULL OR sic.image_count = 0)`;
     }
 
-    queryText += ` GROUP BY i.sku, sic.image_count, sic.has_primary_image`;
+    queryText += ` GROUP BY i.sku, sic.image_count, sic.has_primary_image, spi.shared_link`;
 
     const countQuery = `SELECT COUNT(*) FROM (${queryText}) as count_query`;
     const countResult = await pool.query(countQuery, queryParams);
@@ -81,7 +92,8 @@ router.get('/', [
         sku: row.sku,
         item_count: parseInt(row.item_count),
         image_count: parseInt(row.image_count),
-        has_primary_image: row.has_primary_image
+        has_primary_image: row.has_primary_image,
+        primary_image_url: row.primary_image_url
       })),
       total,
       page,

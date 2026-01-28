@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Box } from '@mui/material';
 import Table from '../Table';
 import type { Column } from '../Table';
 
@@ -17,6 +18,45 @@ interface ItemsTableProps {
 }
 
 const columns: Column[] = [
+  {
+    key: 'primary_image_url',
+    label: 'Preview',
+    format: (value) => {
+      if (value) {
+        return (
+          <Box
+            component="img"
+            src={value.replace(/(\?dl=0|\?dl=1)$/, '?raw=1').replace(/&dl=0|&dl=1/, '&raw=1')}
+            alt="Item preview"
+            sx={{
+              width: 60,
+              height: 60,
+              bgcolor: 'white',
+              objectFit: 'contain',
+              borderRadius: 1,
+            }}
+          />
+        );
+      }
+      return (
+        <Box
+          sx={{
+            width: 60,
+            height: 60,
+            bgcolor: 'grey.200',
+            borderRadius: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '10px',
+            color: 'text.secondary',
+          }}
+        >
+          No Preview
+        </Box>
+      );
+    },
+  },
   { key: 'item_code', label: 'Item Code' },
   { key: 'sku', label: 'SKU' },
   { key: 'description', label: 'Description' },

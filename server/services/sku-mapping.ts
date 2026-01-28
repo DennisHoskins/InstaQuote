@@ -32,12 +32,14 @@ export async function generateMappings(): Promise<{ mappingsCreated: number; orp
         ELSE 'contains'
       END as match_type,
       CASE
-        WHEN UPPER(df.file_name_no_ext) LIKE '%6MM%' 
-          OR UPPER(df.file_name_no_ext) LIKE '%6 MM%'
+        WHEN df.file_extension IN ('.jpg', '.jpeg', '.png', '.gif')
+          AND (UPPER(df.file_name_no_ext) LIKE '%6MM%' 
+            OR UPPER(df.file_name_no_ext) LIKE '%6 MM%')
         THEN TRUE
         ELSE FALSE
       END as is_primary,
       CASE
+        WHEN df.file_extension NOT IN ('.jpg', '.jpeg', '.png', '.gif') THEN 0.3
         WHEN UPPER(df.file_name_no_ext) = UPPER(i.sku) THEN 1.0
         WHEN UPPER(df.file_name_no_ext) LIKE '%6MM%' OR UPPER(df.file_name_no_ext) LIKE '%6 MM%' THEN 0.8
         ELSE 0.5

@@ -21,6 +21,7 @@ describe('Admin Items API', () => {
         expect(item).toHaveProperty('destination');
         expect(item).toHaveProperty('total_ws_price');
         expect(item).toHaveProperty('has_image');
+        expect(item).toHaveProperty('primary_image_url');
       }
     });
 

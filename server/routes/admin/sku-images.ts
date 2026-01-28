@@ -31,7 +31,8 @@ router.get('/', [
         df.file_name_no_ext,
         df.file_name,
         df.folder_path,
-        df.file_extension
+        df.file_extension,
+        df.shared_link
       FROM sku_images si
       JOIN dropbox_files df ON si.image_id = df.id
       WHERE 1=1
