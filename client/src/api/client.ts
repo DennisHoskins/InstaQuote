@@ -1,4 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
+import { apiClient } from './apiClient';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -9,8 +10,6 @@ export const queryClient = new QueryClient({
   },
 });
 
-const API_BASE_URL = 'http://localhost:3001/api';
-
 export const api = {
   getCatalogItems: async (page: number, limit: number, search?: string) => {
     const params = new URLSearchParams({
@@ -18,18 +17,15 @@ export const api = {
       limit: limit.toString(),
       ...(search && { search }),
     });
-    const response = await fetch(`${API_BASE_URL}/catalog/items?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch catalog items');
-    return response.json();
+    return apiClient.get(`/catalog/items?${params}`);
   },
 
   getDestinations: async (search?: string) => {
     const params = new URLSearchParams({
       ...(search && { search }),
     });
-    const response = await fetch(`${API_BASE_URL}/destinations?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch destinations');
-    return response.json();
+    const query = params.toString();
+    return apiClient.get(`/destinations${query ? `?${query}` : ''}`);
   },
 
   getDestinationItems: async (destination: string, page: number, limit: number, search?: string) => {
@@ -38,9 +34,7 @@ export const api = {
       limit: limit.toString(),
       ...(search && { search }),
     });
-    const response = await fetch(`${API_BASE_URL}/destinations/${destination}/items?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch destination items');
-    return response.json();
+    return apiClient.get(`/destinations/${destination}/items?${params}`);
   },
 
   searchAllItems: async (search: string, page: number, limit: number) => {
@@ -49,14 +43,10 @@ export const api = {
       page: page.toString(),
       limit: limit.toString(),
     });
-    const response = await fetch(`${API_BASE_URL}/search?${params}`);
-    if (!response.ok) throw new Error('Failed to search items');
-    return response.json();
+    return apiClient.get(`/search?${params}`);
   },
 
   getItem: async (itemCode: string) => {
-    const response = await fetch(`${API_BASE_URL}/items/${itemCode}`);
-    if (!response.ok) throw new Error('Failed to fetch item');
-    return response.json();
+    return apiClient.get(`/items/${itemCode}`);
   },  
 };

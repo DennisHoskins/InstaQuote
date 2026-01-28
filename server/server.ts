@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { requireAuth, requireAdmin } from './middleware/auth.js';
+import authRouter from './routes/auth.js';
 import searchRouter from './routes/search.js';
 import catalogRouter from './routes/catalog.js';
 import destinationsRouter from './routes/destinations.js';
@@ -32,24 +34,30 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // CORS
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 
 // Body parser
 app.use(express.json());
 
 // Routes
-app.use('/api/search', searchRouter);
-app.use('/api/catalog', catalogRouter);
-app.use('/api/destinations', destinationsRouter);
-app.use('/api/items', itemsRouter);
-app.use('/api/admin', adminRouter);
-app.use('/api/admin/sync', adminSyncRouter);
-app.use('/api/admin/sync-log', adminSyncLogRouter);
-app.use('/api/admin/items', adminItemsRouter);
-app.use('/api/admin/images', adminImagesRouter);
-app.use('/api/admin/skus', adminSkusRouter);
-app.use('/api/admin/sku-images', adminSkuImagesRouter);
-app.use('/api/admin/metals', adminMetalsRouter);
+app.use('/api/auth', authRouter);
+
+app.use('/api/search', requireAuth, searchRouter);
+app.use('/api/catalog', requireAuth, catalogRouter);
+app.use('/api/destinations', requireAuth, destinationsRouter);
+app.use('/api/items', requireAuth, itemsRouter);
+
+app.use('/api/admin', requireAuth, requireAdmin, adminRouter);
+app.use('/api/admin/sync', requireAuth, requireAdmin, adminSyncRouter);
+app.use('/api/admin/sync-log', requireAuth, requireAdmin, adminSyncLogRouter);
+app.use('/api/admin/items', requireAuth, requireAdmin, adminItemsRouter);
+app.use('/api/admin/images', requireAuth, requireAdmin, adminImagesRouter);
+app.use('/api/admin/skus', requireAuth, requireAdmin, adminSkusRouter);
+app.use('/api/admin/sku-images', requireAuth, requireAdmin, adminSkuImagesRouter);
+app.use('/api/admin/metals', requireAuth, requireAdmin, adminMetalsRouter);
 
 // Don't start server if we're testing
 if (process.env.NODE_ENV !== 'test') {

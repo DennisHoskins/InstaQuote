@@ -1,4 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
+import { apiClient } from './apiClient';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -9,13 +10,9 @@ export const queryClient = new QueryClient({
   },
 });
 
-const API_BASE_URL = 'http://localhost:3001/api';
-
 export const api = {
   getDashboard: async () => {
-    const response = await fetch(`${API_BASE_URL}/admin/dashboard`);
-    if (!response.ok) throw new Error('Failed to fetch dashboard');
-    return response.json();
+    return apiClient.get('/admin/dashboard');
   },
 
   getSyncLog: async (page: number, limit: number, type?: 'access' | 'dropbox' | 'dropbox_crawl' | 'dropbox_links' | 'sku_mapping', search?: string, status?: 'success' | 'failed', startDate?: string, endDate?: string) => {
@@ -28,33 +25,25 @@ export const api = {
     if (status) params.append('status', status);
     if (startDate) params.append('start_date', startDate);
     if (endDate) params.append('end_date', endDate);
-    const response = await fetch(`${API_BASE_URL}/admin/sync-log?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch sync log');
-    return response.json();
+    return apiClient.get(`/admin/sync-log?${params}`);
   },
 
   getSyncStats: async (days: number = 30) => {
     const params = new URLSearchParams({
       days: days.toString(),
     });
-    const response = await fetch(`${API_BASE_URL}/admin/sync-stats?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch sync stats');
-    return response.json();
+    return apiClient.get(`/admin/sync-stats?${params}`);
   },
 
   getSyncStatus: async (syncType: string) => {
-    const response = await fetch(`${API_BASE_URL}/admin/sync/status/${syncType}`);
-    if (!response.ok) throw new Error('Failed to fetch sync status');
-    return response.json();
+    return apiClient.get(`/admin/sync/status/${syncType}`);
   },
 
   getMetalsPrices: async (days: number = 30) => {
     const params = new URLSearchParams({
       days: days.toString(),
     });
-    const response = await fetch(`${API_BASE_URL}/admin/metals-prices?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch metals prices');
-    return response.json();
+    return apiClient.get(`/admin/metals-prices?${params}`);
   },
 
   getMetals: async (page: number, limit: number, startDate?: string, endDate?: string) => {
@@ -64,15 +53,11 @@ export const api = {
     });
     if (startDate) params.append('start_date', startDate);
     if (endDate) params.append('end_date', endDate);
-    const response = await fetch(`${API_BASE_URL}/admin/metals?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch metals');
-    return response.json();
+    return apiClient.get(`/admin/metals?${params}`);
   },
 
   getItemsStats: async () => {
-    const response = await fetch(`${API_BASE_URL}/admin/items-stats`);
-    if (!response.ok) throw new Error('Failed to fetch items stats');
-    return response.json();
+    return apiClient.get('/admin/items-stats');
   },
 
   getItems: async (page: number, limit: number, search?: string, hasImage?: boolean) => {
@@ -82,21 +67,15 @@ export const api = {
     });
     if (search) params.append('search', search);
     if (hasImage !== undefined) params.append('has_image', hasImage.toString());
-    const response = await fetch(`${API_BASE_URL}/admin/items?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch items');
-    return response.json();
+    return apiClient.get(`/admin/items?${params}`);
   },
 
   getImagesStats: async () => {
-    const response = await fetch(`${API_BASE_URL}/admin/images-stats`);
-    if (!response.ok) throw new Error('Failed to fetch images stats');
-    return response.json();
+    return apiClient.get('/admin/images-stats');
   },
 
   getFileTypes: async () => {
-    const response = await fetch(`${API_BASE_URL}/admin/images/file-types`);
-    if (!response.ok) throw new Error('Failed to fetch file types');
-    return response.json();
+    return apiClient.get('/admin/images/file-types');
   },
 
   getImages: async (page: number, limit: number, search?: string, matched?: boolean, fileType?: string) => {
@@ -107,21 +86,15 @@ export const api = {
     if (search) params.append('search', search);
     if (matched !== undefined) params.append('matched', matched.toString());
     if (fileType) params.append('file_type', fileType);
-    const response = await fetch(`${API_BASE_URL}/admin/images?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch images');
-    return response.json();
+    return apiClient.get(`/admin/images?${params}`);
   },
 
   getImageDetail: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/admin/images/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch image details');
-    return response.json();
-  },  
+    return apiClient.get(`/admin/images/${id}`);
+  },
 
   getSkuImagesStats: async () => {
-    const response = await fetch(`${API_BASE_URL}/admin/sku-images/stats`);
-    if (!response.ok) throw new Error('Failed to fetch SKU images stats');
-    return response.json();
+    return apiClient.get('/admin/sku-images/stats');
   },
 
   getSkuImages: async (page: number, limit: number, sku?: string, matchType?: string, isPrimary?: boolean) => {
@@ -132,21 +105,15 @@ export const api = {
     if (sku) params.append('sku', sku);
     if (matchType) params.append('match_type', matchType);
     if (isPrimary !== undefined) params.append('is_primary', isPrimary.toString());
-    const response = await fetch(`${API_BASE_URL}/admin/sku-images?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch SKU images');
-    return response.json();
+    return apiClient.get(`/admin/sku-images?${params}`);
   },
 
   getSkuImage: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/admin/sku-images/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch SKU image mapping');
-    return response.json();
-  },  
+    return apiClient.get(`/admin/sku-images/${id}`);
+  },
 
   getMissingLinksCount: async () => {
-    const response = await fetch(`${API_BASE_URL}/admin/sync/missing-links-count`);
-    if (!response.ok) throw new Error('Failed to fetch missing links count');
-    return response.json();
+    return apiClient.get('/admin/sync/missing-links-count');
   },
 
   getSkus: async (page: number, limit: number, search?: string, hasImage?: boolean) => {
@@ -156,71 +123,38 @@ export const api = {
     });
     if (search) params.append('search', search);
     if (hasImage !== undefined) params.append('has_image', hasImage.toString());
-    const response = await fetch(`${API_BASE_URL}/admin/skus?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch SKUs');
-    return response.json();
+    return apiClient.get(`/admin/skus?${params}`);
   },
 
   getSkuDetail: async (sku: string) => {
-    const response = await fetch(`${API_BASE_URL}/admin/skus/${sku}`);
-    if (!response.ok) throw new Error('Failed to fetch SKU details');
-    return response.json();
+    return apiClient.get(`/admin/skus/${sku}`);
   },
 
   // Sync operations
   triggerDropboxCrawl: async (userName: string, dropboxToken: string) => {
-    const response = await fetch(`${API_BASE_URL}/admin/sync/dropbox-crawl`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_name: userName, dropbox_token: dropboxToken }),
-    });
-    if (!response.ok) throw new Error('Failed to trigger Dropbox crawl');
-    return response.json();
+    return apiClient.post('/admin/sync/dropbox-crawl', { user_name: userName, dropbox_token: dropboxToken });
   },
 
   triggerCreateLinks: async (userName: string, dropboxToken: string) => {
-    const response = await fetch(`${API_BASE_URL}/admin/sync/create-links`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_name: userName, dropbox_token: dropboxToken }),
-    });
-    if (!response.ok) throw new Error('Failed to trigger link creation');
-    return response.json();
+    return apiClient.post('/admin/sync/create-links', { user_name: userName, dropbox_token: dropboxToken });
   },
 
   triggerGenerateMappings: async (userName: string) => {
-    const response = await fetch(`${API_BASE_URL}/admin/sync/generate-mappings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_name: userName }),
-    });
-    if (!response.ok) throw new Error('Failed to trigger mapping generation');
-    return response.json();
+    return apiClient.post('/admin/sync/generate-mappings', { user_name: userName });
   },
 
   deleteAllSkuImageMappings: async () => {
-    const response = await fetch(`${API_BASE_URL}/admin/sync/mappings/all`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) throw new Error('Failed to delete all mappings');
-    return response.json();
-  },  
+    return apiClient.delete('/admin/sync/mappings/all');
+  },
 
   deleteSkuImageMapping: async (id: number) => {
-    const response = await fetch(`${API_BASE_URL}/admin/sync/mapping/${id}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) throw new Error('Failed to delete mapping');
-    return response.json();
+    return apiClient.delete(`/admin/sync/mapping/${id}`);
   },
 
   async markSyncAsFailed(id: number, errorMessage: string) {
-    const response = await fetch(`${API_BASE_URL}/admin/sync/${id}/mark-failed`, {
+    return apiClient.request(`http://localhost:3001/api/admin/sync/${id}/mark-failed`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ error_message: errorMessage }),
     });
-    if (!response.ok) throw new Error('Failed to mark sync as failed');
-    return response.json();
-  },  
+  },
 };
