@@ -17,7 +17,7 @@ export default function AdminSkuImage() {
   });
   
   const deleteMutation = useMutation({
-    mutationFn: (mappingId: number) => api.deleteSkuImage(mappingId),
+    mutationFn: (mappingId: number) => api.deleteSkuImageMapping(mappingId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-sku-images'] });
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });

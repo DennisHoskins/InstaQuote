@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Container,
   Typography,
@@ -24,7 +24,6 @@ export default function AdminSkuImages() {
   const matchType = searchParams.get('match_type') || '';
   const isPrimary = searchParams.get('is_primary');
   const limit = 25;
-  const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-sku-images', page, search, matchType, isPrimary],
@@ -36,14 +35,6 @@ export default function AdminSkuImages() {
         matchType || undefined,
         isPrimary === 'true' ? true : isPrimary === 'false' ? false : undefined
       ),
-  });
-
-  const generateMutation = useMutation({
-    mutationFn: () => api.triggerGenerateMappings('Dennis'),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_mapping'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-    },
   });
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;
@@ -79,10 +70,6 @@ export default function AdminSkuImages() {
     setSearchParams(params);
   };
 
-  const handleGenerate = () => {
-    generateMutation.mutate();
-  };
-
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
@@ -114,14 +101,6 @@ export default function AdminSkuImages() {
           </Button>
           <Typography variant="h4">SKU-Image Matches</Typography>
         </Box>
-
-        <Button
-          variant="contained"
-          onClick={handleGenerate}
-          disabled={generateMutation.isPending}
-        >
-          {generateMutation.isPending ? 'Generating...' : 'Generate Matches'}
-        </Button>
       </Box>
 
       <Box sx={{ display: 'flex', gap: 2 }}>

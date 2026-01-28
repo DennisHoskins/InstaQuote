@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useState, useEffect, useRef } from 'react';
 import {
   Container,
@@ -54,6 +54,33 @@ export default function SyncLogSkuMapping() {
         startDate || undefined,
         endDate || undefined
       ),
+  });
+
+  const deleteAllMutation = useMutation({
+    mutationFn: () => fetch(`http://localhost:3001/api/admin/sync/mappings/all`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_name: 'Dennis' }),
+    }).then(res => {
+      if (!res.ok) throw new Error('Failed to delete all mappings');
+      return res.json();
+    }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-sku-images'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-sku-images-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_mapping'] });
+      setStatusMessage({ 
+        type: 'success', 
+        message: `Successfully deleted ${data.mappingsDeleted} SKU image mappings` 
+      });
+    },
+    onError: (error: Error) => {
+      setStatusMessage({ 
+        type: 'error', 
+        message: `Failed to delete mappings: ${error.message}` 
+      });
+    },
   });
 
   // Show running message on initial load if sync is running
@@ -210,6 +237,15 @@ export default function SyncLogSkuMapping() {
     }
   };
 
+  const handleDeleteAll = () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete ALL SKU image mappings? This cannot be undone.'
+    );
+    if (confirmed) {
+      deleteAllMutation.mutate();
+    }
+  };
+
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
@@ -239,19 +275,30 @@ export default function SyncLogSkuMapping() {
           <Typography variant="h4">Match SKUs Log</Typography>
         </Box>
 
-        <SyncTriggerButton
-          title="Generate SKU Mappings"
-          buttonText="Generate Matches"
-          requiresToken={false}
-          apiCall={() => api.triggerGenerateMappings('Dennis')}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_mapping'] });
-            queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-            queryClient.invalidateQueries({ queryKey: ['sync-status', 'sku_mapping'] });
-          }}
-          onStatusChange={handleSyncStatusChange}
-          disabled={isRunning}
-        />
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleDeleteAll}
+            disabled={deleteAllMutation.isPending || isRunning}
+          >
+            {deleteAllMutation.isPending ? 'Deleting...' : 'Delete All Mappings'}
+          </Button>
+          
+          <SyncTriggerButton
+            title="Generate SKU Mappings"
+            buttonText="Generate Matches"
+            requiresToken={false}
+            apiCall={() => api.triggerGenerateMappings('Dennis')}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_mapping'] });
+              queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+              queryClient.invalidateQueries({ queryKey: ['sync-status', 'sku_mapping'] });
+            }}
+            onStatusChange={handleSyncStatusChange}
+            disabled={isRunning}
+          />
+        </Box>
       </Box>
 
       {statusMessage && (

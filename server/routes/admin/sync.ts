@@ -185,15 +185,43 @@ router.post('/generate-mappings', [
 });
 
 // Delete all SKU image mappings
-router.delete('/mappings/all', async (req: Request, res: Response) => {
+router.delete('/mappings/all', [
+  body('user_name').isString().trim().notEmpty(),
+], async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { user_name } = req.body;
+  const startedAt = new Date();
+  let syncId: number | null = null;
+
   try {
+    syncId = await startSync(user_name, 'sku_mapping');
     const result = await deleteAllMappings();
+    
+    // Log as negative number to indicate deletion
+    await pool.query(
+      `UPDATE sync_log
+       SET status = 'success',
+           completed_at = NOW(),
+           duration_seconds = EXTRACT(EPOCH FROM (NOW() - $1)),
+           items_synced = $2,
+           error_message = 'Deleted all mappings'
+       WHERE id = $3`,
+      [startedAt, -result.mappingsDeleted, syncId]
+    );
+    
     res.json({ 
       deleted: true,
       mappingsDeleted: result.mappingsDeleted
     });
   } catch (error: any) {
     console.error('Error deleting all mappings:', error);
+    if (syncId) {
+      await failSync(syncId, startedAt, error.message);
+    }
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -223,6 +251,40 @@ router.delete('/mapping/:id', [
   } catch (error: any) {
     console.error('Error deleting SKU image:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.patch('/:id/mark-failed', [
+  param('id').isInt(),
+  body('error_message').isString().trim().notEmpty(),
+], async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+  const { error_message } = req.body;
+
+  try {
+    const result = await pool.query(
+      `UPDATE sync_log
+       SET status = 'failed',
+           error_message = $1,
+           completed_at = NOW()
+       WHERE id = $2 AND status = 'running'
+       RETURNING *`,
+      [error_message, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Sync log not found or not in running state' });
+    }
+
+    res.json({ message: 'Sync log marked as failed', log: result.rows[0] });
+  } catch (error) {
+    console.error('Error marking sync as failed:', error);
+    res.status(500).json({ error: 'Failed to update sync log' });
   }
 });
 

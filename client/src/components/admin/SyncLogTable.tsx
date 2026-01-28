@@ -1,9 +1,13 @@
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Box, Typography } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 import Table from '../Table';
 import type { Column } from '../Table';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
+import SyncLogEditModal from './SyncLogEditModal';
+import { api } from '../../api/admin';
 
 export interface SyncLog {
   id: string;
@@ -90,11 +94,38 @@ const columns: Column[] = [
 ];
 
 export default function SyncLogTable({ logs }: SyncLogTableProps) {
+  const [selectedLog, setSelectedLog] = useState<SyncLog | null>(null);
+  const queryClient = useQueryClient();
+
+  const markFailedMutation = useMutation({
+    mutationFn: ({ id, errorMessage }: { id: number; errorMessage: string }) =>
+      api.markSyncAsFailed(id, errorMessage),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-sync-log'] });
+      queryClient.invalidateQueries({ queryKey: ['sync-status'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+    },
+  });
+
+  const handleMarkFailed = (id: number, errorMessage: string) => {
+    markFailedMutation.mutate({ id, errorMessage });
+  };
+
   return (
-    <Table
-      columns={columns}
-      data={logs}
-      emptyMessage="No sync logs found"
-    />
+    <>
+      <Table
+        columns={columns}
+        data={logs}
+        emptyMessage="No sync logs found"
+        onRowClick={(row) => setSelectedLog(row as SyncLog)}
+      />
+
+      <SyncLogEditModal
+        log={selectedLog}
+        open={!!selectedLog}
+        onClose={() => setSelectedLog(null)}
+        onMarkFailed={handleMarkFailed}
+      />
+    </>
   );
 }

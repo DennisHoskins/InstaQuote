@@ -198,6 +198,14 @@ export const api = {
     return response.json();
   },
 
+  deleteAllSkuImageMappings: async () => {
+    const response = await fetch(`${API_BASE_URL}/admin/sync/mappings/all`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete all mappings');
+    return response.json();
+  },  
+
   deleteSkuImageMapping: async (id: number) => {
     const response = await fetch(`${API_BASE_URL}/admin/sync/mapping/${id}`, {
       method: 'DELETE',
@@ -205,4 +213,14 @@ export const api = {
     if (!response.ok) throw new Error('Failed to delete mapping');
     return response.json();
   },
+
+  async markSyncAsFailed(id: number, errorMessage: string) {
+    const response = await fetch(`${API_BASE_URL}/admin/sync/${id}/mark-failed`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error_message: errorMessage }),
+    });
+    if (!response.ok) throw new Error('Failed to mark sync as failed');
+    return response.json();
+  },  
 };
