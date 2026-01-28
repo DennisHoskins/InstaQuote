@@ -1,5 +1,5 @@
-import { Card, CardContent, Typography, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { Card, CardContent, Typography, Box } from '@mui/material';
 
 interface ImageMatchStatsCardProps {
   totalMappings: number;

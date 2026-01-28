@@ -1,5 +1,5 @@
-import { Card, CardContent, Typography, Box, Grid } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { Card, CardContent, Typography, Box, Grid } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
 
 interface MetalsPriceCardProps {

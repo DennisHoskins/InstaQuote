@@ -1,6 +1,6 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Typography } from '@mui/material';
-import Link from '@mui/material/Link';
 import { useState } from 'react';
+import Link from '@mui/material/Link';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Typography } from '@mui/material';
 
 interface DropboxTokenDialogProps {
   open: boolean;

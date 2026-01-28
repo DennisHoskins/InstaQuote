@@ -1,5 +1,5 @@
-import { Box, Card, CardContent, Typography, LinearProgress } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { Box, Card, CardContent, Typography, LinearProgress } from '@mui/material';
 
 interface ImagesStatsCardProps {
   totalImages: number;

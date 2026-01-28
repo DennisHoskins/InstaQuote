@@ -1,5 +1,5 @@
-import { TextField, Box } from '@mui/material';
 import { useRef, useEffect } from 'react';
+import { TextField, Box } from '@mui/material';
 
 interface FilterInputProps {
   onFilter: (value: string) => void;

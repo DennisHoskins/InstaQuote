@@ -1,5 +1,5 @@
-import { TextField, Box, Button } from '@mui/material';
 import { useState, useRef, useEffect } from 'react';
+import { TextField, Box, Button } from '@mui/material';
 
 interface SearchBarProps {
   onSearch: (value: string) => void;

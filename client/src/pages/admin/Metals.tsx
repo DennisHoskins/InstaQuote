@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { Container, Typography, Box, Button, CircularProgress, Alert, TextField } from '@mui/material';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { Container, Typography, Box, Button, CircularProgress, Alert, TextField } from '@mui/material';
 import MetalsTable from '../../components/admin/MetalsTable';
 import PaginationControls from '../../components/PaginationControls';
 

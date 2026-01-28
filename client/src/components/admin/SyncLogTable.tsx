@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../../api/admin';
 import { Box, Typography } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -7,7 +8,6 @@ import AutorenewIcon from '@mui/icons-material/Autorenew';
 import Table from '../Table';
 import type { Column } from '../Table';
 import SyncLogEditModal from './SyncLogEditModal';
-import { api } from '../../api/admin';
 
 export interface SyncLog {
   id: string;

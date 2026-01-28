@@ -1,5 +1,5 @@
-import { Box, Button, Container, Typography } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
+import { Box, Button, Container, Typography } from '@mui/material';
 import NavBar from '../components/NavBar';
 import SearchBar from '../components/SearchBar';
 

@@ -1,7 +1,7 @@
+import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import Table from '../Table';
 import type { Column } from '../Table';
-import { useNavigate } from 'react-router-dom';
 
 export interface DropboxImage {
   id: number;
