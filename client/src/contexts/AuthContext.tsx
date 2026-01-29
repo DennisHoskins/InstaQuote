@@ -32,7 +32,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchAuth = async () => {
     try {
-      const response = await fetch(baseUrl, {
+      // Get mock user ID from localStorage
+      const mockUserId = localStorage.getItem('mock_user_id');
+      
+      // Build URL with query param if we have a mock user
+      const url = mockUserId 
+        ? `${baseUrl}?mock_user_id=${mockUserId}`
+        : baseUrl;
+
+      const response = await fetch(url, {
         credentials: 'include',
       });
 
@@ -68,9 +76,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
+    // Clear mock user from localStorage
+    localStorage.removeItem('mock_user_id');
     setUser(null);
     setNonce(null);
     apiClient.setNonce(''); // Clear nonce from API client
+    
+    // Redirect to login
+    window.location.href = '/#/login';
   };
 
   const refreshAuth = async () => {

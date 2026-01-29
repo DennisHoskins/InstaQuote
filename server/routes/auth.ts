@@ -2,13 +2,41 @@ import { Router, Request, Response } from 'express';
 
 const router = Router();
 
+const MOCK_USERS = [
+  {
+    id: 1,
+    username: 'Administrator',
+    email: 'admin@destinationjewelry.com',
+    roles: ['administrator'],
+    capabilities: {
+      manage_options: true,
+      edit_posts: true,
+    }
+  },
+  {
+    id: 2,
+    username: 'Mitchell Ousley',
+    email: 'mitchellousley@gmail.com',
+    roles: ['customer'],
+    capabilities: {}
+  },
+  {
+    id: 3,
+    username: 'Dennis Hoskins',
+    email: 'dennis.r.hoskins@gmail.com',
+    roles: ['customer'],
+    capabilities: {}
+  }
+];
+
 // Get user and nonce - called on app load (no auth required)
 router.get('/user', async (req: Request, res: Response) => {
   try {
-    // Mock authentication - in production, verify WordPress session cookie
-    const isAuthenticated = true;
+    // Check if mock_user_id is provided in query
+    const mockUserId = req.query.mock_user_id ? parseInt(req.query.mock_user_id as string) : null;
     
-    if (!isAuthenticated) {
+    // If no mock user selected, return not authenticated
+    if (!mockUserId) {
       return res.status(401).json({ 
         isAuthenticated: false,
         user: null,
@@ -16,17 +44,16 @@ router.get('/user', async (req: Request, res: Response) => {
       });
     }
 
-    // Mock user data - in production, get from WordPress
-    const user = {
-      id: 1,
-      username: 'Dennis',
-      email: 'dennis@example.com',
-      roles: ['administrator'],
-      capabilities: {
-        manage_options: true,
-        edit_posts: true,
-      }
-    };
+    // Find the mock user
+    const user = MOCK_USERS.find(u => u.id === mockUserId);
+    
+    if (!user) {
+      return res.status(401).json({ 
+        isAuthenticated: false,
+        user: null,
+        nonce: null
+      });
+    }
 
     // Generate nonce - in production, get from WordPress
     const nonce = 'wp_rest_' + Date.now();
@@ -54,26 +81,26 @@ router.get('/verify', async (req: Request, res: Response) => {
       });
     }
 
-    // Mock verification - in production, verify with WordPress
-    const isAuthenticated = true;
+    // Check if mock_user_id is provided in query
+    const mockUserId = req.query.mock_user_id ? parseInt(req.query.mock_user_id as string) : null;
     
-    if (!isAuthenticated) {
+    // If no mock user selected, return not authenticated
+    if (!mockUserId) {
       return res.status(401).json({ 
         isAuthenticated: false,
         user: null
       });
     }
 
-    // Mock user data - in production, get from WordPress
-    const user = {
-      id: 1,
-      username: 'Dennis',
-      roles: ['administrator'],
-      capabilities: {
-        manage_options: true,
-        edit_posts: true,
-      }
-    };
+    // Find the mock user
+    const user = MOCK_USERS.find(u => u.id === mockUserId);
+    
+    if (!user) {
+      return res.status(401).json({ 
+        isAuthenticated: false,
+        user: null
+      });
+    }
 
     res.json({
       isAuthenticated: true,

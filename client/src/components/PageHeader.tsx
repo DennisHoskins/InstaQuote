@@ -18,7 +18,9 @@ export default function PageHeader({ title, breadcrumbs = [], showNavBar = true,
         mb: 3, 
         display: 'flex', 
         alignItems: 'center', 
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        borderBottom: '1px solid #ddd',
+        pb: 2,
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, minWidth: 0 }}>

@@ -30,8 +30,16 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
       return res.status(401).json({ error: 'Authentication required' });
     }
 
+    // Get mock user ID from header
+    const mockUserId = req.headers['x-mock-user-id'] as string;
+
+    // Build verify URL with mock_user_id if present
+    const verifyUrl = mockUserId 
+      ? `${authUrl}?mock_user_id=${mockUserId}`
+      : authUrl;
+
     // Call auth endpoint to verify session
-    const response = await fetch(authUrl, {
+    const response = await fetch(verifyUrl, {
       headers: {
         'Cookie': req.headers.cookie || '',
         'X-WP-Nonce': nonce,

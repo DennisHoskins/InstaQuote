@@ -8,7 +8,12 @@ class ApiClient {
   }
 
   async refreshNonce(): Promise<string> {
-    const response = await fetch(`${API_BASE_URL}/auth/user`, {
+    const mockUserId = localStorage.getItem('mock_user_id');
+    const url = mockUserId 
+      ? `${API_BASE_URL}/auth/user?mock_user_id=${mockUserId}`
+      : `${API_BASE_URL}/auth/user`;
+
+    const response = await fetch(url, {
       credentials: 'include',
     });
 
@@ -26,11 +31,15 @@ class ApiClient {
   }
 
   async request(url: string, options: RequestInit = {}, isRetry = false): Promise<Response> {
-    // Add nonce header if we have one
+    // Get mock user ID from localStorage
+    const mockUserId = localStorage.getItem('mock_user_id');
+    
+    // Add nonce header and mock_user_id if we have them
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
       ...(this.nonce && { 'X-WP-Nonce': this.nonce }),
+      ...(mockUserId && { 'X-Mock-User-Id': mockUserId }),
     };
 
     const response = await fetch(url, {
