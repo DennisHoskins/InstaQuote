@@ -4,9 +4,11 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import HistoryIcon from '@mui/icons-material/History';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function NavBar() {
   const { itemCount } = useCart();
+  const { isAdmin } = useAuth();
 
   return (
     <Box
@@ -46,16 +48,18 @@ export default function NavBar() {
         Order History
       </Button>
 
-      <Button
-        component={Link}
-        to='/admin'
-        variant="text"
-        size="small"
-        sx={{ px: 2 }}
-        startIcon={<AdminPanelSettingsIcon />}
-      >
-        Admin
-      </Button>
+      {isAdmin && (
+        <Button
+          component={Link}
+          to='/admin'
+          variant="text"
+          size="small"
+          sx={{ px: 2 }}
+          startIcon={<AdminPanelSettingsIcon />}
+        >
+          Admin
+        </Button>
+      )}
     </Box>
   );
 }
