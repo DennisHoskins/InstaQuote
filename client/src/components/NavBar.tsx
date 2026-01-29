@@ -3,13 +3,10 @@ import { Box, Button, Badge } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import HistoryIcon from '@mui/icons-material/History';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import { useCart } from '../contexts/CartContext';
 
-interface NavBarProps {
-  cartItemCount?: number;
-  orderCount?: number;
-}
-
-export default function NavBar({ cartItemCount = 0, orderCount = 0 }: NavBarProps) {
+export default function NavBar() {
+  const { itemCount } = useCart();
 
   return (
     <Box
@@ -26,7 +23,7 @@ export default function NavBar({ cartItemCount = 0, orderCount = 0 }: NavBarProp
         size="small"
         sx={{ px: 2 }}
         startIcon={
-          <Badge badgeContent={cartItemCount} color="primary">
+          <Badge badgeContent={itemCount} color="primary">
             <ShoppingCartIcon />
           </Badge>
         }
@@ -41,7 +38,7 @@ export default function NavBar({ cartItemCount = 0, orderCount = 0 }: NavBarProp
         size="small"
         sx={{ px: 2 }}
         startIcon={
-          <Badge badgeContent={orderCount} color="primary">
+          <Badge badgeContent={0} color="primary">
             <HistoryIcon />
           </Badge>
         }

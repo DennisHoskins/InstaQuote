@@ -79,3 +79,41 @@ CREATE INDEX idx_sync_log_type ON sync_log(sync_type);
 CREATE INDEX idx_sync_log_user ON sync_log(user_name);
 CREATE INDEX idx_sync_log_status ON sync_log(status);
 CREATE INDEX idx_sync_log_started_at ON sync_log(started_at DESC);
+
+-- User orders + items tables
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    order_number VARCHAR(50) UNIQUE NOT NULL,
+    user_id INTEGER NOT NULL,
+    user_name VARCHAR(100) NOT NULL,
+    user_email VARCHAR(255) NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'cancelled')),
+    notes TEXT,
+    deleted_at TIMESTAMP,
+    deleted_by INTEGER,
+    updated_at TIMESTAMP DEFAULT NOW(),
+    updated_by INTEGER,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_orders_user_id ON orders(user_id);
+CREATE INDEX idx_orders_order_number ON orders(order_number);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_created_at ON orders(created_at DESC);
+CREATE INDEX idx_orders_deleted_at ON orders(deleted_at) WHERE deleted_at IS NULL;
+
+CREATE TABLE order_items (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    item_code VARCHAR(50) NOT NULL,
+    sku VARCHAR(50),
+    description VARCHAR(100),
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    unit_price DECIMAL(10, 2) NOT NULL,
+    line_total DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX idx_order_items_item_code ON order_items(item_code);

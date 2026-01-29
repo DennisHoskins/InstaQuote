@@ -31,7 +31,7 @@ export default function Admin() {
     );
   }
 
-  const { syncStats, itemsStats, imagesStats, metalsData, skuStats } = data;
+  const { syncStats, itemsStats, imagesStats, metalsData, skuStats, ordersData } = data;
 
   const getRelativeTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -48,11 +48,6 @@ export default function Admin() {
     else relativeTime = 'Just now';
 
     return `${relativeTime}`;
-  };
-
-  const ordersData = {
-    totalOrders: 0,
-    totalRevenue: 0,
   };
 
   return (
@@ -112,7 +107,7 @@ export default function Admin() {
                 title="Access Data Sync"
                 successRate={syncStats.access.successRate}
                 averageSyncTime={syncStats.access.averageSyncTime}
-                totalRuns={syncStats.access.totalRuns}  // Add this
+                totalRuns={syncStats.access.totalRuns}
                 lastSyncItemsCount={syncStats.access.lastSync?.itemsCount || 0}
                 lastSyncDuration={syncStats.access.lastSync?.duration || 0}
                 lastSyncStatus={syncStats.access.lastSync?.status === 'success' ? 'success' : 'failed'}

@@ -48,5 +48,29 @@ export const api = {
 
   getItem: async (itemCode: string) => {
     return apiClient.get(`/items/${itemCode}`);
-  },  
+  },
+
+  submitOrder: async (orderData: any) => {
+    return apiClient.post('/orders', orderData);
+  },
+
+  getOrders: async (page: number, limit: number, search?: string, status?: string, startDate?: string, endDate?: string) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    if (search) params.append('search', search);
+    if (status) params.append('status', status);
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    return apiClient.get(`/orders?${params}`);
+  },
+
+  getOrder: async (id: number) => {
+    return apiClient.get(`/orders/${id}`);
+  },
+
+  reorder: async (id: number) => {
+    return apiClient.post(`/orders/${id}/reorder`);
+  },
 };

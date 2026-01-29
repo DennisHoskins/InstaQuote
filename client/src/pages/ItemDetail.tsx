@@ -3,16 +3,36 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { Container, Typography, Box, CircularProgress, Alert, Grid, Button } from '@mui/material';
 import NavBar from '../components/NavBar';
+import { useCart } from '../contexts/CartContext';
+import { useState } from 'react';
 
 export default function ItemDetail() {
   const { itemCode } = useParams<{ itemCode: string }>();
   const navigate = useNavigate();
+  const { addItem } = useCart();
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const { data: item, isLoading, error } = useQuery({
     queryKey: ['item', itemCode],
     queryFn: () => api.getItem(itemCode!),
     enabled: !!itemCode,
   });
+
+  const handleAddToCart = () => {
+    if (!item) return;
+
+    addItem({
+      item_code: item.item_code,
+      sku: item.sku,
+      description: item.description,
+      category: item.category,
+      unit_price: item.total_ws_price,
+      image_url: item.image_url,
+    });
+
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+  };
 
   if (isLoading) {
     return (
@@ -54,6 +74,12 @@ export default function ItemDetail() {
 
         <NavBar />
       </Box>
+
+      {showSuccess && (
+        <Alert severity="success" sx={{ mb: 3 }}>
+          Added to cart!
+        </Alert>
+      )}
 
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, md: 6 }}>
@@ -113,8 +139,9 @@ export default function ItemDetail() {
             size="large"
             fullWidth
             sx={{ mt: 4 }}
+            onClick={handleAddToCart}
           >
-            Add to Cart (Coming Soon)
+            Add to Cart
           </Button>
         </Grid>
       </Grid>

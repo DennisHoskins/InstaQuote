@@ -48,6 +48,15 @@ router.get('/dashboard', async (req: Request, res: Response) => {
       LEFT JOIN last_syncs ls ON ss.sync_type = ls.sync_type
     `;
 
+    // Get orders stats
+    const ordersStatsQuery = `
+      SELECT 
+        COUNT(*) as total_orders,
+        COALESCE(SUM(total_amount), 0) as total_revenue
+      FROM orders
+      WHERE deleted_at IS NULL
+    `;    
+
     // Get items stats
     const itemsStatsQuery = `
       SELECT 
@@ -127,6 +136,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
 
     const [
       syncStatsResult,
+      ordersStatsResult,
       itemsStatsResult,
       skusStatsResult,
       imagesStatsResult,
@@ -137,6 +147,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
       fileTypeBreakdownResult
     ] = await Promise.all([
       pool.query(syncStatsQuery),
+      pool.query(ordersStatsQuery),
       pool.query(itemsStatsQuery),
       pool.query(skusStatsQuery),
       pool.query(imagesStatsQuery),
@@ -194,6 +205,12 @@ router.get('/dashboard', async (req: Request, res: Response) => {
         syncStats.sku_mapping = stats;
       }
     });
+
+    // Process orders stats
+    const ordersData = {
+      totalOrders: parseInt(ordersStatsResult.rows[0].total_orders) || 0,
+      totalRevenue: parseFloat(ordersStatsResult.rows[0].total_revenue) || 0,
+    };    
 
     // Process items stats
     const totalItems = parseInt(itemsStatsResult.rows[0].total_items);
@@ -259,6 +276,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
 
     res.json({
       syncStats,
+      ordersData,
       itemsStats,
       skuStats,
       imagesStats,

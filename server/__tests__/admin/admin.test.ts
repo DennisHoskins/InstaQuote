@@ -9,6 +9,7 @@ describe('Admin Dashboard API', () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('syncStats');
       expect(response.body).toHaveProperty('itemsStats');
+      expect(response.body).toHaveProperty('ordersData');
       expect(response.body).toHaveProperty('skuStats');
       expect(response.body).toHaveProperty('imagesStats');
       expect(response.body).toHaveProperty('imageMatchStats');
@@ -60,6 +61,19 @@ describe('Admin Dashboard API', () => {
       expect(typeof response.body.skuStats.skusWithImages).toBe('number');
       expect(typeof response.body.skuStats.skusWithoutImages).toBe('number');
       expect(typeof response.body.skuStats.coveragePercent).toBe('number');
+    });
+
+    it('should include ordersData in dashboard response', async () => {
+      const response = await request(app).get('/api/admin/dashboard');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('ordersData');
+      expect(response.body.ordersData).toHaveProperty('totalOrders');
+      expect(response.body.ordersData).toHaveProperty('totalRevenue');
+      expect(typeof response.body.ordersData.totalOrders).toBe('number');
+      expect(typeof response.body.ordersData.totalRevenue).toBe('number');
+      expect(response.body.ordersData.totalOrders).toBeGreaterThanOrEqual(0);
+      expect(response.body.ordersData.totalRevenue).toBeGreaterThanOrEqual(0);
     });
 
     it('should have correct imagesStats structure', async () => {

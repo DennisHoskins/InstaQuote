@@ -151,10 +151,32 @@ export const api = {
     return apiClient.delete(`/admin/sync/mapping/${id}`);
   },
 
-  async markSyncAsFailed(id: number, errorMessage: string) {
-    return apiClient.request(`http://localhost:3001/api/admin/sync/${id}/mark-failed`, {
-      method: 'PATCH',
-      body: JSON.stringify({ error_message: errorMessage }),
+  markSyncAsFailed: async (id: number, errorMessage: string) => {
+    return apiClient.patch(`/admin/sync/${id}/mark-failed`, { error_message: errorMessage });
+  },
+
+  // Admin Orders
+  getOrders: async (page: number, limit: number, search?: string, status?: string, startDate?: string, endDate?: string) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
     });
+    if (search) params.append('search', search);
+    if (status) params.append('status', status);
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    return apiClient.get(`/admin/orders?${params}`);
+  },
+
+  getOrder: async (id: number) => {
+    return apiClient.get(`/admin/orders/${id}`);
+  },
+
+  updateOrder: async (id: number, updates: { status?: string; notes?: string }) => {
+    return apiClient.patch(`/admin/orders/${id}`, updates);
+  },
+
+  deleteOrder: async (id: number) => {
+    return apiClient.delete(`/admin/orders/${id}`);
   },
 };

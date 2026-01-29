@@ -9,6 +9,7 @@ import searchRouter from './routes/search.js';
 import catalogRouter from './routes/catalog.js';
 import destinationsRouter from './routes/destinations.js';
 import itemsRouter from './routes/items.js';
+import ordersRouter from './routes/orders.js';
 import adminRouter from './routes/admin/admin.js';
 import adminSyncRouter from './routes/admin/sync.js';
 import adminSyncLogRouter from './routes/admin/sync-log.js';
@@ -17,6 +18,7 @@ import adminImagesRouter from './routes/admin/images.js';
 import adminSkusRouter from './routes/admin/skus.js';
 import adminSkuImagesRouter from './routes/admin/sku-images.js';
 import adminMetalsRouter from './routes/admin/metals.js';
+import adminOrdersRouter from './routes/admin/orders.js';
 
 dotenv.config();
 
@@ -49,6 +51,7 @@ app.use('/api/search', requireAuth, searchRouter);
 app.use('/api/catalog', requireAuth, catalogRouter);
 app.use('/api/destinations', requireAuth, destinationsRouter);
 app.use('/api/items', requireAuth, itemsRouter);
+app.use('/api/orders', requireAuth, ordersRouter);
 
 app.use('/api/admin', requireAuth, requireAdmin, adminRouter);
 app.use('/api/admin/sync', requireAuth, requireAdmin, adminSyncRouter);
@@ -58,6 +61,7 @@ app.use('/api/admin/images', requireAuth, requireAdmin, adminImagesRouter);
 app.use('/api/admin/skus', requireAuth, requireAdmin, adminSkusRouter);
 app.use('/api/admin/sku-images', requireAuth, requireAdmin, adminSkuImagesRouter);
 app.use('/api/admin/metals', requireAuth, requireAdmin, adminMetalsRouter);
+app.use('/api/admin/orders', requireAuth, requireAdmin, adminOrdersRouter);
 
 // Don't start server if we're testing
 if (process.env.NODE_ENV !== 'test') {

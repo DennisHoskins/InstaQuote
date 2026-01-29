@@ -5,7 +5,13 @@ import Catalog from './pages/Catalog';
 import Destinations from './pages/Destinations';
 import DestinationItems from './pages/DestinationItems';
 import ItemDetail from './pages/ItemDetail';
+import Cart from './pages/Cart';
+import Orders from './pages/Orders';
+import OrderDetail from './pages/OrderDetail';
+import OrderConfirmation from './pages/OrderConfirmation';
 import Admin from './pages/admin/Admin';
+import AdminOrders from './pages/admin/AdminOrders';
+import AdminOrder from './pages/admin/AdminOrder';
 import Items from './pages/admin/Items';
 import SKUs from './pages/admin/SKUs';
 import SKU from './pages/admin/SKU';
@@ -29,8 +35,14 @@ export default function App() {
         <Route path="/destinations/:destination" element={<DestinationItems />} />
         <Route path="/destinations" element={<Destinations />} />
         <Route path="/item/:itemCode" element={<ItemDetail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/orders/:id" element={<OrderDetail />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/items" element={<Items />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/admin/orders/:id" element={<AdminOrder />} />
         <Route path="/admin/skus/:sku" element={<SKU />} />
         <Route path="/admin/skus" element={<SKUs />} />
         <Route path="/admin/images" element={<Images />} />

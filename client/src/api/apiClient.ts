@@ -69,9 +69,9 @@ class ApiClient {
     return response.json();
   }
 
-  async put(path: string, body?: any): Promise<any> {
+  async patch(path: string, body?: any): Promise<any> {
     const response = await this.request(`${API_BASE_URL}${path}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: body ? JSON.stringify(body) : undefined,
     });
     if (!response.ok) throw new Error(`PUT ${path} failed`);
