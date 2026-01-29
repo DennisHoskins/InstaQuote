@@ -1,11 +1,10 @@
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useState, useEffect, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
-  Typography,
   Box,
   Button,
   CircularProgress,
@@ -16,6 +15,7 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
+import PageHeader from '../../components/PageHeader';
 import SyncLogTable from '../../components/admin/SyncLogTable';
 import PaginationControls from '../../components/PaginationControls';
 import SyncTriggerButton from '../../components/admin/SyncTriggerButton';
@@ -267,42 +267,40 @@ export default function SyncLogSkuMapping() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button variant="outlined" component={Link} to="/">
-            Home
-          </Button>
-          <Button variant="outlined" component={Link} to="/admin">
-            Admin
-          </Button>
-          <Typography variant="h4">Match SKUs Log</Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={handleDeleteAll}
-            disabled={deleteAllMutation.isPending || isRunning}
-          >
-            {deleteAllMutation.isPending ? 'Deleting...' : 'Delete All Mappings'}
-          </Button>
-          
-          <SyncTriggerButton
-            title="Generate SKU Mappings"
-            buttonText="Generate Matches"
-            requiresToken={false}
-            apiCall={() => api.triggerGenerateMappings('Dennis')}
-            onSuccess={() => {
-              queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_mapping'] });
-              queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-              queryClient.invalidateQueries({ queryKey: ['sync-status', 'sku_mapping'] });
-            }}
-            onStatusChange={handleSyncStatusChange}
-            disabled={isRunning}
-          />
-        </Box>
-      </Box>
+      <PageHeader 
+        title="SKU Mapping Log"
+        breadcrumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Admin', to: '/admin' }
+        ]}
+        showNavBar={false}
+        rightAction={
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleDeleteAll}
+              disabled={deleteAllMutation.isPending || isRunning}
+            >
+              {deleteAllMutation.isPending ? 'Deleting...' : 'Delete All Mappings'}
+            </Button>
+            
+            <SyncTriggerButton
+              title="Generate SKU Mappings"
+              buttonText="Generate Matches"
+              requiresToken={false}
+              apiCall={() => api.triggerGenerateMappings('Dennis')}
+              onSuccess={() => {
+                queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_mapping'] });
+                queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+                queryClient.invalidateQueries({ queryKey: ['sync-status', 'sku_mapping'] });
+              }}
+              onStatusChange={handleSyncStatusChange}
+              disabled={isRunning}
+            />
+          </Box>
+        }
+      />
 
       {statusMessage && (
         <StatusMessage

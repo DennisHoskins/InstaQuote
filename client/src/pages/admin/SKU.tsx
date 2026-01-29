@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
 import { Container, Typography, Box, Button, CircularProgress, Alert, Grid } from '@mui/material';
+import PageHeader from '../../components/PageHeader';
 import Table from '../../components/Table';
 import type { Column } from '../../components/Table';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -49,7 +50,7 @@ export default function AdminSKU() {
     },
   ];
 
-const imageColumns: Column[] = [
+  const imageColumns: Column[] = [
     {
       key: 'file_name_no_ext',
       label: 'Preview',
@@ -111,32 +112,15 @@ const imageColumns: Column[] = [
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Button 
-          variant="outlined"
-          component={Link}
-          to='/'
-        >
-          Home
-        </Button>
-        <Button
-          variant="outlined"
-          component={Link}
-          to='/admin'
-        >
-          Admin
-        </Button>
-        <Button
-          variant="outlined"
-          component={Link}
-          to='/admin/skus'
-        >
-          SKUs
-        </Button>
-        <Typography variant="h4">
-          SKU: {data.sku}
-        </Typography>
-      </Box>
+      <PageHeader 
+        title={`SKU: ${data.sku}`}
+        breadcrumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Admin', to: '/admin' },
+          { label: 'SKUs', to: '/admin/skus' }
+        ]}
+        showNavBar={false}
+      />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>

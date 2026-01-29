@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
+import { Container, Typography, Box, Button, CircularProgress, Alert, Grid } from '@mui/material';
 import Table from '../../components/Table';
 import type { Column } from '../../components/Table';
-import { Container, Typography, Box, Button, CircularProgress, Alert, Grid } from '@mui/material';
+import PageHeader from '../../components/PageHeader';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
@@ -74,32 +75,15 @@ export default function AdminImage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Button 
-          variant="outlined"
-          component={Link}
-          to='/'
-        >
-          Home
-        </Button>
-        <Button
-          variant="outlined"
-          component={Link}
-          to='/admin'
-        >
-          Admin
-        </Button>
-        <Button
-          variant="outlined"
-          component={Link}
-          to='/admin/images'
-        >
-          Images
-        </Button>
-        <Typography variant="h4">
-          {image.file_name}
-        </Typography>
-      </Box>
+      <PageHeader 
+        title={`Image: ${image.file_name}`}
+        breadcrumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Admin', to: '/admin' },
+          { label: 'Images', to: '/admin/images' }
+        ]}
+        showNavBar={false}
+      />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>

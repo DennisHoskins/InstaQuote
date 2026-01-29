@@ -5,8 +5,8 @@ import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
 import { Container, Typography, Box, Button, IconButton, TextField, Paper, Grid, Alert, CircularProgress } from '@mui/material';
+import PageHeader from '../components/PageHeader';
 import DeleteIcon from '@mui/icons-material/Delete';
-import NavBar from '../components/NavBar';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -58,23 +58,10 @@ export default function Cart() {
   if (items.length === 0) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box
-          sx={{ 
-            width: '100%', 
-            mb: 3, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between'
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Button variant="outlined" component={Link} to="/">
-              Home
-            </Button>
-            <Typography variant="h4">Shopping Cart</Typography>
-          </Box>
-          <NavBar />
-        </Box>
+        <PageHeader 
+          title={`Shopping Cart${itemCount > 0 ? ` (${itemCount})` : ''}`}
+          breadcrumbs={[{ label: 'Home', to: '/' }]}
+        />
 
         <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
@@ -95,23 +82,10 @@ export default function Cart() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box
-        sx={{ 
-          width: '100%', 
-          mb: 3, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button variant="outlined" component={Link} to="/">
-            Home
-          </Button>
-          <Typography variant="h4">Shopping Cart ({itemCount})</Typography>
-        </Box>
-        <NavBar />
-      </Box>
+      <PageHeader 
+        title={`Shopping Cart${itemCount > 0 ? ` (${itemCount})` : ''}`}
+        breadcrumbs={[{ label: 'Home', to: '/' }]}
+      />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 8 }}>

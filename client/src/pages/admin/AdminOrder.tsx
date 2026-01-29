@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -17,11 +18,11 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
+import PageHeader from '../../components/PageHeader';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Table from '../../components/Table';
 import type { Column } from '../../components/Table';
-import { useState, useEffect } from 'react';
 
 export default function AdminOrder() {
   const { id } = useParams<{ id: string }>();
@@ -164,18 +165,15 @@ export default function AdminOrder() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Button variant="outlined" component={Link} to="/">
-          Home
-        </Button>
-        <Button variant="outlined" component={Link} to="/admin">
-          Admin
-        </Button>
-        <Button variant="outlined" component={Link} to="/admin/orders">
-          Orders
-        </Button>
-        <Typography variant="h4">{order.order_number}</Typography>
-      </Box>
+      <PageHeader 
+        title={order.order_number}
+        breadcrumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Admin', to: '/admin' },
+          { label: 'Orders', to: '/admin/orders' }
+        ]}
+        showNavBar={false}
+      />
 
       <Grid container spacing={3}>
         {/* Order Details */}

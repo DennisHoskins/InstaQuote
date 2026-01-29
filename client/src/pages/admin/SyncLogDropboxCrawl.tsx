@@ -1,13 +1,11 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
-  Typography,
   Box,
-  Button,
   CircularProgress,
   Alert,
   TextField,
@@ -16,6 +14,7 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
+import PageHeader from '../../components/PageHeader';
 import SyncLogTable from '../../components/admin/SyncLogTable';
 import PaginationControls from '../../components/PaginationControls';
 import SyncTriggerButton from '../../components/admin/SyncTriggerButton';
@@ -231,31 +230,29 @@ export default function SyncLogDropboxCrawl() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button variant="outlined" component={Link} to="/">
-            Home
-          </Button>
-          <Button variant="outlined" component={Link} to="/admin">
-            Admin
-          </Button>
-          <Typography variant="h4">Crawl Dropbox Log</Typography>
-        </Box>
-
-        <SyncTriggerButton
-          title="Crawl Dropbox"
-          buttonText="Crawl Dropbox"
-          requiresToken={true}
-          apiCall={(token) => api.triggerDropboxCrawl('Dennis', token!)}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'dropbox_crawl'] });
-            queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-            queryClient.invalidateQueries({ queryKey: ['sync-status', 'dropbox_crawl'] });
-          }}
-          onStatusChange={handleSyncStatusChange}
-          disabled={isRunning}
-        />
-      </Box>
+      <PageHeader 
+        title="Crawl Dropbox Log"
+        breadcrumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Admin', to: '/admin' }
+        ]}
+        showNavBar={false}
+        rightAction={
+          <SyncTriggerButton
+            title="Crawl Dropbox"
+            buttonText="Crawl Dropbox"
+            requiresToken={true}
+            apiCall={(token) => api.triggerDropboxCrawl('Dennis', token!)}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'dropbox_crawl'] });
+              queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+              queryClient.invalidateQueries({ queryKey: ['sync-status', 'dropbox_crawl'] });
+            }}
+            onStatusChange={handleSyncStatusChange}
+            disabled={isRunning}
+          />
+        }
+      />
 
       {statusMessage && (
         <StatusMessage

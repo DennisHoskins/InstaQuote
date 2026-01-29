@@ -1,12 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
-  Typography,
   Box,
-  Button,
   CircularProgress,
   Alert,
   TextField,
@@ -15,6 +13,7 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
+import PageHeader from '../../components/PageHeader';
 import SyncLogTable from '../../components/admin/SyncLogTable';
 import PaginationControls from '../../components/PaginationControls';
 
@@ -102,15 +101,14 @@ export default function SyncLogAccess() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Button variant="outlined" component={Link} to="/">
-          Home
-        </Button>
-        <Button variant="outlined" component={Link} to="/admin">
-          Admin
-        </Button>
-        <Typography variant="h4">Access Data Sync Log</Typography>
-      </Box>
+      <PageHeader 
+        title="Access Data Sync Log"
+        breadcrumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Admin', to: '/admin' }
+        ]}
+        showNavBar={false}
+      />
 
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <FormControl size="small" sx={{ minWidth: 150 }}>

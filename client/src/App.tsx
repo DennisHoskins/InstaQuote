@@ -1,7 +1,7 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import Layout from './components/Layout';
-import AdminLayout from './components/admin/AdminLayout';
+import Layout from './layouts/Layout';
+import AdminLayout from './layouts/AdminLayout';
 import SearchResults from './pages/SearchResults';
 import Catalog from './pages/Catalog';
 import Destinations from './pages/Destinations';

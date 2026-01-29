@@ -1,13 +1,11 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
-  Typography,
   Box,
-  Button,
   CircularProgress,
   Alert,
   TextField,
@@ -16,6 +14,7 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
+import PageHeader from '../../components/PageHeader';
 import SyncLogTable from '../../components/admin/SyncLogTable';
 import PaginationControls from '../../components/PaginationControls';
 import SyncTriggerButton from '../../components/admin/SyncTriggerButton';
@@ -265,32 +264,30 @@ export default function SyncLogDropboxLinks() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button variant="outlined" component={Link} to="/">
-            Home
-          </Button>
-          <Button variant="outlined" component={Link} to="/admin">
-            Admin
-          </Button>
-          <Typography variant="h4">Create Dropbox Links Log</Typography>
-        </Box>
-
-        <SyncTriggerButton
-          title="Create Dropbox Links"
-          buttonText={`Create Links (${missingLinks})`}
-          requiresToken={true}
-          apiCall={(token) => api.triggerCreateLinks('Dennis', token!)}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'dropbox_links'] });
-            queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-            queryClient.invalidateQueries({ queryKey: ['sync-status', 'dropbox_links'] });
-            queryClient.invalidateQueries({ queryKey: ['missing-links-count'] });
-          }}
-          onStatusChange={handleSyncStatusChange}
-          disabled={isRunning || missingLinks === 0}
-        />
-      </Box>
+      <PageHeader 
+        title="Create Dropbox Links Log"
+        breadcrumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Admin', to: '/admin' }
+        ]}
+        showNavBar={false}
+        rightAction={
+          <SyncTriggerButton
+            title="Create Dropbox Links"
+            buttonText={`Create Links (${missingLinks})`}
+            requiresToken={true}
+            apiCall={(token) => api.triggerCreateLinks('Dennis', token!)}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'dropbox_links'] });
+              queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+              queryClient.invalidateQueries({ queryKey: ['sync-status', 'dropbox_links'] });
+              queryClient.invalidateQueries({ queryKey: ['missing-links-count'] });
+            }}
+            onStatusChange={handleSyncStatusChange}
+            disabled={isRunning || missingLinks === 0}
+          />
+        }
+      />
 
       {statusMessage && (
         <StatusMessage

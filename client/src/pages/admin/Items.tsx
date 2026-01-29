@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Typography, Box, Button, CircularProgress, Alert } from '@mui/material';
+import { Container, Box, CircularProgress, Alert } from '@mui/material';
+import PageHeader from '../../components/PageHeader';
 import SearchBar from '../../components/SearchBar';
 import ItemsTable from '../../components/admin/ItemsTable';
 import PaginationControls from '../../components/PaginationControls';
@@ -48,32 +49,15 @@ export default function AdminItems() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Button 
-          variant="outlined"
-          component={Link}
-          to='/'
-        >
-          Home
-        </Button>
-        <Button
-          variant="outlined"
-          component={Link}
-          to='/admin'
-        >
-          Admin
-        </Button>
-        <Button
-          variant="outlined"
-          component={Link}
-          to='/admin/skus'
-        >
-          SKUs
-        </Button>
-        <Typography variant="h4">
-          Inventory Items
-        </Typography>
-      </Box>
+      <PageHeader 
+        title="Inventory Items"
+        breadcrumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Admin', to: '/admin' },
+          { label: 'SKUs', to: '/admin/skus' }
+        ]}
+        showNavBar={false}
+      />
 
       <SearchBar
         initialValue={search}

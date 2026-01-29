@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
 import { Container, Typography, Box, Button, CircularProgress, Alert, Grid } from '@mui/material';
+import PageHeader from '../../components/PageHeader';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
@@ -52,43 +53,25 @@ export default function AdminSkuImage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <PageHeader 
+        title={`Mapping #${mapping.id}`}
+        breadcrumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Admin', to: '/admin' },
+          { label: 'SKU-Images', to: '/admin/sku-images' }
+        ]}
+        showNavBar={false}
+        rightAction={
           <Button 
-            variant="outlined"
-            component={Link}
-            to='/'
+            variant="contained"
+            color="error"
+            onClick={handleDelete}
+            disabled={deleteMutation.isPending}
           >
-            Home
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete Mapping'}
           </Button>
-          <Button
-            variant="outlined"
-            component={Link}
-            to='/admin'
-          >
-            Admin
-          </Button>
-          <Button
-            variant="outlined"
-            component={Link}
-            to='/admin/sku-images'
-          >
-            SKU-Images
-          </Button>
-          <Typography variant="h4">
-            Mapping #{mapping.id}
-          </Typography>
-        </Box>
-
-        <Button 
-          variant="contained"
-          color="error"
-          onClick={handleDelete}
-          disabled={deleteMutation.isPending}
-        >
-          {deleteMutation.isPending ? 'Deleting...' : 'Delete Mapping'}
-        </Button>
-      </Box>
+        }
+      />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>

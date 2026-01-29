@@ -2,7 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Typography, Box, Button, CircularProgress, Alert, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Container, Box, Button, CircularProgress, Alert, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import PageHeader from '../../components/PageHeader'; 
 import ImagesTable from '../../components/admin/ImagesTable';
 import SearchBar from '../../components/SearchBar';
 import PaginationControls from '../../components/PaginationControls';
@@ -66,46 +67,25 @@ export default function AdminImages() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box
-        sx={{ 
-          width: '100%', 
-          mb: 3, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button 
-            variant="outlined"
-            component={Link}
-            to='/'
-          >
-            Home
-          </Button>
+      <PageHeader 
+        title="Images"
+        breadcrumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Admin', to: '/admin' }
+        ]}
+        showNavBar={false}
+        rightAction={
           <Button
-            variant="outlined"
             component={Link}
-            to='/admin'
+            to='/admin/sku-images'
+            variant="text"
+            size="small"
+            sx={{ px: 2 }}
           >
-            Admin
+            SKU-Image Matches
           </Button>
-          <Typography variant="h4">
-            Images
-          </Typography>
-        </Box>
-
-        <Button
-          component={Link}
-          to='/admin/sku-images'
-          variant="text"
-          size="small"
-          sx={{ px: 2 }}
-        >
-          SKU-Image Matches
-        </Button>
-      </Box>
-
+        }
+      />
       <Box sx={{ display: 'flex', gap: 2 }}>
         <Box sx={{ flex: 1 }}>
           <SearchBar

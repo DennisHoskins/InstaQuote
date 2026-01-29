@@ -2,6 +2,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 import {
   Container,
   Typography,
@@ -14,9 +15,8 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
+import PageHeader from '../components/PageHeader';
 import DownloadIcon from '@mui/icons-material/Download';
-import NavBar from '../components/NavBar';
-import { useCart } from '../contexts/CartContext';
 
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
@@ -122,23 +122,10 @@ export default function OrderDetail() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box
-        sx={{ 
-          width: '100%', 
-          mb: 3, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button variant="outlined" component={Link} to="/orders">
-            Back to Orders
-          </Button>
-          <Typography variant="h4">{order.order_number}</Typography>
-        </Box>
-        <NavBar />
-      </Box>
+      <PageHeader 
+        title={order.order_number}
+        breadcrumbs={[{ label: 'Back to Orders', to: '/orders' }]}
+      />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 8 }}>

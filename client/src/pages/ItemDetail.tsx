@@ -2,10 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
-import { Container, Typography, Box, CircularProgress, Alert, Grid, Button } from '@mui/material';
-import NavBar from '../components/NavBar';
 import { useCart } from '../contexts/CartContext';
 import { useState } from 'react';
+import { Container, Typography, Box, CircularProgress, Alert, Grid, Button } from '@mui/material';
+import PageHeader from '../components/PageHeader';
 
 export default function ItemDetail() {
   const { itemCode } = useParams<{ itemCode: string }>();
@@ -55,27 +55,10 @@ export default function ItemDetail() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-
-      <Box
-        sx={{ 
-          width: '100%', 
-          mb: 3, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button variant="outlined" onClick={() => navigate(-1)}>
-            Back
-          </Button>
-          <Typography variant="h4">
-           {item.item_code}
-          </Typography>
-        </Box>
-
-        <NavBar />
-      </Box>
+      <PageHeader 
+        title={item.item_code}
+        breadcrumbs={[{ label: 'Back', to: '..' }]}
+      />
 
       {showSuccess && (
         <Alert severity="success" sx={{ mb: 3 }}>

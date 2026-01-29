@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Typography, Box, Button, Grid, CircularProgress, Alert } from '@mui/material';
+import { Container, Box, Grid, CircularProgress, Alert } from '@mui/material';
+import PageHeader from '../../components/PageHeader';
 import SyncStatusCard from '../../components/admin/SyncStatusCard';
 import MetalsPriceCard from '../../components/admin/MetalsPriceCard';
 import OrdersStatsCard from '../../components/admin/OrdersStatsCard';
@@ -56,22 +56,11 @@ export default function Admin() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box
-        sx={{
-          width: '100%',
-          mb: 3,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button component={Link} to="/" variant="outlined">
-            Home
-          </Button>
-          <Typography variant="h4">Admin Dashboard</Typography>
-        </Box>
-      </Box>
+      <PageHeader 
+        title="Admin Dashboard"
+        breadcrumbs={[{ label: 'Home', to: '/' }]}
+        showNavBar={false}
+      />
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, md: 4 }}>

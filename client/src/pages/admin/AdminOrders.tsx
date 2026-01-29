@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
@@ -18,6 +18,7 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
+import PageHeader from '../../components/PageHeader';
 import DownloadIcon from '@mui/icons-material/Download';
 import Table from '../../components/Table';
 import type { Column } from '../../components/Table';
@@ -199,15 +200,14 @@ export default function AdminOrders() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Button variant="outlined" component={Link} to="/">
-          Home
-        </Button>
-        <Button variant="outlined" component={Link} to="/admin">
-          Admin
-        </Button>
-        <Typography variant="h4">Orders</Typography>
-      </Box>
+    <PageHeader 
+      title="Orders"
+      breadcrumbs={[
+        { label: 'Home', to: '/' },
+        { label: 'Admin', to: '/admin' }
+      ]}
+      showNavBar={false}
+    />
 
       {/* Filters */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>

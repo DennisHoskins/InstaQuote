@@ -18,8 +18,8 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
+import PageHeader from '../components/PageHeader';
 import DownloadIcon from '@mui/icons-material/Download';
-import NavBar from '../components/NavBar';
 import Table from '../components/Table';
 import type { Column } from '../components/Table';
 import PaginationControls from '../components/PaginationControls';
@@ -200,23 +200,10 @@ export default function Orders() {
   if (!data) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box
-          sx={{ 
-            width: '100%', 
-            mb: 3, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between'
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Button variant="outlined" component={Link} to="/">
-              Home
-            </Button>
-            <Typography variant="h4">Order History</Typography>
-          </Box>
-          <NavBar />
-        </Box>
+        <PageHeader 
+          title="Order History"
+          breadcrumbs={[{ label: 'Home', to: '/' }]}
+        />
 
         <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
@@ -237,23 +224,11 @@ export default function Orders() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box
-        sx={{ 
-          width: '100%', 
-          mb: 3, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button variant="outlined" component={Link} to="/">
-            Home
-          </Button>
-          <Typography variant="h4">Order History</Typography>
-        </Box>
-        <NavBar />
-      </Box>
+      <PageHeader 
+        title="Order History"
+        breadcrumbs={[{ label: 'Home', to: '/' }]}
+      />
+
 
       {/* Filters */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>

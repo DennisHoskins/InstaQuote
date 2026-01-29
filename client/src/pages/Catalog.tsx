@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
-import { Container, Typography, Box, Button, CircularProgress, Alert } from '@mui/material';
+import { Container, Box, CircularProgress, Alert } from '@mui/material';
+import PageHeader from '../components/PageHeader';
 import SearchBar from '../components/SearchBar';
 import ItemsTable from '../components/ItemsTable';
 import PaginationControls from '../components/PaginationControls';
-import NavBar from '../components/NavBar';
+
 
 export default function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,30 +50,10 @@ export default function Catalog() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-    <Box
-      sx={{ 
-        width: '100%', 
-        mb: 3, 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between'  // Add this
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Button 
-          variant="outlined"
-          component={Link}
-          to='/'
-        >
-          Home
-        </Button>
-        <Typography variant="h4">
-          Catalog Items
-        </Typography>
-      </Box>
-
-      <NavBar />
-    </Box>
+     <PageHeader 
+        title="Catalog Items"
+        breadcrumbs={[{ label: 'Home', to: '/' }]}
+      />
 
       <SearchBar
         initialValue={search}

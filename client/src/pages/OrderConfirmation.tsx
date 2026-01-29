@@ -1,8 +1,8 @@
+import { useEffect } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Container, Typography, Box, Button, Alert } from '@mui/material';
+import PageHeader from '../components/PageHeader';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import NavBar from '../components/NavBar';
-import { useEffect } from 'react';
 
 export default function OrderConfirmation() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -24,23 +24,10 @@ export default function OrderConfirmation() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box
-        sx={{ 
-          width: '100%', 
-          mb: 3, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button variant="outlined" component={Link} to="/">
-            Home
-          </Button>
-          <Typography variant="h4">Order Confirmation</Typography>
-        </Box>
-        <NavBar />
-      </Box>
+      <PageHeader 
+        title="Order Confirmation"
+        breadcrumbs={[{ label: 'Home', to: '/' }]}
+      />
 
       <Box sx={{ p: 4, textAlign: 'center' }}>
         <CheckCircleIcon 
