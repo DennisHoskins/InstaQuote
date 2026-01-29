@@ -30,7 +30,7 @@ export default function SearchBar({ onSearch, placeholder = 'Search...', initial
         onChange={(e) => setValue(e.target.value)}
         inputRef={inputRef}
       />
-      <Button variant="contained" type="submit">
+      <Button variant="contained" type="submit" sx={{ px: 4 }}>
         Search
       </Button>
     </Box>
