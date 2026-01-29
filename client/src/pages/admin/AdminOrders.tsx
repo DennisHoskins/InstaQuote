@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
   Typography,
@@ -23,6 +25,7 @@ import PaginationControls from '../../components/PaginationControls';
 
 export default function AdminOrders() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get('page') || '1');
   const search = searchParams.get('search') || '';
@@ -31,9 +34,17 @@ export default function AdminOrders() {
   const endDate = searchParams.get('end_date') || '';
   const limit = 25;
 
+  const [localSearch, setLocalSearch] = useState(search);
+
+  // Sync local search with URL param
+  useEffect(() => {
+    setLocalSearch(search);
+  }, [search]);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-orders', page, search, status, startDate, endDate],
     queryFn: () => api.getOrders(page, limit, search, status, startDate, endDate),
+    enabled: isAuthenticated,
   });
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;
@@ -47,12 +58,19 @@ export default function AdminOrders() {
     setSearchParams(params);
   };
 
-  const handleSearch = (value: string) => {
-    const params: Record<string, string> = { search: value, page: '1' };
+  const handleSearch = () => {
+    const params: Record<string, string> = { page: '1' };
+    if (localSearch) params.search = localSearch;
     if (status) params.status = status;
     if (startDate) params.start_date = startDate;
     if (endDate) params.end_date = endDate;
     setSearchParams(params);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   const handleStatusChange = (value: string) => {
@@ -194,12 +212,21 @@ export default function AdminOrders() {
       {/* Filters */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <TextField
+          autoFocus
           placeholder="Search by order number, customer, or email..."
-          value={search}
-          onChange={(e) => handleSearch(e.target.value)}
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
+          onKeyPress={handleKeyPress}
           size="small"
           sx={{ minWidth: 300 }}
         />
+
+        <Button
+          variant="contained"
+          onClick={handleSearch}
+        >
+          Search
+        </Button>
 
         <FormControl size="small" sx={{ minWidth: 150 }}>
           <InputLabel>Status</InputLabel>

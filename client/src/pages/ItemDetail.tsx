@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 import { Container, Typography, Box, CircularProgress, Alert, Grid, Button } from '@mui/material';
 import NavBar from '../components/NavBar';
 import { useCart } from '../contexts/CartContext';
@@ -8,6 +9,7 @@ import { useState } from 'react';
 
 export default function ItemDetail() {
   const { itemCode } = useParams<{ itemCode: string }>();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { addItem } = useCart();
   const [showSuccess, setShowSuccess] = useState(false);
@@ -15,7 +17,7 @@ export default function ItemDetail() {
   const { data: item, isLoading, error } = useQuery({
     queryKey: ['item', itemCode],
     queryFn: () => api.getItem(itemCode!),
-    enabled: !!itemCode,
+    enabled: isAuthenticated && !!itemCode,
   });
 
   const handleAddToCart = () => {
@@ -81,7 +83,7 @@ export default function ItemDetail() {
         </Alert>
       )}
 
-      <Grid container spacing={4}>
+      <Grid container spacing={4} sx={{ display: 'flex' }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <Box
             sx={{
@@ -115,8 +117,8 @@ export default function ItemDetail() {
           </Box>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="h6" gutterBottom>
+        <Grid size={{ xs: 12, md: 6 }} sx={{ flexGrow: 1,  display: 'flex', flexDirection: 'column' }}>
+          <Typography variant="h5" gutterBottom>
             {item.description}
           </Typography>
 
@@ -129,16 +131,17 @@ export default function ItemDetail() {
               <strong>Destination:</strong> {item.destination}
             </Typography>
 
-            <Typography variant="h3" sx={{ mt: 3 }} color="primary" fontWeight="bold">
-              ${Number(item.total_ws_price).toFixed(2)}
-            </Typography>
           </Box>
+
+          <Typography variant="h3" sx={{ mt: 3 }} color="primary" fontWeight="bold">
+            ${Number(item.total_ws_price).toFixed(2)}
+          </Typography>
 
           <Button
             variant="contained"
             size="large"
             fullWidth
-            sx={{ mt: 4 }}
+            sx={{ mt: 4, alignSelf: 'flex-end' }}
             onClick={handleAddToCart}
           >
             Add to Cart

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
   Typography,
@@ -19,6 +20,7 @@ import PaginationControls from '../../components/PaginationControls';
 
 export default function SyncLogAccess() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const page = parseInt(searchParams.get('page') || '1');
   const status = searchParams.get('status') as 'success' | 'failed' | undefined;
   const startDate = searchParams.get('start_date') || '';
@@ -37,6 +39,7 @@ export default function SyncLogAccess() {
         startDate || undefined,
         endDate || undefined
       ),
+      enabled: isAuthenticated,
   });
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;

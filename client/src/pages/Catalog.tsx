@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
 import { api } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 import { Container, Typography, Box, Button, CircularProgress, Alert } from '@mui/material';
 import SearchBar from '../components/SearchBar';
 import ItemsTable from '../components/ItemsTable';
@@ -9,6 +10,7 @@ import NavBar from '../components/NavBar';
 
 export default function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const page = parseInt(searchParams.get('page') || '1');
   const search = searchParams.get('search') || '';
   const limit = 25;
@@ -16,6 +18,7 @@ export default function Catalog() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['catalog', page, search],
     queryFn: () => api.getCatalogItems(page, limit, search),
+    enabled: isAuthenticated,
   });
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;

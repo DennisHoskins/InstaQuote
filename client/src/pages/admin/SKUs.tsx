@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import { Container, Typography, Box, Button, CircularProgress, Alert, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import SearchBar from '../../components/SearchBar';
 import SkusTable from '../../components/admin/SkusTable';
@@ -8,6 +9,7 @@ import PaginationControls from '../../components/PaginationControls';
 
 export default function AdminSKUs() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const page = parseInt(searchParams.get('page') || '1');
   const search = searchParams.get('search') || '';
   const hasImage = searchParams.get('has_image');
@@ -16,6 +18,7 @@ export default function AdminSKUs() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-skus', page, search, hasImage],
     queryFn: () => api.getSkus(page, limit, search, hasImage === 'true' ? true : hasImage === 'false' ? false : undefined),
+    enabled: isAuthenticated,
   });
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;

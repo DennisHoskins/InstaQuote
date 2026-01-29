@@ -1,6 +1,7 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 import {
   Container,
   Typography,
@@ -20,12 +21,13 @@ import { useCart } from '../contexts/CartContext';
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const { addItem } = useCart();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['order', id],
     queryFn: () => api.getOrder(parseInt(id!)),
-    enabled: !!id,
+    enabled: isAuthenticated && !!id,
   });
 
   const reorderMutation = useMutation({
@@ -139,19 +141,72 @@ export default function OrderDetail() {
       </Box>
 
       <Grid container spacing={3}>
-        {/* Order Details */}
         <Grid size={{ xs: 12, md: 8 }}>
-          <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Order Details</Typography>
-              <Chip 
-                label={order.status.charAt(0).toUpperCase() + order.status.slice(1)} 
-                color={statusColorMap[order.status] || 'default'}
-              />
-            </Box>
+          {/* Order Items */}
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              Order Items ({items.length})
+            </Typography>
 
-            <Grid container spacing={2}>
-              <Grid size={6}>
+            <Paper variant="outlined">
+              {items.map((item: any) => (
+                <Box
+                  key={item.id}
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    py: 2,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    '&:last-child': { borderBottom: 'none' },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <Typography 
+                      variant="h6"
+                      component={Link}
+                      to={`/item/${item.item_code}`}
+                      sx={{ textDecoration: 'none', color: 'inherit', '&:hover': { color: 'primary.main' } }}
+                    >
+                      {item.item_code}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {item.description}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <Typography variant="h6" fontWeight="medium">
+                      ${Number(item.line_total).toFixed(2)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      ${Number(item.unit_price).toFixed(2)} × {item.quantity}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))}
+            </Paper>
+          </Box>
+        </Grid>
+
+        {/* Order Summary */}
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Box sx={{ p: 3, pt: 0, position: 'sticky', top: 20 }}>
+
+            {/* Order Details */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h6" gutterBottom>
+                  Order Summary
+                </Typography>
+                <Chip 
+                  label={order.status.charAt(0).toUpperCase() + order.status.slice(1)} 
+                  color={statusColorMap[order.status] || 'default'}
+                />
+              </Box>
+
+              <Box sx={{ mt: -1}}>
                 <Typography variant="body2" color="text.secondary">
                   Order Date
                 </Typography>
@@ -164,77 +219,33 @@ export default function OrderDetail() {
                     minute: '2-digit',
                   })}
                 </Typography>
-              </Grid>
-
-              <Grid size={6}>
+              </Box>
+                
+              <Box>
                 <Typography variant="body2" color="text.secondary">
                   Customer
                 </Typography>
                 <Typography variant="body1">{order.user_name}</Typography>
+              </Box>
+                
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  Email Address
+                </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {order.user_email}
                 </Typography>
-              </Grid>
+              </Box>
 
               {order.notes && (
-                <Grid size={12}>
+                <Box mt={2}>
                   <Typography variant="body2" color="text.secondary">
                     Notes
                   </Typography>
                   <Typography variant="body1">{order.notes}</Typography>
-                </Grid>
-              )}
-            </Grid>
-          </Paper>
-
-          {/* Order Items */}
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Order Items ({items.length})
-            </Typography>
-            
-            {items.map((item: any) => (
-              <Box
-                key={item.id}
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  py: 2,
-                  borderBottom: '1px solid',
-                  borderColor: 'divider',
-                  '&:last-child': { borderBottom: 'none' },
-                }}
-              >
-                <Box>
-                  <Typography 
-                    variant="body1"
-                    component={Link}
-                    to={`/item/${item.item_code}`}
-                    sx={{ textDecoration: 'none', color: 'inherit', '&:hover': { color: 'primary.main' } }}
-                  >
-                    {item.item_code}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {item.description}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    ${Number(item.unit_price).toFixed(2)} × {item.quantity}
-                  </Typography>
                 </Box>
-                <Typography variant="body1" fontWeight="medium">
-                  ${Number(item.line_total).toFixed(2)}
-                </Typography>
-              </Box>
-            ))}
-          </Paper>
-        </Grid>
-
-        {/* Order Summary */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Paper variant="outlined" sx={{ p: 3, position: 'sticky', top: 20 }}>
-            <Typography variant="h6" gutterBottom>
-              Order Summary
-            </Typography>
+              )}
+            </Box>
 
             <Divider sx={{ my: 2 }} />
 
@@ -278,7 +289,7 @@ export default function OrderDetail() {
                 'Reorder'
               )}
             </Button>
-          </Paper>
+          </Box>
         </Grid>
       </Grid>
     </Container>

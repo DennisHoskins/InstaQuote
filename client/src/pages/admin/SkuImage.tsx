@@ -1,19 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import { Container, Typography, Box, Button, CircularProgress, Alert, Grid } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 export default function AdminSkuImage() {
   const { id } = useParams<{ id: string }>();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: mapping, isLoading, error } = useQuery({
     queryKey: ['admin-sku-image', id],
     queryFn: () => api.getSkuImage(parseInt(id!)),
-    enabled: !!id,
+    enabled: isAuthenticated && !!id,
   });
   
   const deleteMutation = useMutation({

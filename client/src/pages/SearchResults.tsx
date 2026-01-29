@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { Container, Typography, Box, Button, CircularProgress, Alert } from '@mui/material';
+import { useAuth } from '../contexts/AuthContext';
 import SearchBar from '../components/SearchBar';
 import ItemsTable from '../components/ItemsTable';
 import PaginationControls from '../components/PaginationControls';
@@ -9,6 +10,7 @@ import NavBar from '../components/NavBar';
 
 export default function SearchResults() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const page = parseInt(searchParams.get('page') || '1');
   const search = searchParams.get('q') || '';
   const limit = 25;
@@ -16,7 +18,7 @@ export default function SearchResults() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['search', search, page],
     queryFn: () => api.searchAllItems(search, page, limit),
-    enabled: !!search,
+    enabled: isAuthenticated && !!search,
   });
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;

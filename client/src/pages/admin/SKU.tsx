@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import { Container, Typography, Box, Button, CircularProgress, Alert, Grid } from '@mui/material';
 import Table from '../../components/Table';
 import type { Column } from '../../components/Table';
@@ -9,12 +10,13 @@ import CancelIcon from '@mui/icons-material/Cancel';
 
 export default function AdminSKU() {
   const { sku } = useParams<{ sku: string }>();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-sku', sku],
     queryFn: () => api.getSkuDetail(sku!),
-    enabled: !!sku,
+    enabled: isAuthenticated && !!sku,
   });
 
   if (isLoading) {

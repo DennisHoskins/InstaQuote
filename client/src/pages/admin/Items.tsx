@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import { Container, Typography, Box, Button, CircularProgress, Alert } from '@mui/material';
 import SearchBar from '../../components/SearchBar';
 import ItemsTable from '../../components/admin/ItemsTable';
@@ -8,6 +9,7 @@ import PaginationControls from '../../components/PaginationControls';
 
 export default function AdminItems() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const page = parseInt(searchParams.get('page') || '1');
   const search = searchParams.get('search') || '';
   const limit = 25;
@@ -15,6 +17,7 @@ export default function AdminItems() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-items', page, search],
     queryFn: () => api.getItems(page, limit, search),
+    enabled: isAuthenticated,
   });
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;

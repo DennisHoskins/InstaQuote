@@ -65,12 +65,9 @@ export default function OrderConfirmation() {
           </Link>
         </Typography>
 
-        <Alert severity="info" sx={{ mt: 3, mb: 3, textAlign: 'left', maxWidth: 'md', mx: 'auto' }}>
-          <Typography variant="body1" gutterBottom>
-            Thank you for your order! A confirmation email has been sent to:
-          </Typography>
-          <Typography variant="body1" fontWeight="medium">
-            {customerEmail}
+        <Alert severity="info" sx={{ mt: 3, mb: 3, textAlign: 'left', maxWidth: 'sm', mx: 'auto' }}>
+          <Typography variant="body1">
+            Thank you for your order! A confirmation email has been sent to: {customerEmail}
           </Typography>
         </Alert>
 

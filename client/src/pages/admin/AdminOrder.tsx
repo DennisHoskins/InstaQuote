@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
   Typography,
@@ -8,9 +9,7 @@ import {
   Button,
   CircularProgress,
   Alert,
-  Paper,
   Grid,
-  Chip,
   Divider,
   TextField,
   Select,
@@ -26,6 +25,7 @@ import { useState, useEffect } from 'react';
 
 export default function AdminOrder() {
   const { id } = useParams<{ id: string }>();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -35,7 +35,7 @@ export default function AdminOrder() {
   const { data: order, isLoading, error } = useQuery({
     queryKey: ['admin-order', id],
     queryFn: () => api.getOrder(parseInt(id!)),
-    enabled: !!id,
+    enabled: isAuthenticated && !!id,
   });
 
   useEffect(() => {
@@ -142,13 +142,6 @@ export default function AdminOrder() {
 
   const items = order.items;
 
-  const statusColorMap: Record<string, 'default' | 'primary' | 'success' | 'error'> = {
-    pending: 'default',
-    processing: 'primary',
-    completed: 'success',
-    cancelled: 'error',
-  };
-
   const itemColumns: Column[] = [
     { key: 'item_code', label: 'Item Code' },
     { key: 'description', label: 'Description' },
@@ -181,86 +174,113 @@ export default function AdminOrder() {
         <Button variant="outlined" component={Link} to="/admin/orders">
           Orders
         </Button>
-        <Typography variant="h4">Order {order.order_number}</Typography>
+        <Typography variant="h4">{order.order_number}</Typography>
       </Box>
 
       <Grid container spacing={3}>
         {/* Order Details */}
         <Grid size={{ xs: 12, md: 8 }}>
-          <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Order Details</Typography>
-              <Chip 
-                label={order.status.charAt(0).toUpperCase() + order.status.slice(1)} 
-                color={statusColorMap[order.status] || 'default'}
-              />
+          {/* Order Items */}
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              Order Items ({items.length})
+            </Typography>
+            <Table
+              columns={itemColumns}
+              data={items}
+              emptyMessage="No items in this order"
+              onRowClick={(item) => navigate(`/item/${item.item_code}`)}
+            />
+          </Box>
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 4 }}>
+
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              Order Summary
+            </Typography>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+              <Typography variant="h6">Total:</Typography>
+              <Typography variant="h6" color="primary">
+                ${Number(order.total_amount).toFixed(2)}
+              </Typography>
             </Box>
 
-            <Grid container spacing={2}>
-              <Grid size={6}>
+            <Button
+              variant="outlined"
+              size="large"
+              fullWidth
+              startIcon={<DownloadIcon />}
+              onClick={handleExport}
+              sx={{ mb: 1 }}
+            >
+              Export Order
+            </Button>
+
+            <Button
+              variant="outlined"
+              size="large"
+              fullWidth
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete Order'}
+            </Button>
+          </Box>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="body2" color="text.secondary">
+                Order Date
+              </Typography>
+              <Typography variant="body1">
+                {new Date(order.created_at).toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="body2" color="text.secondary">
+                Customer
+              </Typography>
+              <Typography variant="body1">{order.user_name}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {order.user_email}
+              </Typography>
+            </Box>
+
+            {order.updated_at && (
+              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <Typography variant="body2" color="text.secondary">
-                  Order Date
+                  Last Updated
                 </Typography>
                 <Typography variant="body1">
-                  {new Date(order.created_at).toLocaleDateString('en-US', {
-                    month: 'long',
+                  {new Date(order.updated_at).toLocaleDateString('en-US', {
+                    month: 'short',
                     day: 'numeric',
                     year: 'numeric',
                     hour: 'numeric',
                     minute: '2-digit',
                   })}
                 </Typography>
-              </Grid>
+              </Box>
+            )}
+          </Box>
 
-              <Grid size={6}>
-                <Typography variant="body2" color="text.secondary">
-                  Customer
-                </Typography>
-                <Typography variant="body1">{order.user_name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {order.user_email}
-                </Typography>
-              </Grid>
 
-              {order.updated_at && (
-                <Grid size={6}>
-                  <Typography variant="body2" color="text.secondary">
-                    Last Updated
-                  </Typography>
-                  <Typography variant="body1">
-                    {new Date(order.updated_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                    })}
-                  </Typography>
-                </Grid>
-              )}
-            </Grid>
-          </Paper>
-
-          {/* Order Items */}
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Order Items
-            </Typography>
-            <Table
-              columns={itemColumns}
-              data={items}
-              emptyMessage="No items in this order"
-            />
-          </Paper>
-        </Grid>
-
-        {/* Edit Form Sidebar */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Paper variant="outlined" sx={{ p: 3, mb: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Edit Order
-            </Typography>
-
+          {/* Edit Form Sidebar */}
+          <Box sx={{ mt: 4 }}>
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Status</InputLabel>
               <Select
@@ -306,45 +326,7 @@ export default function AdminOrder() {
             >
               {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
             </Button>
-          </Paper>
-
-          <Paper variant="outlined" sx={{ p: 3, mb: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Order Summary
-            </Typography>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-              <Typography variant="h6">Total:</Typography>
-              <Typography variant="h6" color="primary">
-                ${Number(order.total_amount).toFixed(2)}
-              </Typography>
-            </Box>
-
-            <Button
-              variant="outlined"
-              size="large"
-              fullWidth
-              startIcon={<DownloadIcon />}
-              onClick={handleExport}
-              sx={{ mb: 1 }}
-            >
-              Export Order
-            </Button>
-
-            <Button
-              variant="outlined"
-              size="large"
-              fullWidth
-              color="error"
-              startIcon={<DeleteIcon />}
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? 'Deleting...' : 'Delete Order'}
-            </Button>
-          </Paper>
+          </Box>
         </Grid>
       </Grid>
     </Container>

@@ -2,6 +2,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
   Typography,
@@ -22,6 +23,7 @@ import StatusMessage from '../../components/StatusMessage';
 
 export default function SyncLogSkuMapping() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
   const page = parseInt(searchParams.get('page') || '1');
   const status = searchParams.get('status') as 'success' | 'failed' | undefined;
@@ -38,6 +40,7 @@ export default function SyncLogSkuMapping() {
   const { data: syncStatusData } = useQuery({
     queryKey: ['sync-status', 'sku_mapping'],
     queryFn: () => api.getSyncStatus('sku_mapping'),
+    enabled: isAuthenticated,
   });
 
   const isRunning = syncStatusData?.isRunning || false;

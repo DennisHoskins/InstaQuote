@@ -1,12 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import { Container, Typography, Box, Button, CircularProgress, Alert, TextField } from '@mui/material';
 import MetalsTable from '../../components/admin/MetalsTable';
 import PaginationControls from '../../components/PaginationControls';
 
 export default function AdminMetals() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const page = parseInt(searchParams.get('page') || '1');
   const startDate = searchParams.get('start_date') || '';
   const endDate = searchParams.get('end_date') || '';
@@ -15,6 +17,7 @@ export default function AdminMetals() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-metals', page, startDate, endDate],
     queryFn: () => api.getMetals(page, limit, startDate || undefined, endDate || undefined),
+    enabled: isAuthenticated,
   });
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;

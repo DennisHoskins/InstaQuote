@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
   Typography,
@@ -19,6 +20,7 @@ import PaginationControls from '../../components/PaginationControls';
 
 export default function AdminSkuImages() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const page = parseInt(searchParams.get('page') || '1');
   const search = searchParams.get('search') || '';
   const matchType = searchParams.get('match_type') || '';
@@ -35,6 +37,7 @@ export default function AdminSkuImages() {
         matchType || undefined,
         isPrimary === 'true' ? true : isPrimary === 'false' ? false : undefined
       ),
+      enabled: isAuthenticated,
   });
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;

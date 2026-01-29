@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import Table from '../../components/Table';
 import type { Column } from '../../components/Table';
 import { Container, Typography, Box, Button, CircularProgress, Alert, Grid } from '@mui/material';
@@ -10,11 +11,12 @@ import CancelIcon from '@mui/icons-material/Cancel';
 export default function AdminImage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-image', id],
     queryFn: () => api.getImageDetail(parseInt(id!)),
-    enabled: !!id,
+    enabled: isAuthenticated && !!id,
   });
 
   if (isLoading) {

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import { Container, Typography, Box, Button, Grid, CircularProgress, Alert } from '@mui/material';
 import SyncStatusCard from '../../components/admin/SyncStatusCard';
 import MetalsPriceCard from '../../components/admin/MetalsPriceCard';
@@ -10,12 +11,15 @@ import SkusStatsCard from '../../components/admin/SkusStatsCard';
 import DropboxSyncCard from '../../components/admin/DropboxSyncCard';
 
 export default function Admin() {
+  const { isLoading: authLoading } = useAuth();
+  
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-dashboard'],
     queryFn: () => api.getDashboard(),
+    enabled: !authLoading,
   });
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
         <CircularProgress />

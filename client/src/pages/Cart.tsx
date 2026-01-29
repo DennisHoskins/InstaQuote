@@ -1,12 +1,12 @@
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { Container, Typography, Box, Button, IconButton, TextField, Paper, Grid, Alert, CircularProgress } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
-import NavBar from '../components/NavBar';
-import { useMutation } from '@tanstack/react-query';
 import { api } from '../api/client';
-import { useState } from 'react';
+import { Container, Typography, Box, Button, IconButton, TextField, Paper, Grid, Alert, CircularProgress } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import NavBar from '../components/NavBar';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -115,7 +115,7 @@ export default function Cart() {
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 8 }}>
-          <Paper variant="outlined">
+          <Paper variant='outlined'>
             {items.map((item) => (
               <Box
                 key={item.item_code}
@@ -129,40 +129,42 @@ export default function Cart() {
                 }}
               >
                 {/* Image */}
-                <Box
-                  sx={{
-                    width: 100,
-                    height: 100,
-                    bgcolor: item.image_url ? 'white' : 'grey.200',
-                    border: '1px solid',
-                    borderColor: 'grey.300',
-                    borderRadius: 1,
-                    flexShrink: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                  }}
-                >
-                  {item.image_url ? (
-                    <img
-                      src={item.image_url}
-                      alt={item.description}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                      }}
-                    />
-                  ) : (
-                    <Typography variant="caption" color="text.secondary">
-                      No Image
-                    </Typography>
-                  )}
-                </Box>
+                <Link to={`/item/${item.item_code}`}>
+                  <Box
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      bgcolor: item.image_url ? 'white' : 'grey.200',
+                      border: '1px solid',
+                      borderColor: 'grey.300',
+                      borderRadius: 1,
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {item.image_url ? (
+                      <img
+                        src={item.image_url}
+                        alt={item.description}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain',
+                        }}
+                      />
+                    ) : (
+                      <Typography variant="caption" color="text.secondary">
+                        No Image
+                      </Typography>
+                    )}
+                  </Box>
+                </Link>
 
                 {/* Item Details */}
-                <Box sx={{ flex: 1 }}>
+                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <Typography 
                     variant="h6" 
                     component={Link}
@@ -171,20 +173,31 @@ export default function Cart() {
                   >
                     {item.item_code}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary">
                     {item.description}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {item.category}
+                  <Typography variant="caption" color="text.secondary">
+                    Category: {item.category}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    ${Number(item.unit_price).toFixed(2)} each
                   </Typography>
                 </Box>
 
                 {/* Quantity & Price */}
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
-                  <Typography variant="h6">
+                  <Typography variant="h6" sx={{ flexGrow: 1 }}>
                     ${(Number(item.unit_price) * item.quantity).toFixed(2)}
                   </Typography>
+
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconButton 
+                      size="small" 
+                      color="error"
+                      onClick={() => removeItem(item.item_code)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
                     <TextField
                       type="number"
                       size="small"
@@ -198,65 +211,19 @@ export default function Cart() {
                       inputProps={{ min: 1, style: { textAlign: 'center' } }}
                       sx={{ width: 80 }}
                     />
-                    <IconButton 
-                      size="small" 
-                      color="error"
-                      onClick={() => removeItem(item.item_code)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
                   </Box>
-                  <Typography variant="caption" color="text.secondary">
-                    ${Number(item.unit_price).toFixed(2)} each
-                  </Typography>
                 </Box>
               </Box>
             ))}
           </Paper>
-
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={() => {
-                if (window.confirm('Clear all items from cart?')) {
-                  clearCart();
-                }
-              }}
-            >
-              Clear Cart
-            </Button>
-            <Button
-              variant="outlined"
-              component={Link}
-              to="/catalog"
-            >
-              Continue Shopping
-            </Button>
-          </Box>
         </Grid>
 
         {/* Order Summary */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <Paper variant="outlined" sx={{ p: 3, position: 'sticky', top: 20 }}>
+          <Box sx={{ p: 3, pt: 0, position: 'sticky', top: 20 }}>
             <Typography variant="h5" gutterBottom>
               Order Summary
             </Typography>
-
-            {/* Customer Info */}
-            {user && (
-              <Box sx={{ mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Ordering as:
-                </Typography>
-                <Typography variant="body1" fontWeight="medium">
-                  {user.username}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {user.email}
-                </Typography>
-              </Box>
-            )}
 
             {/* Notes Field */}
             <Box sx={{ mb: 3 }}>
@@ -285,7 +252,7 @@ export default function Cart() {
             <Box sx={{ borderTop: '2px solid', borderColor: 'divider', pt: 2, mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="h6">Total:</Typography>
-                <Typography variant="h6" color="primary">
+                <Typography variant="h4" color="primary">
                   ${total.toFixed(2)}
                 </Typography>
               </Box>
@@ -313,7 +280,7 @@ export default function Cart() {
                 'Place Order'
               )}
             </Button>
-          </Paper>
+          </Box>
         </Grid>
       </Grid>
     </Container>

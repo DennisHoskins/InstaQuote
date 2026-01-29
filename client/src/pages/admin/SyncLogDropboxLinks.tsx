@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
   Typography,
@@ -22,6 +23,7 @@ import StatusMessage from '../../components/StatusMessage';
 
 export default function SyncLogDropboxLinks() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
   const page = parseInt(searchParams.get('page') || '1');
   const status = searchParams.get('status') as 'success' | 'failed' | undefined;
@@ -38,6 +40,7 @@ export default function SyncLogDropboxLinks() {
   const { data: syncStatusData } = useQuery({
     queryKey: ['sync-status', 'dropbox_links'],
     queryFn: () => api.getSyncStatus('dropbox_links'),
+    enabled: isAuthenticated,
   });
 
   // Get missing links count

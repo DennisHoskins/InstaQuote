@@ -2,17 +2,20 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 import { Container, Typography, Box, Button, CircularProgress, Alert, Grid, Card, CardActionArea, CardContent } from '@mui/material';
 import FilterInput from '../components/FilterInput';
 import NavBar from '../components/NavBar';
 
 export default function Destinations() {
   const [filterText, setFilterText] = useState('');
+  const { isAuthenticated } = useAuth();
 
   // Fetch all destinations once (no search param)
   const { data: allDestinations, isLoading, error } = useQuery({
     queryKey: ['destinations'],
     queryFn: () => api.getDestinations(),
+    enabled: isAuthenticated,
   });
 
   // Filter client-side

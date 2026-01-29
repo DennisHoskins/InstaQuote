@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
+import { useAuth } from '../../contexts/AuthContext';
 import { Container, Typography, Box, Button, CircularProgress, Alert, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import ImagesTable from '../../components/admin/ImagesTable';
 import SearchBar from '../../components/SearchBar';
@@ -8,6 +9,7 @@ import PaginationControls from '../../components/PaginationControls';
 
 export default function AdminImages() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const page = parseInt(searchParams.get('page') || '1');
   const search = searchParams.get('search') || '';
   const fileType = searchParams.get('file_type') || '';
@@ -16,6 +18,7 @@ export default function AdminImages() {
   const { data: fileTypes } = useQuery({
     queryKey: ['file-types'],
     queryFn: () => api.getFileTypes(),
+    enabled: isAuthenticated,
   });
 
   const { data, isLoading, error } = useQuery({
