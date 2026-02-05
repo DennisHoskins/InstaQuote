@@ -7,7 +7,7 @@ const router = Router();
 router.get('/', [
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 }),
-  query('type').optional().isIn(['access', 'dropbox', 'dropbox_crawl', 'dropbox_links', 'sku_mapping']),
+  query('type').optional().isIn(['access', 'all', 'catalog', 'destinations', 'dropbox', 'dropbox_crawl', 'dropbox_links', 'sku_mapping']),
   query('status').optional().isIn(['success', 'failed', 'running']),
   query('start_date').optional().isISO8601(),
   query('end_date').optional().isISO8601(),

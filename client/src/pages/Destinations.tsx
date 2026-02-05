@@ -11,18 +11,73 @@ export default function Destinations() {
   const [filterText, setFilterText] = useState('');
   const { isAuthenticated } = useAuth();
 
-  // Fetch all destinations once (no search param)
+  const PRESERVE_UPPERCASE = [
+    // States
+    'NC', 'SC', 'FL', 'MD', 'VA', 'NJ', 'DE', 'TX', 'WY', 'OH', 'WI', 'TN', 'KY',
+    'CO', 'ID', 'MI', 'RI', 'HI', 'NY', 'MA', 'DC', 'CA',
+    // Other
+    'ABC', 'BBQ', 'US', 'USVI', 'SXM', 'JD', 'OC', 'LBI', 'KW', 'II', 'B&O',
+  ];
+
+  const WORD_REPLACEMENTS: Record<string, string> = {
+    'ST': 'St.',
+    'FT': 'Ft.',
+    'MT': 'Mt.',
+  };
+
+  const US_STATE_REGEX = /\b([A-Za-z\s]+?)[,\s]+([A-Za-z]{2})$/;
+
+  const formatDestination = (destination: string) => {
+    const trimmed = destination.trim();
+
+    const stateMatch = trimmed.match(US_STATE_REGEX);
+
+    if (stateMatch) {
+      const cityRaw = stateMatch[1];
+      const stateRaw = stateMatch[2];
+
+      const city = cityRaw
+        .split(' ')
+        .map(word => {
+          const upper = word.toUpperCase();
+          if (WORD_REPLACEMENTS[upper]) {
+            return WORD_REPLACEMENTS[upper];
+          }
+          if (PRESERVE_UPPERCASE.includes(upper)) {
+            return upper;
+          }
+          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        })
+        .join(' ');
+
+      return `${city}, ${stateRaw.toUpperCase()}`;
+    }
+
+    return trimmed
+      .split(' ')
+      .map(word => {
+        const upper = word.toUpperCase();
+        if (WORD_REPLACEMENTS[upper]) {
+          return WORD_REPLACEMENTS[upper];
+        }
+        if (PRESERVE_UPPERCASE.includes(upper)) {
+          return upper;
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      })
+      .join(' ');
+  };
+
   const { data: allDestinations, isLoading, error } = useQuery({
     queryKey: ['destinations'],
     queryFn: () => api.getDestinations(),
     enabled: isAuthenticated,
   });
 
-  // Filter client-side
   const filteredDestinations = useMemo(() => {
     if (!allDestinations) return [];
     if (!filterText) return allDestinations;
-    
+
     return allDestinations.filter((dest: string) =>
       dest.toLowerCase().includes(filterText.toLowerCase())
     );
@@ -46,7 +101,7 @@ export default function Destinations() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <PageHeader 
+      <PageHeader
         title="Choose a Destination"
         breadcrumbs={[{ label: 'Home', to: '/' }]}
       />
@@ -65,7 +120,7 @@ export default function Destinations() {
       <Grid container spacing={2}>
         {filteredDestinations.map((destination: string) => (
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={destination}>
-            <Card 
+            <Card
               variant="outlined"
               sx={{
                 '&:hover': {
@@ -73,17 +128,14 @@ export default function Destinations() {
                 },
               }}
             >
-              <CardActionArea 
-                component={Link} 
+              <CardActionArea
+                component={Link}
                 to={`/destinations/${encodeURIComponent(destination)}`}
                 sx={{ textDecoration: 'none', color: 'inherit' }}
               >
                 <CardContent>
                   <Typography variant="h6">
-                    {destination
-                      .split(' ')
-                      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                      .join(' ')}
+                    {formatDestination(destination)}
                   </Typography>
                 </CardContent>
               </CardActionArea>

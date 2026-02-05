@@ -39,11 +39,14 @@ router.get('/items', [
 
     // Get paginated items
     const itemsResult = await pool.query(
-      `SELECT DISTINCT ON (item_code) item_code, sku, description, category, destination, total_ws_price, inactive
-       FROM inventory_items 
-       ${whereClause}
-       ORDER BY item_code
-       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      `SELECT * FROM (
+        SELECT DISTINCT ON (item_code) item_code, cat_page, cat_page_order, sku, description, category, destination, total_ws_price, inactive
+        FROM inventory_items 
+        ${whereClause}
+        ORDER BY item_code
+      ) sub
+      ORDER BY cat_page, cat_page_order, item_code
+      LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset]
     );
 

@@ -10,6 +10,7 @@ export interface AuthRequest extends Request {
 }
 
 const authUrl = `http://localhost:${process.env.PORT || 3001}/api/auth/verify`;
+//const authUrl = `http://localhost:${process.env.PORT || 3002}/api/auth/verify`;
 
 // Verify nonce and session
 export async function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
@@ -38,6 +39,10 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
       ? `${authUrl}?mock_user_id=${mockUserId}`
       : authUrl;
 
+console.log('Auth middleware - nonce:', nonce);
+console.log('Auth middleware - mockUserId:', mockUserId);
+console.log('Auth middleware - verifyUrl:', verifyUrl);    
+
     // Call auth endpoint to verify session
     const response = await fetch(verifyUrl, {
       headers: {
@@ -51,6 +56,9 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
     }
 
     const data = await response.json();
+
+console.log('Auth verify response status:', response.status);
+console.log('Auth verify response data:', data);    
     
     if (!data.isAuthenticated) {
       return res.status(401).json({ error: 'Not authenticated' });

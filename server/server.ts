@@ -23,6 +23,7 @@ import adminOrdersRouter from './routes/admin/orders.js';
 dotenv.config();
 
 const app: Express = express();
+app.set('trust proxy', 'loopback');
 
 // Security middleware
 app.use(helmet());

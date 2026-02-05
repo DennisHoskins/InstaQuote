@@ -12,6 +12,8 @@ CREATE TABLE inventory_items (
     item_code VARCHAR(50) NOT NULL,
     sku VARCHAR(50),
     description VARCHAR(100) NOT NULL,
+    cat_page INTEGER,
+    cat_page_order INTEGER,
     category VARCHAR(50),
     destination VARCHAR(50),
     total_ws_price DECIMAL(10, 2) NOT NULL,
@@ -35,7 +37,7 @@ CREATE TABLE dropbox_files (
     file_name_no_ext TEXT NOT NULL,
     file_extension TEXT,
     folder_path TEXT NOT NULL,
-    shared_link TEXT;
+    shared_link TEXT,
     file_size BIGINT,
     modified_date TIMESTAMP,
     dropbox_id TEXT UNIQUE NOT NULL,
@@ -53,7 +55,7 @@ CREATE TABLE sku_images (
   image_id INTEGER NOT NULL REFERENCES dropbox_files(id) ON DELETE CASCADE,
   is_primary BOOLEAN DEFAULT FALSE,
   match_type VARCHAR(20) CHECK (match_type IN ('exact', 'contains', 'manual')),
-  confidence DECIMAL(3,2), -- 0.00 to 1.00
+  confidence DECIMAL(3,2),
   created_at TIMESTAMP DEFAULT NOW(),
   UNIQUE(sku, image_id)
 );

@@ -64,7 +64,7 @@ export default function DestinationItems() {
         placeholder="Search items..."
       />
 
-      <ItemsTable items={data?.items || []} />
+      <ItemsTable items={data?.items || []} showPageColumn={false} />
 
       <PaginationControls
         page={page}

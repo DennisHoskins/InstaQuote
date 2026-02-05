@@ -62,6 +62,8 @@ const columns: Column[] = [
   { key: 'description', label: 'Description' },
   { key: 'category', label: 'Category', mobileHide: true },
   { key: 'destination', label: 'Destination', mobileHide: true },
+  { key: 'cat_page', label: 'Page', mobileHide: true },
+  { key: 'cat_page_order', label: 'Order', mobileHide: true },
   { 
     key: 'total_ws_price', 
     label: 'Price', 

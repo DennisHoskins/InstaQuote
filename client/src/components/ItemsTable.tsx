@@ -14,10 +14,12 @@ export interface Item {
 
 interface ItemsTableProps {
   items: Item[];
+  showPageColumn?: boolean;
 }
 
 const columns: Column[] = [
   { key: 'item_code', label: 'Item Code' },
+  { key: 'cat_page', label: 'Page', align: 'center', mobileHide: true },
   { key: 'description', label: 'Description' },
   { key: 'category', label: 'Category', mobileHide: true },
   { 
@@ -28,12 +30,14 @@ const columns: Column[] = [
   },
 ];
 
-export default function ItemsTable({ items }: ItemsTableProps) {
+export default function ItemsTable({ items, showPageColumn = false }: ItemsTableProps) {
   const navigate = useNavigate();
+
+  const filteredColumns = showPageColumn ? columns : columns.filter(col => col.key !== 'cat_page');
 
   return (
     <Table
-      columns={columns}
+      columns={filteredColumns}
       data={items}
       rowKey="item_code"
       onRowClick={(item) => navigate(`/item/${item.item_code}`)}
