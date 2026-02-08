@@ -9,8 +9,8 @@ export interface AuthRequest extends Request {
   };
 }
 
-const authUrl = `http://localhost:${process.env.PORT || 3001}/api/auth/verify`;
-//const authUrl = `http://localhost:${process.env.PORT || 3002}/api/auth/verify`;
+//const authUrl = `http://localhost:${process.env.PORT || 3001}/api/auth/verify`;
+const authUrl = `http://localhost:${process.env.PORT || 3002}/api/auth/verify`;
 
 // Verify nonce and session
 export async function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {

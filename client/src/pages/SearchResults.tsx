@@ -7,6 +7,7 @@ import PageHeader from '../components/PageHeader';
 import SearchBar from '../components/SearchBar';
 import ItemsTable from '../components/ItemsTable';
 import PaginationControls from '../components/PaginationControls';
+import ErrorAlert from '../components/ErrorAlert';
 
 export default function SearchResults() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,11 +49,7 @@ export default function SearchResults() {
   }
 
   if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to search items</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load search results" />;
   }
 
   return (

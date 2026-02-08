@@ -2,10 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Box, CircularProgress, Alert, TextField } from '@mui/material';
+import { Container, Box, CircularProgress, TextField } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
 import MetalsTable from '../../components/admin/MetalsTable';
 import PaginationControls from '../../components/PaginationControls';
+import ErrorAlert from '../../components/ErrorAlert';
 
 export default function AdminMetals() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,11 +52,7 @@ export default function AdminMetals() {
   }
 
   if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to load metal prices</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load metal prices" />;
   }
 
   return (

@@ -2,11 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Box, CircularProgress, Alert } from '@mui/material';
+import { Container, Box, CircularProgress } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
 import SearchBar from '../../components/SearchBar';
 import ItemsTable from '../../components/admin/ItemsTable';
 import PaginationControls from '../../components/PaginationControls';
+import ErrorAlert from '../../components/ErrorAlert';
 
 export default function AdminItems() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -40,11 +41,7 @@ export default function AdminItems() {
   }
 
   if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to load items</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load items" />;
   }
 
   return (

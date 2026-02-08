@@ -6,7 +6,6 @@ import {
   Container,
   Box,
   CircularProgress,
-  Alert,
   FormControl,
   InputLabel,
   Select,
@@ -16,6 +15,7 @@ import PageHeader from '../../components/PageHeader';
 import SearchBar from '../../components/SearchBar';
 import SkuImagesTable from '../../components/admin/SkuImagesTable';
 import PaginationControls from '../../components/PaginationControls';
+import ErrorAlert from '../../components/ErrorAlert';
 
 export default function AdminSkuImages() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -81,11 +81,7 @@ export default function AdminSkuImages() {
   }
 
   if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to load SKU image mappings</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load SKU image mappings" />;
   }
 
   return (

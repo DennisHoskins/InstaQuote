@@ -2,11 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Box, Button, CircularProgress, Alert, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Container, Box, Button, CircularProgress, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
 import SearchBar from '../../components/SearchBar';
 import SkusTable from '../../components/admin/SkusTable';
 import PaginationControls from '../../components/PaginationControls';
+import ErrorAlert from '../../components/ErrorAlert';
 
 export default function AdminSKUs() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -53,11 +54,7 @@ export default function AdminSKUs() {
   }
 
   if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to load SKUs</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load SKUs" />;
   }
 
   return (

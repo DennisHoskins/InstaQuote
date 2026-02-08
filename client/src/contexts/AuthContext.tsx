@@ -23,8 +23,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const baseUrl = 'http://localhost:3001/api/auth/user';
-//const baseUrl = '/instaquote/api/auth/user';
+//const baseUrl = 'http://localhost:3001/api/auth/user';
+const baseUrl = '/instaquote/api/auth/user';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

@@ -15,14 +15,14 @@ describe('Destinations API', () => {
     it('should search destinations by name', async () => {
       const response = await request(app)
         .get('/api/destinations')
-        .query({ search: 'ARUBA' });
+        .query({ search: 'aruba' });
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
       
       if (response.body.length > 0) {
         const hasSearch = response.body.every((dest: string) =>
-          dest.includes('ARUBA')
+          dest.toLowerCase().includes('aruba')
         );
         expect(hasSearch).toBe(true);
       }
@@ -32,7 +32,7 @@ describe('Destinations API', () => {
   describe('GET /api/destinations/:destination/items', () => {
     it('should return paginated items for a specific destination', async () => {
       const response = await request(app)
-        .get('/api/destinations/ARUBA/items')
+        .get('/api/destinations/Aruba/items')
         .query({ page: 1, limit: 10 });
 
       expectPaginatedResponse(response);
@@ -40,7 +40,7 @@ describe('Destinations API', () => {
 
     it('should search destination items by item code and description', async () => {
       const response = await request(app)
-        .get('/api/destinations/ARUBA/items')
+        .get('/api/destinations/Aruba/items')
         .query({ page: 1, limit: 10, search: 'bracelet' });
 
       expectPaginatedResponse(response);

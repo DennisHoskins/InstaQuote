@@ -3,70 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
-import { Container, Typography, Box, CircularProgress, Alert, Grid, Card, CardActionArea, CardContent } from '@mui/material';
+import { Container, Typography, Box, CircularProgress, Grid, Card, CardActionArea, CardContent } from '@mui/material';
 import PageHeader from '../components/PageHeader';
 import FilterInput from '../components/FilterInput';
+import ErrorAlert from '../components/ErrorAlert';
 
 export default function Destinations() {
   const [filterText, setFilterText] = useState('');
   const { isAuthenticated } = useAuth();
-
-  const PRESERVE_UPPERCASE = [
-    // States
-    'NC', 'SC', 'FL', 'MD', 'VA', 'NJ', 'DE', 'TX', 'WY', 'OH', 'WI', 'TN', 'KY',
-    'CO', 'ID', 'MI', 'RI', 'HI', 'NY', 'MA', 'DC', 'CA',
-    // Other
-    'ABC', 'BBQ', 'US', 'USVI', 'SXM', 'JD', 'OC', 'LBI', 'KW', 'II', 'B&O',
-  ];
-
-  const WORD_REPLACEMENTS: Record<string, string> = {
-    'ST': 'St.',
-    'FT': 'Ft.',
-    'MT': 'Mt.',
-  };
-
-  const US_STATE_REGEX = /\b([A-Za-z\s]+?)[,\s]+([A-Za-z]{2})$/;
-
-  const formatDestination = (destination: string) => {
-    const trimmed = destination.trim();
-
-    const stateMatch = trimmed.match(US_STATE_REGEX);
-
-    if (stateMatch) {
-      const cityRaw = stateMatch[1];
-      const stateRaw = stateMatch[2];
-
-      const city = cityRaw
-        .split(' ')
-        .map(word => {
-          const upper = word.toUpperCase();
-          if (WORD_REPLACEMENTS[upper]) {
-            return WORD_REPLACEMENTS[upper];
-          }
-          if (PRESERVE_UPPERCASE.includes(upper)) {
-            return upper;
-          }
-          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-        })
-        .join(' ');
-
-      return `${city}, ${stateRaw.toUpperCase()}`;
-    }
-
-    return trimmed
-      .split(' ')
-      .map(word => {
-        const upper = word.toUpperCase();
-        if (WORD_REPLACEMENTS[upper]) {
-          return WORD_REPLACEMENTS[upper];
-        }
-        if (PRESERVE_UPPERCASE.includes(upper)) {
-          return upper;
-        }
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-      })
-      .join(' ');
-  };
 
   const { data: allDestinations, isLoading, error } = useQuery({
     queryKey: ['destinations'],
@@ -92,11 +36,7 @@ export default function Destinations() {
   }
 
   if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to load destinations</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load destinations" />;
   }
 
   return (
@@ -135,7 +75,7 @@ export default function Destinations() {
               >
                 <CardContent>
                   <Typography variant="h6">
-                    {formatDestination(destination)}
+                    {destination}
                   </Typography>
                 </CardContent>
               </CardActionArea>

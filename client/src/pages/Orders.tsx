@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,8 +9,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Alert,
-  Paper,
   Chip,
   TextField,
   MenuItem,
@@ -23,6 +21,8 @@ import DownloadIcon from '@mui/icons-material/Download';
 import Table from '../components/Table';
 import type { Column } from '../components/Table';
 import PaginationControls from '../components/PaginationControls';
+import ErrorAlert from '../components/ErrorAlert';
+import { exportOrdersListCsv } from '../utils/exportCsv';
 
 export default function Orders() {
   const navigate = useNavigate();
@@ -99,33 +99,7 @@ export default function Orders() {
 
   const handleExport = () => {
     if (!data || !data.items.length) return;
-
-    // CSV headers
-    const headers = ['Order Number', 'Date', 'Items', 'Total', 'Status'];
-    
-    // CSV rows
-    const rows = data.items.map((order: any) => [
-      order.order_number,
-      new Date(order.created_at).toLocaleDateString('en-US'),
-      order.item_count,
-      `$${Number(order.total_amount).toFixed(2)}`,
-      order.status
-    ]);
-
-    // Create CSV content
-    const csvContent = [
-      headers.join(','),
-      ...rows.map((row: string[]) => row.join(','))
-    ].join('\n');
-
-    // Download CSV
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    exportOrdersListCsv(data.items, false);
   };
 
   const columns: Column[] = [
@@ -190,50 +164,38 @@ export default function Orders() {
   }
 
   if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to load order history</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load orders" />;
   }
 
-  if (!data) {
+  if (!data || data.items.length === 0) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <PageHeader 
-          title="Order History"
+        <PageHeader
+          title="My Orders"
           breadcrumbs={[{ label: 'Home', to: '/' }]}
         />
-
-        <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+        <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
             No orders yet
           </Typography>
-          <Button 
-            variant="contained" 
-            component={Link} 
-            to="/catalog"
-            sx={{ mt: 2 }}
-          >
-            Start Shopping
-          </Button>
-        </Paper>
+          <Typography variant="body2" color="text.secondary">
+            Your order history will appear here after you place an order.
+          </Typography>
+        </Box>
       </Container>
     );
   }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <PageHeader 
-        title="Order History"
+      <PageHeader
+        title="My Orders"
         breadcrumbs={[{ label: 'Home', to: '/' }]}
       />
-
 
       {/* Filters */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <TextField
-          autoFocus
           placeholder="Search by order number..."
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}

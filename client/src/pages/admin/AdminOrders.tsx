@@ -9,7 +9,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Alert,
   Paper,
   Chip,
   TextField,
@@ -22,7 +21,9 @@ import PageHeader from '../../components/PageHeader';
 import DownloadIcon from '@mui/icons-material/Download';
 import Table from '../../components/Table';
 import type { Column } from '../../components/Table';
+import ErrorAlert from '../../components/ErrorAlert';
 import PaginationControls from '../../components/PaginationControls';
+import { exportOrdersListCsv } from '../../utils/exportCsv';
 
 export default function AdminOrders() {
   const navigate = useNavigate();
@@ -99,32 +100,7 @@ export default function AdminOrders() {
 
   const handleExport = () => {
     if (!data || data.items.length === 0) return;
-
-    const headers = ['Order Number', 'Customer', 'Email', 'Date', 'Items', 'Total', 'Status'];
-    const rows = data.items.map((order: any) => [
-      order.order_number,
-      `"${order.user_name.replace(/"/g, '""')}"`,
-      order.user_email,
-      new Date(order.created_at).toLocaleDateString(),
-      order.item_count,
-      order.total_amount.toFixed(2),
-      order.status,
-    ]);
-
-    const csvContent = [
-      headers.join(','),
-      ...rows.map((row: string[]) => row.join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `admin-orders-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    exportOrdersListCsv(data.items, true);
   };
 
   const columns: Column[] = [
@@ -191,11 +167,7 @@ export default function AdminOrders() {
   }
 
   if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to load orders</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load orders" />;
   }
 
   return (

@@ -2,11 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, useParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
-import { Container, Box, CircularProgress, Alert } from '@mui/material';
+import { Container, Box, CircularProgress } from '@mui/material';
 import PageHeader from '../components/PageHeader';
 import SearchBar from '../components/SearchBar';
 import ItemsTable from '../components/ItemsTable';
 import PaginationControls from '../components/PaginationControls';
+import ErrorAlert from '../components/ErrorAlert';
 
 export default function DestinationItems() {
   const { destination } = useParams<{ destination: string }>();
@@ -41,11 +42,7 @@ export default function DestinationItems() {
   }
 
   if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to load items for this destination</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load destination items" />;
   }
 
   return (

@@ -21,24 +21,15 @@ router.get('/', [
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 25;
-    const search = req.query.search as string | undefined;
-    const status = req.query.status as string | undefined;
-    const startDate = req.query.start_date as string | undefined;
-    const endDate = req.query.end_date as string | undefined;
+    const search = req.query.search as string || '';
+    const status = req.query.status as string || '';
+    const startDate = req.query.start_date as string || '';
+    const endDate = req.query.end_date as string || '';
     const offset = (page - 1) * limit;
 
     let queryText = `
       SELECT 
-        o.id,
-        o.order_number,
-        o.user_id,
-        o.user_name,
-        o.user_email,
-        o.status,
-        o.notes,
-        o.total_amount,
-        o.created_at,
-        o.updated_at,
+        o.*,
         COUNT(oi.id) as item_count
       FROM orders o
       LEFT JOIN order_items oi ON oi.order_id = o.id
@@ -98,7 +89,7 @@ router.get('/', [
   }
 });
 
-// Get single order with items
+// Get single order with items (including images)
 router.get('/:id', [
   param('id').isInt().toInt(),
 ], async (req: Request, res: Response) => {
@@ -119,8 +110,22 @@ router.get('/:id', [
       return res.status(404).json({ error: 'Order not found' });
     }
 
+    // Get order items with image URLs
     const itemsResult = await pool.query(
-      `SELECT * FROM order_items WHERE order_id = $1 ORDER BY id`,
+      `SELECT 
+        oi.*,
+        ii.sku,
+        CASE 
+          WHEN df.shared_link IS NOT NULL THEN 
+            REPLACE(REPLACE(df.shared_link, '?dl=0', '?raw=1'), '?dl=1', '?raw=1')
+          ELSE NULL
+        END as image_url
+      FROM order_items oi
+      LEFT JOIN inventory_items ii ON ii.item_code = oi.item_code
+      LEFT JOIN sku_images si ON si.sku = ii.sku AND si.is_primary = true
+      LEFT JOIN dropbox_files df ON df.id = si.image_id
+      WHERE oi.order_id = $1 
+      ORDER BY oi.id`,
       [id]
     );
 
@@ -186,22 +191,24 @@ router.patch('/:id', [
       return res.status(400).json({ error: 'No updates provided' });
     }
 
+    // Add updated_at
     paramCount++;
-    updates.push(`updated_at = NOW()`);
+    updates.push(`updated_at = $${paramCount}`);
+    values.push(new Date());
+
+    // Add id as last parameter
+    paramCount++;
     values.push(id);
 
-    const updateQuery = `
-      UPDATE orders
-      SET ${updates.join(', ')}
-      WHERE id = $${paramCount}
-      RETURNING *
-    `;
+    const result = await pool.query(
+      `UPDATE orders SET ${updates.join(', ')} WHERE id = $${paramCount} RETURNING *`,
+      values
+    );
 
-    const result = await pool.query(updateQuery, values);
-    
+    const updated = result.rows[0];
     res.json({
-      ...result.rows[0],
-      total_amount: parseFloat(result.rows[0].total_amount),
+      ...updated,
+      total_amount: parseFloat(updated.total_amount),
     });
   } catch (error) {
     console.error('Error updating order:', error);
@@ -222,7 +229,7 @@ router.delete('/:id', [
     const { id } = req.params;
 
     const result = await pool.query(
-      `UPDATE orders
+      `UPDATE orders 
        SET deleted_at = NOW()
        WHERE id = $1 AND deleted_at IS NULL
        RETURNING id`,

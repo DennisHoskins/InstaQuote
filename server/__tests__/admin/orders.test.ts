@@ -2,6 +2,9 @@ import request from 'supertest';
 import app from '../../server';
 import pool from '../../db/connection';
 
+// Helper to generate unique order number
+const uniqueOrderNumber = () => `ORD-TEST-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
 describe('Admin Orders API', () => {
   describe('GET /api/admin/orders', () => {
     it('should return paginated orders list', async () => {
@@ -63,8 +66,9 @@ describe('Admin Orders API', () => {
       // Create a test order
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, notes, updated_by)
-         VALUES (1, 'TestUser', 'TestUser@example.com', 'ORD-TEST-' || FLOOR(RANDOM() * 1000), 'pending', 100, 'Admin test order', 1)
-         RETURNING id`
+         VALUES (1, 'TestUser', 'TestUser@example.com', $1, 'pending', 100, 'Admin test order', 1)
+         RETURNING id`,
+        [uniqueOrderNumber()]
       );
       const orderId = orderResult.rows[0].id;
 
@@ -99,8 +103,9 @@ describe('Admin Orders API', () => {
       // Create test order
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
-         VALUES (1, 'TestUser', 'TestUser@example.com', 'ORD-TEST-' || FLOOR(RANDOM() * 1000), 'pending', 50, 1)
-         RETURNING id`
+         VALUES (1, 'TestUser', 'TestUser@example.com', $1, 'pending', 50, 1)
+         RETURNING id`,
+        [uniqueOrderNumber()]
       );
       const orderId = orderResult.rows[0].id;
 
@@ -117,8 +122,9 @@ describe('Admin Orders API', () => {
       // Create test order
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
-         VALUES (1, 'TestUser', 'TestUser@example.com', 'ORD-TEST-' || FLOOR(RANDOM() * 1000), 'pending', 50, 1)
-         RETURNING id`
+         VALUES (1, 'TestUser', 'TestUser@example.com', $1, 'pending', 50, 1)
+         RETURNING id`,
+        [uniqueOrderNumber()]
       );
       const orderId = orderResult.rows[0].id;
 
@@ -134,8 +140,9 @@ describe('Admin Orders API', () => {
       // Create test order
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
-         VALUES (1, 'TestUser', 'TestUser@example.com', 'ORD-TEST-' || FLOOR(RANDOM() * 1000), 'pending', 50, 1)
-         RETURNING id`
+         VALUES (1, 'TestUser', 'TestUser@example.com', $1, 'pending', 50, 1)
+         RETURNING id`,
+        [uniqueOrderNumber()]
       );
       const orderId = orderResult.rows[0].id;
 
@@ -161,8 +168,9 @@ describe('Admin Orders API', () => {
       // Create test order
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
-         VALUES (1, 'TestUser', 'TestUser@example.com', 'ORD-TEST-' || FLOOR(RANDOM() * 1000), 'pending', 50, 1)
-         RETURNING id`
+         VALUES (1, 'TestUser', 'TestUser@example.com', $1, 'pending', 50, 1)
+         RETURNING id`,
+        [uniqueOrderNumber()]
       );
       const orderId = orderResult.rows[0].id;
 
@@ -179,8 +187,9 @@ describe('Admin Orders API', () => {
       // Create test order
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
-         VALUES (1, 'TestUser', 'TestUser@example.com', 'ORD-TEST-' || FLOOR(RANDOM() * 1000), 'pending', 50, 1)
-         RETURNING id`
+         VALUES (1, 'TestUser', 'TestUser@example.com', $1, 'pending', 50, 1)
+         RETURNING id`,
+        [uniqueOrderNumber()]
       );
       const orderId = orderResult.rows[0].id;
 

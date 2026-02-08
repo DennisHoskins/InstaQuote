@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Typography, Box, Button, CircularProgress, Alert, Grid } from '@mui/material';
+import { Container, Typography, Box, CircularProgress, Grid } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
 import Table from '../../components/Table';
 import type { Column } from '../../components/Table';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import ErrorAlert from '../../components/ErrorAlert';
 
 export default function AdminSKU() {
   const { sku } = useParams<{ sku: string }>();
@@ -29,12 +30,7 @@ export default function AdminSKU() {
   }
 
   if (error || !data) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">SKU not found</Alert>
-        <Button sx={{ mt: 2 }} onClick={() => navigate(-1)}>Go Back</Button>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load SKU" />;
   }
 
   const itemColumns: Column[] = [

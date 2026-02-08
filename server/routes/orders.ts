@@ -203,7 +203,7 @@ router.get('/', [
   }
 });
 
-// Get order detail
+// Get order detail (with images)
 router.get('/:id', [
   param('id').isInt().toInt(),
 ], async (req: AuthRequest, res: Response) => {
@@ -229,9 +229,21 @@ router.get('/:id', [
 
     const order = orderResult.rows[0];
 
-    // Get order items
+    // Get order items with image URLs
     const itemsResult = await pool.query(
-      `SELECT * FROM order_items WHERE order_id = $1 ORDER BY id`,
+      `SELECT 
+        oi.*,
+        CASE 
+          WHEN df.shared_link IS NOT NULL THEN 
+            REPLACE(REPLACE(df.shared_link, '?dl=0', '?raw=1'), '?dl=1', '?raw=1')
+          ELSE NULL
+        END as image_url
+      FROM order_items oi
+      LEFT JOIN inventory_items ii ON ii.item_code = oi.item_code
+      LEFT JOIN sku_images si ON si.sku = ii.sku AND si.is_primary = true
+      LEFT JOIN dropbox_files df ON df.id = si.image_id
+      WHERE oi.order_id = $1 
+      ORDER BY oi.id`,
       [id]
     );
 
@@ -253,7 +265,8 @@ router.get('/:id', [
         description: item.description,
         quantity: item.quantity,
         unit_price: parseFloat(item.unit_price),
-        line_total: parseFloat(item.line_total)
+        line_total: parseFloat(item.line_total),
+        image_url: item.image_url
       }))
     });
   } catch (error) {
@@ -298,7 +311,7 @@ router.post('/:id/reorder', [
           ii.category,
           CASE 
             WHEN df.shared_link IS NOT NULL THEN 
-              REPLACE(REPLACE(df.shared_link, '&dl=0', '&raw=1'), '&dl=1', '&raw=1')
+              REPLACE(REPLACE(df.shared_link, '?dl=0', '?raw=1'), '?dl=1', '?raw=1')
             ELSE NULL
           END as image_url
          FROM inventory_items ii

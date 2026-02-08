@@ -2,10 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Typography, Box, Button, CircularProgress, Alert, Grid } from '@mui/material';
+import { Container, Typography, Box, Button, CircularProgress, Grid } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import ErrorAlert from '../../components/ErrorAlert';
 
 export default function AdminSkuImage() {
   const { id } = useParams<{ id: string }>();
@@ -37,12 +38,7 @@ export default function AdminSkuImage() {
   }
 
   if (error || !mapping) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">SKU-Image mapping not found</Alert>
-        <Button sx={{ mt: 2 }} onClick={() => navigate(-1)}>Go Back</Button>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load SKU image mapping" />;
   }
 
   const handleDelete = () => {

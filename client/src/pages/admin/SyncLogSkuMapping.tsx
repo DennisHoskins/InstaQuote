@@ -8,7 +8,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Alert,
   TextField,
   MenuItem,
   Select,
@@ -20,6 +19,7 @@ import SyncLogTable from '../../components/admin/SyncLogTable';
 import PaginationControls from '../../components/PaginationControls';
 import SyncTriggerButton from '../../components/admin/SyncTriggerButton';
 import StatusMessage from '../../components/StatusMessage';
+import ErrorAlert from '../../components/ErrorAlert';
 
 export default function SyncLogSkuMapping() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -258,11 +258,7 @@ export default function SyncLogSkuMapping() {
   }
 
   if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to load sync log</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load sync log" />;
   }
 
   return (

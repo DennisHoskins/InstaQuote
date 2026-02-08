@@ -6,7 +6,6 @@ import {
   Container,
   Box,
   CircularProgress,
-  Alert,
   TextField,
   MenuItem,
   Select,
@@ -16,6 +15,7 @@ import {
 import PageHeader from '../../components/PageHeader';
 import SyncLogTable from '../../components/admin/SyncLogTable';
 import PaginationControls from '../../components/PaginationControls';
+import ErrorAlert from '../../components/ErrorAlert';
 
 export default function SyncLogAccess() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -92,11 +92,7 @@ export default function SyncLogAccess() {
   }
 
   if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to load sync log</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load sync log" />;
   }
 
   return (

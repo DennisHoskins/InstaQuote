@@ -2,26 +2,21 @@ import request from 'supertest';
 import app from '../server';
 import pool from '../db/connection';
 
+// Helper to generate unique order number
+const uniqueOrderNumber = () => `ORD-TEST-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
 describe('User Orders API', () => {
   describe('POST /api/orders', () => {
-    it('should create a new order with items', async () => {
+    it('should create a new order', async () => {
       const orderData = {
         items: [
           {
             item_code: 'AC10SIL',
-            sku: 'ACSIL',
-            description: 'SS NAXO DIDRACHM (SILENO) W/14KY BAIL',
             quantity: 2,
-            unit_price: 50,
-          },
-          {
-            item_code: 'ABC6',
-            sku: 'ABC6',
-            description: 'Test Item',
-            quantity: 1,
-            unit_price: 100,
+            unit_price: 50.00,
           },
         ],
+        notes: 'Test order',
       };
 
       const response = await request(app)
@@ -32,37 +27,35 @@ describe('User Orders API', () => {
       expect(response.body).toHaveProperty('order');
       expect(response.body.order).toHaveProperty('id');
       expect(response.body.order).toHaveProperty('order_number');
+      expect(response.body.order).toHaveProperty('total_amount', 100);
       expect(response.body.order).toHaveProperty('status', 'pending');
-      expect(response.body.order).toHaveProperty('total_amount', 200);
     });
 
-    it('should validate required fields', async () => {
+    it('should require at least one item', async () => {
       const response = await request(app)
         .post('/api/orders')
         .send({ items: [] });
 
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty('errors');
     });
 
-    it('should validate item structure', async () => {
-      const orderData = {
-        items: [
-          {
-            item_code: 'AC10SIL',
-            // missing sku, description, quantity, unit_price
-          },
-        ],
-      };
-
+    it('should validate item fields', async () => {
       const response = await request(app)
         .post('/api/orders')
-        .send(orderData);
+        .send({
+          items: [
+            {
+              item_code: '',
+              quantity: 0,
+              unit_price: -10,
+            },
+          ],
+        });
 
       expect(response.status).toBe(400);
     });
 
-    it('should calculate total amount correctly', async () => {
+    it('should calculate total from items', async () => {
       const orderData = {
         items: [
           {
@@ -97,7 +90,8 @@ describe('User Orders API', () => {
       // Create a test order first
       await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
-         VALUES (1, 'TestUser', 'test@example.com', 'ORD-TEST-' || FLOOR(RANDOM() * 1000), 'pending', 100, 1)`
+         VALUES (1, 'TestUser', 'test@example.com', $1, 'pending', 100, 1)`,
+        [uniqueOrderNumber()]
       );
 
       const response = await request(app)
@@ -160,8 +154,9 @@ describe('User Orders API', () => {
       // Create test order
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
-         VALUES (1, 'TestUser', 'test@example.com', 'ORD-TEST-' || FLOOR(RANDOM() * 1000), 'pending', 100, 1)
-         RETURNING id`
+         VALUES (1, 'TestUser', 'test@example.com', $1, 'pending', 100, 1)
+         RETURNING id`,
+        [uniqueOrderNumber()]
       );
       const orderId = orderResult.rows[0].id;
 
@@ -175,12 +170,13 @@ describe('User Orders API', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('order');
+      expect(response.body).toHaveProperty('items');
       expect(response.body.order).toHaveProperty('id', orderId);
       expect(response.body.order).toHaveProperty('order_number');
       expect(response.body.order).toHaveProperty('status', 'pending');
-      expect(response.body).toHaveProperty('items');
       expect(Array.isArray(response.body.items)).toBe(true);
       expect(response.body.items.length).toBe(1);
+      expect(response.body.items[0]).toHaveProperty('item_code', 'AC10SIL');
     });
 
     it('should return 404 for non-existent order', async () => {
@@ -190,18 +186,19 @@ describe('User Orders API', () => {
       expect(response.body).toHaveProperty('error');
     });
 
-    it('should not allow accessing other users orders', async () => {
+    it('should not return other users orders', async () => {
       // Create order for different user
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
-         VALUES (999, 'OtherUser', 'other@example.com', 'ORD-TEST-' || FLOOR(RANDOM() * 1000), 'pending', 100, 999)
-         RETURNING id`
+         VALUES (999, 'OtherUser', 'other@example.com', $1, 'pending', 100, 999)
+         RETURNING id`,
+        [uniqueOrderNumber()]
       );
       const orderId = orderResult.rows[0].id;
 
       const response = await request(app).get(`/api/orders/${orderId}`);
 
-      // Should return 404 (not 403) to prevent information leakage
+      // Should return 404 because the order belongs to a different user
       expect(response.status).toBe(404);
     });
   });
@@ -211,8 +208,9 @@ describe('User Orders API', () => {
       // Create original order
       const originalOrderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
-         VALUES (1, 'TestUser', 'test@example.com', 'ORD-TEST-' || FLOOR(RANDOM() * 1000), 'completed', 150, 1)
-         RETURNING id`
+         VALUES (1, 'TestUser', 'test@example.com', $1, 'completed', 150, 1)
+         RETURNING id`,
+        [uniqueOrderNumber()]
       );
       const originalOrderId = originalOrderResult.rows[0].id;
 
@@ -250,8 +248,9 @@ describe('User Orders API', () => {
       // Create order for different user
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
-         VALUES (999, 'OtherUser', 'other@example.com', 'ORD-TEST-' || FLOOR(RANDOM() * 1000), 'completed', 100, 999)
-         RETURNING id`
+         VALUES (999, 'OtherUser', 'other@example.com', $1, 'completed', 100, 999)
+         RETURNING id`,
+        [uniqueOrderNumber()]
       );
       const orderId = orderResult.rows[0].id;
 

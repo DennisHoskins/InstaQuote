@@ -9,7 +9,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Alert,
   Grid,
   Divider,
   TextField,
@@ -17,12 +16,15 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Alert,
 } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
-import DownloadIcon from '@mui/icons-material/Download';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Table from '../../components/Table';
+import ErrorAlert from '../../components/ErrorAlert';
 import type { Column } from '../../components/Table';
+import { exportOrderPdf } from '../../utils/exportPdf';
 
 export default function AdminOrder() {
   const { id } = useParams<{ id: string }>();
@@ -87,41 +89,7 @@ export default function AdminOrder() {
 
   const handleExport = () => {
     if (!order) return;
-
-    const items = order.items;
-
-    const headers = ['Item Code', 'Description', 'Quantity', 'Unit Price', 'Subtotal'];
-    const rows = items.map((item: any) => [
-      item.item_code,
-      `"${(item.description || '').replace(/"/g, '""')}"`,
-      item.quantity,
-      item.unit_price.toFixed(2),
-      (item.quantity * item.unit_price).toFixed(2),
-    ]);
-
-    const csvContent = [
-      `Order Number: ${order.order_number}`,
-      `Order Date: ${new Date(order.created_at).toLocaleDateString()}`,
-      `Customer: ${order.user_name}`,
-      `Email: ${order.user_email}`,
-      `Status: ${order.status}`,
-      `Notes: "${(order.notes || '').replace(/"/g, '""')}"`,
-      '',
-      headers.join(','),
-      ...rows.map((row: string[]) => row.join(',')),
-      '',
-      `Total:,,,,$${order.total_amount.toFixed(2)}`
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `order-${order.order_number}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    exportOrderPdf(order, order.items);
   };
 
   if (isLoading) {
@@ -133,17 +101,51 @@ export default function AdminOrder() {
   }
 
   if (error || !order) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Order not found</Alert>
-        <Button sx={{ mt: 2 }} onClick={() => navigate(-1)}>Go Back</Button>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load order details" />;
   }
 
   const items = order.items;
 
   const itemColumns: Column[] = [
+    {
+      key: 'image_url',
+      label: 'Image',
+      format: (value) => {
+        if (value) {
+          return (
+            <Box
+              component="img"
+              src={value}
+              alt="Item"
+              sx={{
+                width: 50,
+                height: 50,
+                objectFit: 'contain',
+                borderRadius: 1,
+                bgcolor: 'white',
+              }}
+            />
+          );
+        }
+        return (
+          <Box
+            sx={{
+              width: 50,
+              height: 50,
+              bgcolor: 'grey.200',
+              borderRadius: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '10px',
+              color: 'text.secondary',
+            }}
+          >
+            No Image
+          </Box>
+        );
+      },
+    },
     { key: 'item_code', label: 'Item Code' },
     { key: 'description', label: 'Description' },
     { key: 'quantity', label: 'Qty', align: 'right' },
@@ -212,11 +214,11 @@ export default function AdminOrder() {
               variant="outlined"
               size="large"
               fullWidth
-              startIcon={<DownloadIcon />}
+              startIcon={<PictureAsPdfIcon />}
               onClick={handleExport}
               sx={{ mb: 1 }}
             >
-              Export Order
+              Download PDF
             </Button>
 
             <Button
@@ -311,7 +313,7 @@ export default function AdminOrder() {
 
             {updateMutation.isSuccess && (
               <Alert severity="success" sx={{ mb: 2 }}>
-                Order updated successfully
+                Order updated successfully.
               </Alert>
             )}
 
@@ -320,7 +322,6 @@ export default function AdminOrder() {
               fullWidth
               onClick={handleSave}
               disabled={!hasChanges || updateMutation.isPending}
-              sx={{ mb: 1 }}
             >
               {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
             </Button>

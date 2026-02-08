@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Box, Grid, CircularProgress, Alert } from '@mui/material';
+import { Container, Box, Grid, CircularProgress } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
 import SyncStatusCard from '../../components/admin/SyncStatusCard';
 import MetalsPriceCard from '../../components/admin/MetalsPriceCard';
@@ -9,6 +9,7 @@ import OrdersStatsCard from '../../components/admin/OrdersStatsCard';
 import ImagesStatsCard from '../../components/admin/ImagesStatsCard';
 import SkusStatsCard from '../../components/admin/SkusStatsCard';
 import DropboxSyncCard from '../../components/admin/DropboxSyncCard';
+import ErrorAlert from '../../components/ErrorAlert';
 
 export default function Admin() {
   const { isLoading: authLoading } = useAuth();
@@ -28,11 +29,7 @@ export default function Admin() {
   }
 
   if (error || !data) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Failed to load dashboard data</Alert>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load admin dashboard data" />;
   }
 
   const { syncStats, itemsStats, imagesStats, metalsData, skuStats, ordersData } = data;

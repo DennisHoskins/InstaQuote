@@ -27,80 +27,439 @@ CHAR_SUBSTITUTIONS = {
 
 # Destinations to skip entirely (case insensitive)
 SKIP_DESTINATIONS = [
+    # System/placeholder
     '---',
     '1CBIMAP',
+    
+    # Beads (explicit list)
+    'ADK BEADS',
+    'AV BEADS',
     'BEADS',
+    'BHI BEADS',
+    'HHI BEADS',
+    'LBK BEADS',
+    'ME BEADS',
+    'NASSAU BAH BEADS',
+    'NHK BEADS',
+    'NNK BEADS',
+    'NWW BEADS',
+    'OBX BEADS',
+    'OC BEADS',
+    'RHM BEADS',
+    'SH BEADS',
+    'SIC BEADS',
+    'WW BEADS',
+    
+    # Customer exclusions
+    'AZURA JAMAICA',
+    'BITTER END YACHT',
+    'BRISA VIRGIN GORDA',
+    'CAMP LEJEUNE',
+    'CITRIX',
+    'CLEMSON UNIVERSITY',
+    'CLEMSOM UNIVERSITY',
+    'CRUISE PLANNERS',
+    'DOM REP',
+    'DUKE UNIVERSITY',
+    'EQUESTRIAN 1',
+    'EQUESTRIAN 2',
+    'EQUESTRIAN 3',
+    'EQUIESTRIAN 1',
+    'EQUIESTRIAN 2',
+    'EQUIESTRIAN 3',
+    'FATIMA',
+    'FINGER LAKE',
+    'FLORIDA STATE UNIVERSITY',
+    'FLORIDA STATE UNIVESRITY',
+    'FLORIDA STATE UNVERSITY',
+    'GEORGETOWN LOGO',
+    'HOC SPECIAL',
+    'HUG & KISSES',
+    'JAM FLAG HOOK',
+    'JERUSALEM',
+    'KEY WEST CHARMS',
+    'KING FISH',
+    'KW SPECIAL',
+    'LIBERTY UNIVERSITY',
+    'LIBERTY UNIVERSITY II',
+    'MAHI MAHI',
+    'MARCO SPECIAL',
+    'MARK EDWARDS',
+    'MARLIN',
+    'MARSOC',
+    'MORRO BAY SPECIAL',
+    'MSC',
+    'PH LIBERTY BELL',
+    'RADFORD UNIVERSITY',
+    'RAILROAD COUPLING',
+    'RED FISH',
+    'RODEO CHINA',
+    'SAIL FISH',
+    'SEA-CRETS',
+    'ST EDWARDS SCHOOL',
+    'STANFORD UNIVERSITY',
+    'SUN VALLEY SPECIAL',
+    'SURF CITY SHELL',
+    'TARHEEL',
+    'TERRY QUINN',
+    'UCLA',
+    'UNI OF SOUTH CAROLINA GAMECOCKS',
+    'UNI SOUTH CAROLINA BASEBALL MARKS',
+    'UNIVERSITY OF FLORIDA',
+    'UNIVERSITY OF GEORGIA',
+    'UNIVERSITY OF MIAMI',
+    'UNIVERSITY OF NOTRE DAME',
+    'UNIVERSITY OF TENNESSEE',
+    'UNIVERSITY OF WASHINGTON',
+    'UNIVERSITY OF WASHINGTON 01',
+    'UPPER ARLINGTON',
+    'US VIRIGIN ISLANDS',
+    'UT HOOK UNIVERSITY',
+    'UT HOOK UNVERSITY',
+    'VERY BEAUTIFUL',
+    'VIRGINIA SHUMAN YOUNG',
+    'VIRGINIA TECH',
+    'VIRGINIA TECH LOGO',
+    'VIRINGIA TECH',
+    'VIRGNIA TECH',
+    'W AND M UNIVERSITY',
+    'WARE ACADEMY',
+    'WEST VIRGINIA UNIVERSITY',
+    'WEST VIRGINIA UNIVERSITY HOOK',
 ]
 
-# Patterns to skip (if destination contains these)
-SKIP_PATTERNS = [
-    ' BEAD',
-]
-
-# Destination aliases - map variations to canonical name
+# Destination name normalization - maps raw names to clean display names
+# Format: 'Clean Name': ['raw_variation1', 'raw_variation2', ...]
 DESTINATION_ALIASES = {
-    # Typos / spelling variations
-    'ANNA MARIA ISLAND': ['Anna Maria Island'],
-    'NEWPORT': ['NEW PORT'],
-    'VIRGINIA TECH': ['VIRINGIA TECH', 'VIRGNIA TECH', 'VIRGINIA TECH LOGO'],
-    'VIRGINIA BEACH': ['VIRGNIA BEACH'],
-    'US VIRGIN ISLANDS': ['US VIRIGIN ISLANDS', 'USVI HOOK'],
-    'FLORIDA STATE UNIVERSITY': ['FLORIDA STATE UNIVESRITY', 'FLORIDA STATE UNVERSITY'],
-    'UNIVERSITY OF TENNESSEE': ['UT HOOK UNVERSITY'],
-    'WEST VIRGINIA UNIVERSITY': ['WEST VIRGINIA UNIVERSITY HOOK'],
-    'SOUTHPORT': ['South Port', 'SOUTH PORT'],
+    # === ADD STATE ABBREVIATIONS ===
+    # Florida
+    'Amelia Island, FL': ['AMELIA ISLAND'],
+    'Anna Maria Island, FL': ['ANNA MARIA ISLAND', 'Anna Maria Island'],
+    'Bonita Springs, FL': ['BONITA SPRING', 'BONITA SPRINGS'],
+    'Cape Canaveral, FL': ['CAPE CANAVERAL'],
+    'Cape Coral, FL': ['CAPE CORAL'],
+    'Celebration, FL': ['CELEBRATION FLORIDA'],
+    'Crystal River, FL': ['CRYSTAL RIVER'],
+    'Daytona Beach, FL': ['DAYTONA BEACH'],
+    'Delray Beach, FL': ['DELRAY BEACH'],
+    'Destin, FL': ['DESTIN'],
+    'Estero, FL': ['ESTERO FL'],
+    'Ft. Myers, FL': ['FORT MYERS', 'FT MYERS HOOK'],
+    'Islamorada, FL': ['ISLA MORADA'],
+    'Jacksonville, FL': ['JACKSONVILLE'],
+    'Key Biscayne, FL': ['KEY BISCAYNE'],
+    'Key Largo, FL': ['KEY LARGO'],
+    'Key West, FL': ['KEY WEST'],
+    'Longboat Key, FL': ['LONGBOAT KEY'],
+    'Marathon, FL': ['MARATHON'],
+    'Marco Island, FL': ['MARCO ISLAND'],
+    'Naples, FL': ['NAPLES'],
+    'New Smyrna Beach, FL': ['NEW SMYRNA'],
+    'Orlando, FL': ['ORLANDO FL'],
+    'Palm Beach, FL': ['PALM BEACH', 'PALM BEACH GARDEN'],
+    'Panama City Beach, FL': ['PANAMA CITY BEACH'],
+    'Port St. Joe, FL': ['PORT ST JOE'],
+    'Port St. Lucie, FL': ['PORT ST LUCIE'],
+    'Sanibel Island, FL': ['SANIBEL ISLAND'],
+    'Sarasota, FL': ['SARASOTA'],
+    'Siesta Key, FL': ['SIESTA KEY'],
+    'St. Augustine, FL': ['ST AUGUSTINE'],
+    'St. Petersburg, FL': ['ST PETERSBURG', 'ST PETERSBURG SPECIAL'],
+    'Stuart, FL': ['STUART FL'],
+    'Tampa, FL': ['TAMPA'],
+    'Tarpon Springs, FL': ['TARPON SPRINGS'],
+    'Treasure Coast, FL': ['TREASURE COAST'],
+    'Venice, FL': ['VENICE FL'],
+    'Vero Beach, FL': ['VERO BEACH'],
+    'West Palm Beach, FL': ['WEST PALM BEACH'],
     
-    # Consolidate numbered/special versions
-    'GULF SHORES': ['GULF SHORES II'],
-    'STONE HARBOR': ['STONE HARBOR II', 'STONE HARBOR BIRD SANCTUARY'],
-    'LIBERTY UNIVERSITY': ['LIBERTY UNIVERSITY II'],
-    'UNIVERSITY OF WASHINGTON': ['UNIVERSITY OF WASHINGTON 01'],
-    'AVALON': ['AVALON II'],
+    # North Carolina
+    'Atlantic Beach, NC': ['ATLANTIC BEACH'],
+    'Banner Elk, NC': ['BANNER ELK NC'],
+    'Beaufort, NC': ['BEAUFORT NC'],
+    'Bodie Island, NC': ['BODIE ISLAND'],
+    'Blowing Rock, NC': ['BLOWING ROCK'],
+    'Cape Hatteras, NC': ['CAPE HATTERAS'],
+    'Cape Lookout, NC': ['CAPE LOOKOUT'],
+    'Carolina Beach, NC': ['CAROLINA BEACH'],
+    'Charlotte, NC': ['CHARLOTTE NC'],
+    'Currituck, NC': ['CURRITUCK'],
+    'Durham, NC': ['DURHAM NC'],
+    'Emerald Isle, NC': ['EMERALD ISLAND', 'EMERALD ISLE'],
+    'Holden Beach, NC': ['HOLDEN BEACH'],
+    'Kure Beach, NC': ['KURE BEACH'],
+    'New Bern, NC': ['NEW BERN NC', 'NEW BERN NC ANNIVERSARY'],
+    'Oak Island, NC': ['OAK ISLAND'],
+    'Ocean Isle Beach, NC': ['OCEAN ISLE BEACH'],
+    'Ocracoke Island, NC': ['OCRACOKE ISLAND'],
+    'Outer Banks, NC': ['OUTER BANKS', 'OBX'],
+    'Sunset Beach, NC': ['SUNSET BEACH'],
+    'Surf City, NC': ['SURF CITY'],
+    'Topsail Island, NC': ['TOPSAIL ISLAND'],
+    'Washington, NC': ['WASHINGTON NC'],
+    'Wilmington, NC': ['WILMINGTON NC'],
     
-    # Consolidate location specials/anniversaries
-    'OCEAN CITY NJ': ['OC NJ ANNIVERSARY', 'OC NJ BEACH TAG', 'OC NJ JH', 'OC NJ SPECIAL'],
-    'OCEAN CITY MD': ['OC MD ANNIVERSARY', 'OC HENRY\'S SPECIAL'],
-    'CAPE MAY': ['CAPE MAY ANI', 'CAPE MAY SPECIAL'],
-    'KEY WEST': ['KEY WEST CHARMS', 'KW SPECIAL'],
-    'MARCO ISLAND': ['MARCO SPECIAL'],
-    'LONG BEACH ISLAND': ['LBI SPECIAL'],
-    'SUN VALLEY': ['SUN VALLEY ID', 'SUN VALLEY SPECIAL'],
-    'ST PETERSBURG': ['ST PETERSBURG SPECIAL'],
-    'MORRO BAY': ['MORRO BAY SPECIAL', 'MORRO ROCK'],
-    'NEW BERN NC': ['NEW BERN NC ANNIVERSARY'],
-    'HOC': ['HOC SPECIAL'],
-    'PALM BEACH': ['PALM BEACH GARDEN'],
+    # South Carolina
+    'Aiken, SC': ['AIKEN SC'],
+    'Beaufort, SC': ['BEAUFORT SC'],
+    'Charleston, SC': ['CHARLESTON'],
+    'Edisto Beach, SC': ['EDISTO BEACH'],
+    'Hilton Head Island, SC': ['HILTON HEAD ISLAND'],
+    'Kiawah Island, SC': ['KIAWAH ISLAND'],
+    'Mt. Pleasant, SC': ['MT PLEASANT'],
+    'Myrtle Beach, SC': ['MYRTLE BEACH'],
+    "Pawley's Island, SC": ["PAWLEY'S ISLAND"],
+    'Seabrook Island, SC': ['SEABROOK ISLAND'],
     
-    # Consolidate palm/lizard variations
-    'CAPE COD': ['CAPE COD FISH', 'CAPE COD SHELL'],
-    'ST CROIX': ['ST CROIX LIZARD', 'ST CROIX PALM'],
-    'ST JOHN': ['ST JOHN LIZARD', 'ST JOHN PALM', 'JD ST JOHN'],
-    'ST THOMAS': ['ST THOMAS LIZARD', 'ST THOMAS PALM'],
-    'ST MARTIN': ['ST MARTIN LIZARD', 'SXM HOOK'],
-    'SURF CITY': ['SURF CITY SHELL'],
+    # Georgia
+    'Jekyll Island, GA': ['JEKYLL ISLAND'],
+    'Savannah, GA': ['SAVANNAH', 'NEW SAVANNAH'],
+    'St. Simons Island, GA': ['ST SIMONS'],
     
-    # Consolidate logo variations
-    'GEORGE TOWN': ['GEORGE TOWN LOGO'],
+    # Virginia
+    'Chesapeake Bay, VA': ['CHESAPEAKE BAY VA'],
+    'Chincoteague, VA': ['CHINCOTEAUGE', 'CHINCOTEAGUE'],
+    'Colonial Williamsburg, VA': ['COLONIAL WILLIAMSBURG'],
+    'Gloucester, VA': ['GLOUCESTER VA'],
+    'Jamestown, VA': ['JAMESTOWN VA'],
+    'Lynchburg, VA': ['LYNCHBURG VA'],
+    'Northern Neck, VA': ['NORTHERN NECK'],
+    'Occoquan, VA': ['OCCOQUAN VA'],
+    'Roanoke, VA': ['ROANOKE VA'],
+    'Virginia Beach, VA': ['VIRGINIA BEACH', 'VIRGNIA BEACH'],
+    'Yorktown, VA': ['YORK TOWN', 'YORKTOWN'],
     
-    # Consolidate equestrian
-    'EQUESTRIAN': ['EQUIESTRIAN 1', 'EQUIESTRIAN 2', 'EQUIESTRIAN 3', 'EQUESTRIAN 1', 'EQUESTRIAN 2', 'EQUESTRIAN 3'],
+    # Maryland
+    'Annapolis, MD': ['ANNAPOLIS MD'],
+    'Assateague Island, MD': ['ASSATEAGUE ISLAND'],
+    'Chestertown, MD': ['CHESTERTOWN MD'],
+    'Ocean City, MD': ['OCEAN CITY MD', 'OC MD ANNIVERSARY', "OC HENRY'S SPECIAL"],
+    'Ocean Pines, MD': ['OCEAN PINES'],
+    'Rock Hall, MD': ['ROCK HALL MD'],
+    "St. Mary's County, MD": ["ST MARY'S COUNTY"],
+    'St. Michaels, MD': ['ST MICHAEL ISLAND'],
+    'Tolchester, MD': ['TOLCHESTER'],
     
-    # Consolidate universities
-    'UNIVERSITY OF SOUTH CAROLINA': ['UNI OF SOUTH CAROLINA GAMECOCKS', 'UNI SOUTH CAROLINA BASEBALL MARKS'],
-    'WILLIAM AND MARY': ['W AND M UNIVERSITY'],
+    # New Jersey
+    'Asbury Park, NJ': ['ASBURY PARK, NJ', 'ASBURY PARK NJ', 'ASBURY PARK'],
+    'Atlantic City, NJ': ['ATLANTIC CITY'],
+    'Avalon, NJ': ['AVALON', 'AVALON II'],
+    'Long Beach Island, NJ': ['LONG BEACH ISLAND', 'LBI SPECIAL'],
+    'Longport, NJ': ['LONG PORT', 'LONGPORT'],
+    'Margate, NJ': ['MARGATE'],
+    'Ocean City, NJ': ['OCEAN CITY NJ', 'OC NJ ANNIVERSARY', 'OC NJ BEACH TAG', 'OC NJ JH', 'OC NJ SPECIAL'],
+    'Sea Isle City, NJ': ['SEA ISLE CITY'],
+    'Seaside Heights, NJ': ['SEA SIDE HEIGHTS', 'SEASIDE HEIGHTS'],
+    'Stone Harbor, NJ': ['STONE HARBOR', 'STONE HARBOR II', 'STONE HARBOR BIRD SANCTUARY'],
+    'Ventnor, NJ': ['VENTNOR'],
+    'Wildwood, NJ': ['WILDWOOD'],
     
-    # Fort variations
-    'FORT MYERS': ['FT MYERS HOOK', 'FT. LAUDERDALE'],
+    # Delaware
+    'Bethany Beach, DE': ['BETHANY BEACH'],
+    'Fenwick Island, DE': ['FENWICK ISLAND DE'],
+    'Lewes, DE': ['LEWES DE'],
+    'Long Neck, DE': ['LONG NECK DE'],
+    'Rehoboth Beach, DE': ['REHOBOTH BEACH'],
+    'South Bethany, DE': ['SOUTH BETHANY'],
     
-    # Jamaica consolidation
-    'JAMAICA': ['AZURA JAMAICA', 'CHULANI JAMAICA', 'JAM FLAG HOOK'],
+    # Massachusetts
+    'Bar Harbor, ME': ['BAR HARBOR'],
+    'Boston, MA': ['BOSTON MA'],
+    'Cape Cod, MA': ['CAPE COD', 'CAPE COD FISH', 'CAPE COD SHELL'],
+    'Harwich Port, MA': ['HARDWICH PORT MA', 'HARWICH PORT'],
+    "Martha's Vineyard, MA": ["MARTHA'S VINEYARD"],
+    'Nantucket, MA': ['NANTUCKET'],
+    'Nobska Light, MA': ['NOBSKA LIGHT'],
+    'Plymouth, MA': ['PLYMOUTH'],
+    'Provincetown, MA': ['PROVINCE TOWN', 'PROVINCETOWN'],
+    
+    # Rhode Island
+    'Block Island, RI': ['BLOCK ISLAND'],
+    'Newport, RI': ['NEWPORT RI', 'NEW PORT RI', 'NEWPORT', 'NEW PORT'],
+    
+    # New York
+    'Montauk, NY': ['MONTAUK NY'],
+    'Port Jefferson, NY': ['PORT JEFFERSON'],
+    
+    # Texas
+    'Austin, TX': ['AUSTIN TX'],
+    'Fredericksburg, TX': ['FREDRICKSBURG TX', 'FREDERICKSBURG TX'],
+    'Galveston, TX': ['GALVESTON'],
+    'Houston, TX': ['HOUSTON TX'],
+    'South Padre Island, TX': ['SOUTH PADRE ISLAND'],
+    'The Woodlands, TX': ['THE WOODLANDS TX'],
+    
+    # Louisiana
+    'New Orleans, LA': ['NEW ORLEANS', 'NOLA'],
+    
+    # Tennessee
+    'Gatlinburg, TN': ['GATLINBURG TN'],
+    'Nashville, TN': ['NASHVILLE'],
+    
+    # Kentucky
+    'Bardstown, KY': ['BARDSTOWN KY'],
+    'Lexington, KY': ['LEXINGTON KY'],
+    'Louisville, KY': ['LOUISVILLE KY'],
+    
+    # Alabama
+    'Gulf Shores, AL': ['GULF SHORES', 'GULF SHORES II'],
+    'Orange Beach, AL': ['ORANGE BEACH'],
+    
+    # Mississippi
+    'Biloxi, MS': ['BILOXI'],
+    'Gulfport, MS': ['GULFPORT'],
+    'Ocean Springs, MS': ['OCEAN SPRINGS'],
+    
+    # Ohio
+    'Catawba Island, OH': ['CATAWBA ISLAND'],
+    'Kelleys Island, OH': ['KELLEYS ISLAND'],
+    'Marblehead, OH': ['MARBLEHEAD OH'],
+    'Port Clinton, OH': ['PORT CLINTON OH'],
+    'Put-in-Bay, OH': ['PUT IN BAY OH'],
+    
+    # Michigan
+    'Fishtown, MI': ['FISH TOWN'],
+    'Oscoda, MI': ['OSCODA, MICHIGAN', 'OSCODA MI'],
+    'Tawas, MI': ['TAWAS MI'],
+    'West Branch, MI': ['WEST BRANCH MI'],
+    
+    # Wisconsin
+    'Door County, WI': ['DOOR COUNTY WI'],
+    'Green Bay, WI': ['GREEN BAY'],
+    
+    # Minnesota
+    'Nisswa, MN': ['NISSWA'],
+    
+    # Colorado
+    'Aspen, CO': ['ASPEN CO'],
+    'Steamboat Springs, CO': ['STEAM BOAT SPRINGS', 'STEAMBOAT SPRINGS'],
+    'Vail, CO': ['VAIL CO'],
+    
+    # Wyoming
+    'Jackson Hole, WY': ['JACKSON HOLE WY', 'JACKSON WY'],
+    
+    # Idaho
+    'Sun Valley, ID': ['SUN VALLEY', 'SUN VALLEY ID'],
+    
+    # California
+    'Morro Bay, CA': ['MORRO BAY', 'MORRO ROCK'],
+    'Northern California': ['NORTHERN CALIFORNIA'],
+    'San Francisco, CA': ['SAN FRANCISCO'],
+    
+    # Washington
+    'Lake Chelan, WA': ['LAKE CHELAN'],
+    'Seattle, WA': ['SEATTLE'],
+    
+    # Alaska
+    'Juneau, AK': ['JUNEAU'],
+    'Ketchikan, AK': ['KETCHIKAN', 'KETCHIKAN/JENEAU/SKAGWAY'],
+    'Skagway, AK': ['SKAGWAY'],
+    
+    # Nevada
+    'Las Vegas, NV': ['LAS VEGAS'],
+    
+    # New Mexico
+    'Santa Fe, NM': ['SANTA FE'],
+    
+    # Missouri
+    'Branson, MO': ['BRANSON'],
+    
+    # Indiana
+    'West Baden Springs, IN': ['WEST BADEN SPRINGS'],
+    
+    # Washington DC
+    'Washington, DC': ['WASHINGTON DC'],
+    
+    # Hawaii
+    'Maui, HI': ['MAUI HI', 'HAWAII'],
+    
+    # === INTERNATIONAL (no state, just clean up formatting) ===
+    # Caribbean
+    'Abaco, Bahamas': ['ABACO'],
+    'Anguilla': ['ANGUILLA'],
+    'Antigua': ['ANTIGUA'],
+    'Aruba': ['ARUBA'],
+    'Bahamas': ['BAHAMAS CONCH', 'BAHAMAS CRUISE SHIP'],
+    'Barbados': ['BARBADOS'],
+    'Bermuda': ['BERMUDA'],
+    'British Virgin Islands': ['BRITISH VIRGIN ISLAND'],
+    'Cayman Islands': ['CAYMAN ISLAND'],
+    'Curacao': ['CURACAO'],
+    'Grenada': ['GRENADA'],
+    'Jamaica': ['JAMAICA', 'CHULANI JAMAICA'],
+    'Nassau, Bahamas': ['NASSAU'],
+    'Puerto Rico': ['PUERTO RICO'],
+    'St. Barts': ['ST BARTS'],
+    'St. Croix, USVI': ['ST CROIX', 'ST CROIX LIZARD', 'ST CROIX PALM'],
+    'St. John, USVI': ['ST JOHN', 'ST JOHN LIZARD', 'ST JOHN PALM', 'JD ST JOHN', 'JVD'],
+    'St. Kitts': ['ST KITTS'],
+    'St. Lucia': ['ST LUCIA'],
+    'St. Martin': ['ST MARTIN', 'ST MARTIN LIZARD', 'SXM HOOK'],
+    'St. Thomas, USVI': ['ST THOMAS', 'ST THOMAS LIZARD', 'ST THOMAS PALM'],
+    'Tortola, BVI': ['TORTOLA'],
+    'Turks and Caicos': ['TURKS AND CAICOS'],
+    'US Virgin Islands': ['US VIRGIN ISLANDS', 'USVI HOOK', 'VI HOOK'],
+    'Virgin Gorda, BVI': ['VIRGIN GORDA'],
+    
+    # Mexico
+    'Cabo San Lucas, Mexico': ['CABO'],
+    
+    # === US STATES (general) ===
+    'Arkansas': ['ARKANSAS'],
+    'Kentucky': ['KENTUCKY'],
+    'Louisiana': ['LOUISIANA'],
+    'Mississippi': ['MISSISSIPPI'],
+    'North Carolina': ['NORTH CAROLINA'],
+    'South Carolina': ['SOUTH CAROLINA'],
+    'Vermont': ['VERMONT HOOK'],
+    'Virginia': ['VIRGINIA', 'VIRGINIA CARDINAL DOGWOOD'],
+    
+    # === SPECIAL/OTHER ===
+    'ABC Islands': ['ABC ISLAND'],
+    'Adirondacks, NY': ['ADIRONDACK'],
+    'B&O Railroad': ['B&O RAILROAD'],
+    'Bald Head Island, NC': ['BALD HEAD ISLAND'],
+    'BBQ': ['BBQ'],
+    'Biltmore Estate, NC': ['BILTMORE ESTATE'],
+    'Blue Ridge Mountains': ['BLUE RIDGE'],
+    'Cape May, NJ': ['CAPE MAY', 'CAPE MAY ANI', 'CAPE MAY SPECIAL'],
+    'George Town, Cayman': ['GEORGE TOWN', 'GEORGE TOWN LOGO'],
+    'Island Packet': ['ISLAND PACKET'],
+    'Keller Williams': ['KELLER WILLIAMS/REAL ESTATE CO'],
+    'Lauderdale-by-the-Sea, FL': ['LAUDERDALE BY THE SEA', 'FT. LAUDERDALE'],
+    'Lincoln Memorial': ['ABRAHAM LINCOLN'],
+    "Mariner's Boat House": ["MARINER'S BOAT HOUSE"],
+    'Maison Mythe': ['MAISON MYTHE'],
+    'Mar Azul Larimar': ['MAR AZUL LARIMAR'],
+    'Navy': ['NAVY'],
+    'Ocean City Shell': ['OCEAN CITY SHELL'],
+    'Philadelphia, PA': ['PHILADELPHIA LIBERTY BELL'],
+    'Sandy Hook, NJ': ['SANDY HOOK'],
+    'Shag Dancing': ['SHAGGERS'],
+    'South Beach, FL': ['SOUTH BEACH'],
+    'Southport, NC': ['SOUTHPORT', 'South Port', 'SOUTH PORT'],
+    "St. Armand's Circle, FL": ['ST ARMAND CIRCLE'],
+    'The Village': ['THE VILLAGE'],
+    'University of Notre Dame': ['UNIVERSITY OF NOTRE DAME'],
+    'Custom Clasp Collection': ['CUSTOM CLASP COLLECTION'],
+    
+    # === AWAITING CUSTOMER CLARIFICATION ===
+    # These will be updated once customer responds
+    'Madison, WI': ['MADISON'],
+    'Maryville, TN': ['MARYVILLE'],
+    'Muscle Shoals, AL': ['MUSCLE SHOALS'],
+    'Peachtree City, GA': ['PEACHTREE CITY'],
+    'Sumter, SC': ['SUMTER'],
+    'Twin Ports, MN': ['TWIN PORT'],
+    'Westchester, NY': ['WESTCHESTER'],
 }
 
-# Build reverse lookup
+# Build reverse lookup (variation -> canonical name)
 DESTINATION_MAP = {}
 for canonical, variations in DESTINATION_ALIASES.items():
     for variation in variations:
         DESTINATION_MAP[variation] = canonical
+    # Also map canonical to itself for consistency
     DESTINATION_MAP[canonical] = canonical
 
 def clean_destination(destination):
@@ -108,24 +467,30 @@ def clean_destination(destination):
     if not destination:
         return None
     
+    # Strip whitespace
+    destination = destination.strip()
+    
     # Character substitutions
     for old_char, new_char in CHAR_SUBSTITUTIONS.items():
         destination = destination.replace(old_char, new_char)
     
     # Skip if in skip list (case insensitive)
-    if destination.upper().strip() in [s.upper() for s in SKIP_DESTINATIONS]:
+    if destination.upper() in [s.upper() for s in SKIP_DESTINATIONS]:
         return None
     
-    # Skip if matches a pattern (case insensitive)
-    dest_upper = destination.upper()
-    for pattern in SKIP_PATTERNS:
-        if pattern in dest_upper:
-            return None
-    
     # Map to canonical name if alias exists
-    destination = DESTINATION_MAP.get(destination, destination)
+    # Try exact match first
+    if destination in DESTINATION_MAP:
+        return DESTINATION_MAP[destination]
     
-    return destination
+    # Try uppercase match
+    destination_upper = destination.upper()
+    for variation, canonical in DESTINATION_MAP.items():
+        if variation.upper() == destination_upper:
+            return canonical
+    
+    # No match found - return as-is (title case)
+    return destination.title()
 
 def extract_sku(item_code):
     """Extract SKU from item_code using dash or digit logic"""

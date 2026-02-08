@@ -1,16 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useState } from 'react';
-import { Container, Typography, Box, CircularProgress, Alert, Grid, Button } from '@mui/material';
+import { Container, Typography, Box, CircularProgress, Grid, Button, Alert } from '@mui/material';
 import PageHeader from '../components/PageHeader';
+import ErrorAlert from '../components/ErrorAlert';
 
 export default function ItemDetail() {
   const { itemCode } = useParams<{ itemCode: string }>();
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
   const { addItem } = useCart();
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -45,12 +45,7 @@ export default function ItemDetail() {
   }
 
   if (error || !item) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Item not found</Alert>
-        <Button sx={{ mt: 2 }} onClick={() => navigate(-1)}>Go Back</Button>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load item details" />;
   }
 
   return (

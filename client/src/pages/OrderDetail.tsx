@@ -9,14 +9,16 @@ import {
   Box,
   Button,
   CircularProgress,
-  Alert,
   Paper,
   Grid,
+  Alert,
   Chip,
   Divider,
 } from '@mui/material';
 import PageHeader from '../components/PageHeader';
-import DownloadIcon from '@mui/icons-material/Download';
+import ErrorAlert from '../components/ErrorAlert';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { exportOrderPdf } from '../utils/exportPdf';
 
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
@@ -55,43 +57,8 @@ export default function OrderDetail() {
 
   const handleExport = () => {
     if (!data) return;
-
     const { order, items } = data;
-
-    // Create CSV content
-    const headers = ['Item Code', 'Description', 'Quantity', 'Unit Price', 'Subtotal'];
-    const rows = items.map((item: any) => [
-      item.item_code,
-      `"${(item.description || '').replace(/"/g, '""')}"`,
-      item.quantity,
-      item.unit_price.toFixed(2),
-      (item.quantity * item.unit_price).toFixed(2),
-    ]);
-
-    const csvContent = [
-      `Order Number: ${order.order_number}`,
-      `Order Date: ${new Date(order.created_at).toLocaleDateString()}`,
-      `Customer: ${order.user_name}`,
-      `Email: ${order.user_email}`,
-      `Status: ${order.status}`,
-      `Notes: "${order.notes || ''}"`,
-      '',
-      headers.join(','),
-      ...rows.map((row: string[]) => row.join(',')),
-      '',
-      `Total:,,,,$${order.total_amount.toFixed(2)}`
-    ].join('\n');
-
-    // Download CSV
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `order-${order.order_number}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    exportOrderPdf(order, items);
   };
 
   if (isLoading) {
@@ -103,12 +70,7 @@ export default function OrderDetail() {
   }
 
   if (error || !data) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">Order not found</Alert>
-        <Button sx={{ mt: 2 }} onClick={() => navigate(-1)}>Go Back</Button>
-      </Container>
-    );
+    return <ErrorAlert message="Failed to load order details" />;
   }
 
   const { order, items } = data;
@@ -139,35 +101,88 @@ export default function OrderDetail() {
               {items.map((item: any) => (
                 <Box
                   key={item.id}
+                  component={Link}
+                  to={`/item/${item.item_code}`}
                   sx={{
                     p: 2,
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    py: 2,
+                    alignItems: 'center',
+                    gap: 2,
                     borderBottom: '1px solid',
                     borderColor: 'divider',
+                    textDecoration: 'none',
+                    color: 'inherit',
                     '&:last-child': { borderBottom: 'none' },
+                    '&:hover': { bgcolor: 'action.hover' },
                   }}
                 >
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  {/* Item Image */}
+                  {item.image_url ? (
+                    <Box
+                      component="img"
+                      src={item.image_url}
+                      alt={item.description}
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        objectFit: 'contain',
+                        borderRadius: 1,
+                        bgcolor: 'white',
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <Box
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        bgcolor: 'grey.200',
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        color: 'text.secondary',
+                        flexShrink: 0,
+                      }}
+                    >
+                      No Image
+                    </Box>
+                  )}
+
+                  {/* Item Details */}
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography 
                       variant="h6"
-                      component={Link}
-                      to={`/item/${item.item_code}`}
-                      sx={{ textDecoration: 'none', color: 'inherit', '&:hover': { color: 'primary.main' } }}
+                      sx={{ 
+                        fontWeight: 500,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
                     >
                       {item.item_code}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary"
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
                       {item.description}
                     </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="h6" fontWeight="medium">
-                      ${Number(item.line_total).toFixed(2)}
-                    </Typography>
+
+                  {/* Quantity and Price */}
+                  <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
                     <Typography variant="body2" color="text.secondary">
-                      ${Number(item.unit_price).toFixed(2)} × {item.quantity}
+                      Qty: {item.quantity} × ${item.unit_price.toFixed(2)}
+                    </Typography>
+                    <Typography variant="h6" color="primary">
+                      ${item.line_total.toFixed(2)}
                     </Typography>
                   </Box>
                 </Box>
@@ -176,62 +191,42 @@ export default function OrderDetail() {
           </Box>
         </Grid>
 
-        {/* Order Summary */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <Box sx={{ p: 3, pt: 0, position: 'sticky', top: 20 }}>
+          {/* Order Summary */}
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              Order Summary
+            </Typography>
+            
+            <Box sx={{ mb: 2 }}>
+              <Chip
+                label={order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                color={statusColorMap[order.status] || 'default'}
+                size="small"
+              />
+            </Box>
 
-            {/* Order Details */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6" gutterBottom>
-                  Order Summary
-                </Typography>
-                <Chip 
-                  label={order.status.charAt(0).toUpperCase() + order.status.slice(1)} 
-                  color={statusColorMap[order.status] || 'default'}
-                />
-              </Box>
-
-              <Box sx={{ mt: -1}}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="body2" color="text.secondary">
                   Order Date
                 </Typography>
-                <Typography variant="body1">
+                <Typography variant="body2">
                   {new Date(order.created_at).toLocaleDateString('en-US', {
                     month: 'long',
                     day: 'numeric',
                     year: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
                   })}
                 </Typography>
               </Box>
-                
-              <Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="body2" color="text.secondary">
-                  Customer
+                  Items
                 </Typography>
-                <Typography variant="body1">{order.user_name}</Typography>
-              </Box>
-                
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Email Address
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {order.user_email}
+                <Typography variant="body2">
+                  {items.reduce((sum: number, item: any) => sum + item.quantity, 0)}
                 </Typography>
               </Box>
-
-              {order.notes && (
-                <Box mt={2}>
-                  <Typography variant="body2" color="text.secondary">
-                    Notes
-                  </Typography>
-                  <Typography variant="body1">{order.notes}</Typography>
-                </Box>
-              )}
             </Box>
 
             <Divider sx={{ my: 2 }} />
@@ -239,26 +234,18 @@ export default function OrderDetail() {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
               <Typography variant="h6">Total:</Typography>
               <Typography variant="h6" color="primary">
-                ${Number(order.total_amount).toFixed(2)}
+                ${order.total_amount.toFixed(2)}
               </Typography>
             </Box>
 
-            {reorderMutation.isError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                Failed to reorder. Please try again.
-              </Alert>
+            {order.notes && (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Notes
+                </Typography>
+                <Typography variant="body2">{order.notes}</Typography>
+              </Box>
             )}
-
-            <Button
-              variant="outlined"
-              size="large"
-              fullWidth
-              startIcon={<DownloadIcon />}
-              onClick={handleExport}
-              sx={{ mb: 2 }}
-            >
-              Export Order
-            </Button>
 
             <Button
               variant="contained"
@@ -266,16 +253,26 @@ export default function OrderDetail() {
               fullWidth
               onClick={() => reorderMutation.mutate()}
               disabled={reorderMutation.isPending}
+              sx={{ mb: 1 }}
             >
-              {reorderMutation.isPending ? (
-                <>
-                  <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
-                  Loading...
-                </>
-              ) : (
-                'Reorder'
-              )}
+              {reorderMutation.isPending ? 'Adding to Cart...' : 'Reorder'}
             </Button>
+
+            <Button
+              variant="outlined"
+              size="large"
+              fullWidth
+              startIcon={<PictureAsPdfIcon />}
+              onClick={handleExport}
+            >
+              Download PDF
+            </Button>
+
+            {reorderMutation.isError && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                Failed to reorder. Some items may no longer be available.
+              </Alert>
+            )}
           </Box>
         </Grid>
       </Grid>
