@@ -1,21 +1,26 @@
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { CircularProgress, Box } from '@mui/material';
 
 export default function Layout() {
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        minHeight: '100vh' 
+      }}>
         <CircularProgress />
       </Box>
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <Outlet />;
+  return (
+    <Box sx={{ minHeight: '100vh' }}>
+      <Outlet />
+    </Box>
+  );
 }

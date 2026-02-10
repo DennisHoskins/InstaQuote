@@ -1,65 +1,30 @@
-//const API_BASE_URL = 'http://localhost:3001/api';
-const API_BASE_URL = '/instaquote/api';
+const API_BASE_URL = '/wp-json/instaquote/v1/proxy';
 
 class ApiClient {
-  private nonce: string | null = null;
-
-  setNonce(nonce: string) {
-    this.nonce = nonce;
-  }
-
-  async refreshNonce(): Promise<string> {
-    const mockUserId = localStorage.getItem('mock_user_id');
-    const url = mockUserId 
-      ? `${API_BASE_URL}/auth/user?mock_user_id=${mockUserId}`
-      : `${API_BASE_URL}/auth/user`;
-
-    const response = await fetch(url, {
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to refresh authentication');
-    }
-
-    const data = await response.json();
-    if (!data.isAuthenticated || !data.nonce) {
-      throw new Error('Not authenticated');
-    }
-
-    this.nonce = data.nonce;
-    return data.nonce;
-  }
-
-  async request(url: string, options: RequestInit = {}, isRetry = false): Promise<Response> {
-    // Get mock user ID from localStorage
-    const mockUserId = localStorage.getItem('mock_user_id');
+  async request(url: string, options: RequestInit = {}): Promise<Response> {
+    // Get nonce from root element's data attribute
+    const rootEl = document.getElementById('root');
+    const nonce = rootEl?.getAttribute('data-wp-nonce');
     
-    // Add nonce header and mock_user_id if we have them
+    console.log('ApiClient - nonce:', nonce);
+    console.log('ApiClient - rootEl:', rootEl);
+    
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
-      ...(this.nonce && { 'X-WP-Nonce': this.nonce }),
-      ...(mockUserId && { 'X-Mock-User-Id': mockUserId }),
     };
+    
+    if (nonce) {
+      headers['X-WP-Nonce'] = nonce;
+    }
+    
+    console.log('ApiClient - headers:', headers);
 
     const response = await fetch(url, {
       ...options,
       headers,
       credentials: 'include',
     });
-
-    // If 401, try refreshing nonce and retry once
-    if (response.status === 401 && !isRetry) {
-      try {
-        await this.refreshNonce();
-        
-        // Retry with new nonce
-        return this.request(url, options, true);
-      } catch (error) {
-        throw new Error('Authentication failed');
-      }
-    }
 
     return response;
   }
@@ -84,7 +49,7 @@ class ApiClient {
       method: 'PATCH',
       body: body ? JSON.stringify(body) : undefined,
     });
-    if (!response.ok) throw new Error(`PUT ${path} failed`);
+    if (!response.ok) throw new Error(`PATCH ${path} failed`);
     return response.json();
   }
 

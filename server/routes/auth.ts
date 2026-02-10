@@ -30,41 +30,22 @@ const MOCK_USERS = [
 ];
 
 // Get user and nonce - called on app load (no auth required)
-router.get('/user', async (req: Request, res: Response) => {
+router.get('/user', async (req, res) => {
   try {
-    // Check if mock_user_id is provided in query
-    const mockUserId = req.query.mock_user_id ? parseInt(req.query.mock_user_id as string) : null;
-    
-    // If no mock user selected, return not authenticated
-    if (!mockUserId) {
-      return res.status(401).json({ 
-        isAuthenticated: false,
-        user: null,
-        nonce: null
-      });
-    }
-
-    // Find the mock user
-    const user = MOCK_USERS.find(u => u.id === mockUserId);
-    
-    if (!user) {
-      return res.status(401).json({ 
-        isAuthenticated: false,
-        user: null,
-        nonce: null
-      });
-    }
-
-    // Generate nonce - in production, get from WordPress
-    const nonce = 'wp_rest_' + Date.now();
-
+    // Return mock authenticated user for WordPress integration
     res.json({
       isAuthenticated: true,
-      user,
-      nonce
+      user: {
+        id: 1,
+        username: 'testuser',
+        email: 'test@example.com',
+        roles: ['administrator'],
+        capabilities: { manage_options: true }
+      },
+      nonce: 'mock-nonce'
     });
   } catch (error) {
-    console.error('Auth error:', error);
+    console.error('Auth user error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { apiClient } from '../api/apiClient';
 
 interface User {
   id: number;
@@ -12,7 +11,6 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  nonce: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
@@ -23,46 +21,31 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-//const baseUrl = 'http://localhost:3001/api/auth/user';
-const baseUrl = '/instaquote/api/auth/user';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [nonce, setNonce] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchAuth = async () => {
     try {
-      // Get mock user ID from localStorage
-      const mockUserId = localStorage.getItem('mock_user_id');
+      setIsLoading(true);
       
-      // Build URL with query param if we have a mock user
-      const url = mockUserId 
-        ? `${baseUrl}?mock_user_id=${mockUserId}`
-        : baseUrl;
-
-      const response = await fetch(url, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch auth');
-      }
-
-      const data = await response.json();
-
-      if (data.isAuthenticated) {
-        setUser(data.user);
-        setNonce(data.nonce);
-        apiClient.setNonce(data.nonce); // Set nonce in API client
+      // Get WordPress user from window object (injected by shortcode)
+      const wpUser = (window as any).wpUser;
+      
+      if (wpUser && wpUser.isLoggedIn) {
+        setUser({
+          id: wpUser.id,
+          username: wpUser.username,
+          email: wpUser.email,
+          roles: wpUser.roles,
+          capabilities: { manage_options: wpUser.roles.includes('administrator') }
+        });
       } else {
         setUser(null);
-        setNonce(null);
       }
     } catch (error) {
-      console.error('Failed to fetch auth:', error);
+      console.error('Auth check failed:', error);
       setUser(null);
-      setNonce(null);
     } finally {
       setIsLoading(false);
     }
@@ -73,18 +56,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async () => {
-    await fetchAuth();
+    window.location.href = '/wp-login.php?redirect_to=' + encodeURIComponent(window.location.href);
   };
 
   const logout = () => {
-    // Clear mock user from localStorage
-    localStorage.removeItem('mock_user_id');
-    setUser(null);
-    setNonce(null);
-    apiClient.setNonce(''); // Clear nonce from API client
-    
-    // Redirect to login
-    window.location.href = '/instaquote/#/login';
+    window.location.href = '/wp-login.php?action=logout';
   };
 
   const refreshAuth = async () => {
@@ -98,7 +74,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        nonce,
         isLoading,
         isAuthenticated,
         isAdmin,

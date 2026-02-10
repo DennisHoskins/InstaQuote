@@ -1,8 +1,7 @@
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './api/client';
-import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { ThemeProvider, createTheme, CssBaseline, StyledEngineProvider } from '@mui/material';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -15,18 +14,18 @@ const theme = createTheme({
 });
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <StyledEngineProvider injectFirst>
         <ThemeProvider theme={theme}>
+          <CssBaseline />
           <AuthProvider>
             <CartProvider>
-              <CssBaseline />
               <App />
             </CartProvider>
           </AuthProvider>
         </ThemeProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
-  </StrictMode>,
+      </StyledEngineProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );

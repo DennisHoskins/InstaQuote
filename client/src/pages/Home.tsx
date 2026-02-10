@@ -2,11 +2,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Typography } from '@mui/material';
 import NavBar from '../components/NavBar';
 import SearchBar from '../components/SearchBar';
-import { useAuth } from '../contexts/AuthContext';
 
 export default function Home() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
 
   const handleSearch = (value: string) => {
     if (value.trim()) {
@@ -18,22 +16,15 @@ export default function Home() {
     <Container maxWidth="md">
       <Box
         sx={{
+          mt: '25px',
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
+          justifyContent: 'flex-start',
           alignItems: 'center',
           gap: 4,
         }}
       >
-        <Button
-          variant="outlined"
-          onClick={logout}
-          sx={{ position: 'absolute', top: 20, left: 20 }}
-        >
-          Change User
-        </Button>
-
         <NavBar />
 
         <Typography variant="h2" component="h1">

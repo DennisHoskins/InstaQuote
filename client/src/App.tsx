@@ -2,7 +2,6 @@ import { HashRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Layout from './layouts/Layout';
 import AdminLayout from './layouts/AdminLayout';
-import Login from './pages/Login';
 import SearchResults from './pages/SearchResults';
 import Catalog from './pages/Catalog';
 import Destinations from './pages/Destinations';
@@ -32,8 +31,6 @@ export default function App() {
   return (
     <HashRouter>
       <Routes>
-        <Route path="/Login" element={<Login />} />
-        
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<SearchResults />} />
