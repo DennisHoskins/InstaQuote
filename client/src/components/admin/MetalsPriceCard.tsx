@@ -53,7 +53,7 @@ export default function MetalsPriceCard({
                   color: '#C0C0C0',
                 },
               ]}
-              height={140}
+              height={115}
             />
           </Box>
 

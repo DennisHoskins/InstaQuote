@@ -13,6 +13,16 @@ const theme = createTheme({
   palette: {
     mode: 'light',
   },
+  components: {
+    MuiContainer: {
+      styleOverrides: {
+        root: {
+          paddingLeft: '0 !important',
+          paddingRight: '0 !important',
+        },
+      },
+    },
+  },
 });
 
 const muiCache = createCache({

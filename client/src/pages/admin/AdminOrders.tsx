@@ -172,14 +172,24 @@ export default function AdminOrders() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-    <PageHeader 
-      title="Orders"
-      breadcrumbs={[
-        { label: 'Home', to: '/' },
-        { label: 'Admin', to: '/admin' }
-      ]}
-      showNavBar={false}
-    />
+      <PageHeader 
+        title="Orders"
+        breadcrumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Admin', to: '/admin' }
+        ]}
+        showNavBar={false}
+        rightAction={
+          <Button
+            variant="outlined"
+            startIcon={<DownloadIcon />}
+            onClick={handleExport}
+            disabled={!data || data.items.length === 0}
+          >
+            Export CSV
+          </Button>
+        }
+      />
 
       {/* Filters */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -190,7 +200,24 @@ export default function AdminOrders() {
           onChange={(e) => setLocalSearch(e.target.value)}
           onKeyPress={handleKeyPress}
           size="small"
-          sx={{ minWidth: 300 }}
+          sx={{
+            minWidth: 300,
+            flexGrow: 1,
+            '& .MuiOutlinedInput-root': {
+              '& input': {
+                boxSizing: 'content-box',
+                height: '1.4375em',
+                padding: '16.5px 14px',
+                border: 0,
+                background: 'none',
+              },
+              '& fieldset': {
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: 'rgba(0, 0, 0, 0.23)',
+              },
+            },
+          }}
         />
 
         <Button
@@ -200,12 +227,13 @@ export default function AdminOrders() {
           Search
         </Button>
 
-        <FormControl size="small" sx={{ minWidth: 150 }}>
+        <FormControl sx={{ minWidth: 100 }}>
           <InputLabel>Status</InputLabel>
           <Select
             value={status}
             label="Status"
             onChange={(e) => handleStatusChange(e.target.value)}
+            sx={{ height: '56px' }}
           >
             <MenuItem value="">All</MenuItem>
             <MenuItem value="pending">Pending</MenuItem>
@@ -221,7 +249,7 @@ export default function AdminOrders() {
           value={startDate}
           onChange={(e) => handleDateChange('start_date', e.target.value)}
           slotProps={{ inputLabel: { shrink: true } }}
-          size="small"
+          sx={{ height: '56px' }}
         />
 
         <TextField
@@ -230,17 +258,8 @@ export default function AdminOrders() {
           value={endDate}
           onChange={(e) => handleDateChange('end_date', e.target.value)}
           slotProps={{ inputLabel: { shrink: true } }}
-          size="small"
+          sx={{ height: '56px' }}
         />
-
-        <Button
-          variant="outlined"
-          startIcon={<DownloadIcon />}
-          onClick={handleExport}
-          disabled={!data || data.items.length === 0}
-        >
-          Export CSV
-        </Button>
       </Box>
 
       {!data || data.items.length === 0 ? (

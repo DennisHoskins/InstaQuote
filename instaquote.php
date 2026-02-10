@@ -100,8 +100,8 @@ function instaquote_app_shortcode() {
     </div>
     <script type="module" src="<?php echo $plugin_url; ?>purify.es-Bzr520pe.js?v=<?php echo $version; ?>"></script>
     <script type="module" src="<?php echo $plugin_url; ?>html2canvas.esm-DXEQVQnt.js?v=<?php echo $version; ?>"></script>
-    <script type="module" src="<?php echo $plugin_url; ?>index.es-5mBdIVo9.js?v=<?php echo $version; ?>"></script>
-    <script type="module" src="<?php echo $plugin_url; ?>index-C4Dqz-Mt.js?v=<?php echo $version; ?>"></script>
+    <script type="module" src="<?php echo $plugin_url; ?>index.es-BvuvPC96.js?v=<?php echo $version; ?>"></script>
+    <script type="module" src="<?php echo $plugin_url; ?>index-ClwwKiVS.js?v=<?php echo $version; ?>"></script>
     <?php
     return ob_get_clean();
 }

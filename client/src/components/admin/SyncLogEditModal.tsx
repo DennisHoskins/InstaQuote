@@ -41,7 +41,7 @@ export default function SyncLogEditModal({ log, open, onClose, onMarkFailed }: S
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth sx={{ zIndex: 100000 }}>
       <DialogTitle>Sync Log Details</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>

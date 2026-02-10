@@ -47,7 +47,7 @@ export default function Table({
 
   return (
     <TableContainer component={Paper} variant="outlined">
-      <MuiTable>
+      <MuiTable sx={{ margin: '0 !important' }}>
         <TableHead>
           <TableRow>
             {columns.map((column) => (

@@ -32,7 +32,7 @@ export default function OrdersStatsCard({
             {totalOrders.toLocaleString()}
           </Typography>
 
-          <Typography variant="h6" sx={{ mt: -1 }} color="success.main">
+          <Typography variant="h6" sx={{ mt: -2 }} color="success.main">
             ${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </Typography>
           <Typography variant="caption" color="text.secondary">
