@@ -6,7 +6,6 @@ interface User {
   username: string;
   email: string;
   roles: string[];
-  capabilities: Record<string, boolean>;
 }
 
 interface AuthContextType {
@@ -14,9 +13,8 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: () => Promise<void>;
+  login: () => void;
   logout: () => void;
-  refreshAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,37 +23,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchAuth = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Get WordPress user from window object (injected by shortcode)
-      const wpUser = (window as any).wpUser;
-      
-      if (wpUser && wpUser.isLoggedIn) {
-        setUser({
-          id: wpUser.id,
-          username: wpUser.username,
-          email: wpUser.email,
-          roles: wpUser.roles,
-          capabilities: { manage_options: wpUser.roles.includes('administrator') }
-        });
-      } else {
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchAuth();
+    const fetchUser = async () => {
+      try {
+        const rootEl = document.getElementById('root');
+        const nonce = rootEl?.getAttribute('data-wp-nonce');
+
+        const response = await fetch('/wp-json/instaquote/v1/me', {
+          headers: nonce ? { 'X-WP-Nonce': nonce } : {},
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUser();
   }, []);
 
-  const login = async () => {
+  const login = () => {
     window.location.href = '/wp-login.php?redirect_to=' + encodeURIComponent(window.location.href);
   };
 
@@ -63,25 +59,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = '/wp-login.php?action=logout';
   };
 
-  const refreshAuth = async () => {
-    await fetchAuth();
-  };
-
   const isAuthenticated = !!user;
   const isAdmin = user?.roles.includes('administrator') ?? false;
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        isAuthenticated,
-        isAdmin,
-        login,
-        logout,
-        refreshAuth,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, isAdmin, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

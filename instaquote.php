@@ -3,7 +3,7 @@
  * Plugin Name: InstaQuote Integration
  * Description: API proxy and shortcode for InstaQuote app
  * Version: 1.0
- * Author: Your Name
+ * Author: Dennis Hoskins
  */
 
 // Prevent direct access
@@ -11,6 +11,24 @@ if (!defined('ABSPATH')) exit;
 
 // API Proxy
 add_action('rest_api_init', function () {
+    register_rest_route('instaquote/v1', '/me', array(
+        'methods' => 'GET',
+        'callback' => function() {
+            if (!is_user_logged_in()) {
+                return new WP_REST_Response(array('error' => 'Not authenticated'), 401);
+            }
+            
+            $current_user = wp_get_current_user();
+            return new WP_REST_Response(array(
+                'id' => $current_user->ID,
+                'username' => $current_user->user_login,
+                'email' => $current_user->user_email,
+                'roles' => $current_user->roles,
+            ), 200);
+        },
+        'permission_callback' => '__return_true'
+    ));
+
     register_rest_route('instaquote/v1', '/proxy/(?P<path>.*)', array(
         'methods' => 'GET,POST,PUT,DELETE,PATCH',
         'callback' => 'instaquote_proxy_request',
@@ -60,57 +78,33 @@ function instaquote_proxy_request($request) {
     $body = wp_remote_retrieve_body($response);
     $status = wp_remote_retrieve_response_code($response);
     
-    return new WP_REST_Response(array(
-        'data' => json_decode($body)
-    ), $status);
+    return new WP_REST_Response(json_decode($body), $status);
 }
 
 // Shortcode
 function instaquote_app_shortcode() {
     $version = time();
     $plugin_url = plugin_dir_url(__FILE__);
-    
-    $current_user = wp_get_current_user();
-    $user_data = array(
-        'isLoggedIn' => is_user_logged_in(),
-        'id' => $current_user->ID,
-        'username' => $current_user->user_login,
-        'email' => $current_user->user_email,
-        'roles' => $current_user->roles,
-    );
-    
     ob_start();
     ?>
     <style>
-        .et_pb_code_inner {
-            padding: 0 !important;
-            margin: 0 !important;
+        .et_pb_section_0 {
+            padding-top: 0 !important;
         }
-
         #instaquote-wrapper {
-            all: initial;
-            display: block;
-            font-family: Roboto, system-ui, sans-serif;
-        }
-
-        #instaquote-wrapper * {
-            box-sizing: border-box;
-        }
-        
-        #instaquote-wrapper .MuiInputBase-input {
-            all: unset;
-            box-sizing: border-box;
-        }
+            min-height: 100vh;
+        }        
     </style>
     <div id="instaquote-wrapper">
         <div id="root" data-wp-nonce="<?php echo wp_create_nonce('wp_rest'); ?>"></div>
     </div>
     <script type="module" src="<?php echo $plugin_url; ?>purify.es-Bzr520pe.js?v=<?php echo $version; ?>"></script>
     <script type="module" src="<?php echo $plugin_url; ?>html2canvas.esm-DXEQVQnt.js?v=<?php echo $version; ?>"></script>
-    <script type="module" src="<?php echo $plugin_url; ?>index.es-OZVMRz-I.js?v=<?php echo $version; ?>"></script>
-    <script type="module" src="<?php echo $plugin_url; ?>index-DVAXYFZL.js?v=<?php echo $version; ?>"></script>
+    <script type="module" src="<?php echo $plugin_url; ?>index.es-5mBdIVo9.js?v=<?php echo $version; ?>"></script>
+    <script type="module" src="<?php echo $plugin_url; ?>index-C4Dqz-Mt.js?v=<?php echo $version; ?>"></script>
     <?php
     return ob_get_clean();
 }
 
 add_shortcode('instaquote_app', 'instaquote_app_shortcode');
+?>

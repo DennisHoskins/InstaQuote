@@ -74,7 +74,7 @@ export default function Destinations() {
                 sx={{ textDecoration: 'none', color: 'inherit' }}
               >
                 <CardContent>
-                  <Typography variant="h6">
+                  <Typography variant="h6" sx={{ paddingBottom: '0 !important', marginBottom: '0 !important' }}>
                     {destination}
                   </Typography>
                 </CardContent>

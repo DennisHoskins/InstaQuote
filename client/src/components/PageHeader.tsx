@@ -39,7 +39,10 @@ export default function PageHeader({ title, breadcrumbs = [], showNavBar = true,
           sx={{
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            m: 0,
+            lineHeight: 1,
+            paddingBottom: '0 !important', 
           }}
         >
           {title}

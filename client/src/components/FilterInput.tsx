@@ -30,6 +30,22 @@ export default function FilterInput({ onFilter, onEnter, placeholder = 'Filter..
         onChange={(e) => onFilter(e.target.value)}
         onKeyDown={handleKeyDown}
         inputRef={inputRef}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& input': {
+              boxSizing: 'content-box',
+              height: '1.4375em',
+              padding: '16.5px 14px',
+              border: 0,
+              background: 'none',
+            },
+            '& fieldset': {
+              borderWidth: '1px',
+              borderStyle: 'solid',
+              borderColor: 'rgba(0, 0, 0, 0.23)',
+            },
+          },
+        }}
       />
     </Box>
   );

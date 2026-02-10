@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Layout from './layouts/Layout';
 import AdminLayout from './layouts/AdminLayout';
@@ -30,6 +31,7 @@ import SyncLogSkuMapping from './pages/admin/SyncLogSkuMapping';
 export default function App() {
   return (
     <HashRouter>
+      <ScrollToTop />
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />

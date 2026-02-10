@@ -29,6 +29,22 @@ export default function SearchBar({ onSearch, placeholder = 'Search...', initial
         value={value}
         onChange={(e) => setValue(e.target.value)}
         inputRef={inputRef}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& input': {
+              boxSizing: 'content-box',
+              height: '1.4375em',
+              padding: '16.5px 14px',
+              border: 0,
+              background: 'none',
+            },
+            '& fieldset': {
+              borderWidth: '1px',
+              borderStyle: 'solid',
+              borderColor: 'rgba(0, 0, 0, 0.23)',
+            },
+          },
+        }}
       />
       <Button variant="contained" type="submit" sx={{ px: 4 }}>
         Search

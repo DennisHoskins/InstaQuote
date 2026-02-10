@@ -58,6 +58,7 @@ export default function Table({
                   display: column.mobileHide
                     ? { xs: 'none', md: 'table-cell' }
                     : 'table-cell',
+                  padding: '16px !important',
                 }}
               >
                 {column.label}
@@ -89,6 +90,7 @@ export default function Table({
                       display: column.mobileHide
                         ? { xs: 'none', md: 'table-cell' }
                         : 'table-cell',
+                      padding: '16px !important',
                     }}
                   >
                     {formattedValue}
