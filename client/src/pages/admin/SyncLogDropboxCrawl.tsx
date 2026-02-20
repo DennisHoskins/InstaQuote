@@ -238,7 +238,7 @@ export default function SyncLogDropboxCrawl() {
             title="Crawl Dropbox"
             buttonText="Crawl Dropbox"
             requiresToken={true}
-            apiCall={(token) => api.triggerDropboxCrawl('Dennis', token!)}
+            apiCall={(token) => api.triggerDropboxCrawl(token!)}
             onSuccess={() => {
               queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'dropbox_crawl'] });
               queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });

@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
+import { AuthRequest } from '../../middleware/auth.js';
 import { body, param, validationResult } from 'express-validator';
 import { crawlDropbox, createLinks, getMissingLinksCount } from '../../services/dropbox.js';
 import { generateMappings, deleteAllMappings } from '../../services/sku-mapping.js';
@@ -8,7 +9,7 @@ import pool from '../../db/connection.js';
 const router = Router();
 
 // Get missing links count
-router.get('/missing-links-count', async (req: Request, res: Response) => {
+router.get('/missing-links-count', async (req: AuthRequest, res: Response) => {
   try {
     const missingLinks = await getMissingLinksCount();
     res.json({ missingLinks });
@@ -19,7 +20,7 @@ router.get('/missing-links-count', async (req: Request, res: Response) => {
 });
 
 // Get sync status for a specific type
-router.get('/status/:syncType', async (req: Request, res: Response) => {
+router.get('/status/:syncType', async (req: AuthRequest, res: Response) => {
   try {
     const syncType = Array.isArray(req.params.syncType) 
       ? req.params.syncType[0] 
@@ -59,15 +60,10 @@ router.get('/status/:syncType', async (req: Request, res: Response) => {
 
 // Trigger Dropbox crawl
 router.post('/dropbox-crawl', [
-  body('user_name').isString().trim().notEmpty(),
   body('dropbox_token').isString().trim().notEmpty(),
-], async (req: Request, res: Response) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const { user_name, dropbox_token } = req.body;
+], async (req: AuthRequest, res: Response) => {
+  const { dropbox_token } = req.body;
+  const user_name = req.user!.username;
   const startedAt = new Date();
   let syncId: number | null = null;
 
@@ -95,15 +91,10 @@ router.post('/dropbox-crawl', [
 
 // Trigger link creation
 router.post('/create-links', [
-  body('user_name').isString().trim().notEmpty(),
   body('dropbox_token').isString().trim().notEmpty(),
-], async (req: Request, res: Response) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const { user_name, dropbox_token } = req.body;
+], async (req: AuthRequest, res: Response) => {
+  const { dropbox_token } = req.body;
+  const user_name = req.user!.username;
   const startedAt = new Date();
   let syncId: number | null = null;
 
@@ -149,15 +140,8 @@ router.post('/create-links', [
 });
 
 // Generate SKU image mappings
-router.post('/generate-mappings', [
-  body('user_name').isString().trim().notEmpty(),
-], async (req: Request, res: Response) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const { user_name } = req.body;
+router.post('/generate-mappings', async (req: AuthRequest, res: Response) => {
+  const user_name = req.user!.username;
   const startedAt = new Date();
   let syncId: number | null = null;
 
@@ -185,15 +169,8 @@ router.post('/generate-mappings', [
 });
 
 // Delete all SKU image mappings
-router.delete('/mappings/all', [
-  body('user_name').isString().trim().notEmpty(),
-], async (req: Request, res: Response) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const { user_name } = req.body;
+router.delete('/mappings/all', async (req: AuthRequest, res: Response) => {
+  const user_name = req.user!.username;
   const startedAt = new Date();
   let syncId: number | null = null;
 
@@ -229,12 +206,7 @@ router.delete('/mappings/all', [
 // Delete a single SKU image mapping
 router.delete('/mapping/:id', [
   param('id').isInt().toInt(),
-], async (req: Request, res: Response) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
+], async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -257,12 +229,7 @@ router.delete('/mapping/:id', [
 router.patch('/:id/mark-failed', [
   param('id').isInt(),
   body('error_message').isString().trim().notEmpty(),
-], async (req: Request, res: Response) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
+], async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const { error_message } = req.body;
 

@@ -1,15 +1,17 @@
 import pyodbc
 import psycopg2
+from psycopg2.extras import execute_values
 from datetime import datetime
+
 import sys
 
 # PostgreSQL connection
 pg_config = {
     'dbname': 'instaquote',
-    'user': 'postgres',
-    'password': 'admin',
+    'user': 'instaquote_user',
+    'password': '1nst4qu0t3',
     'host': 'localhost',
-    'port': '5432'
+    'port': '5433'
 }
 
 # Access database paths
@@ -130,6 +132,7 @@ SKIP_DESTINATIONS = [
 
 # Destination name normalization - maps raw names to clean display names
 # Format: 'Clean Name': ['raw_variation1', 'raw_variation2', ...]
+# NOTE: Mitchell said NOT to consolidate variations like "II" or "SPECIAL" - keep them separate
 DESTINATION_ALIASES = {
     # === ADD STATE ABBREVIATIONS ===
     # Florida
@@ -156,7 +159,8 @@ DESTINATION_ALIASES = {
     'Naples, FL': ['NAPLES'],
     'New Smyrna Beach, FL': ['NEW SMYRNA'],
     'Orlando, FL': ['ORLANDO FL'],
-    'Palm Beach, FL': ['PALM BEACH', 'PALM BEACH GARDEN'],
+    'Palm Beach, FL': ['PALM BEACH'],
+    'Palm Beach Gardens, FL': ['PALM BEACH GARDEN'],
     'Panama City Beach, FL': ['PANAMA CITY BEACH'],
     'Port St. Joe, FL': ['PORT ST JOE'],
     'Port St. Lucie, FL': ['PORT ST LUCIE'],
@@ -164,10 +168,12 @@ DESTINATION_ALIASES = {
     'Sarasota, FL': ['SARASOTA'],
     'Siesta Key, FL': ['SIESTA KEY'],
     'St. Augustine, FL': ['ST AUGUSTINE'],
-    'St. Petersburg, FL': ['ST PETERSBURG', 'ST PETERSBURG SPECIAL'],
+    'St. Petersburg, FL': ['ST PETERSBURG'],
+    'St. Petersburg Special, FL': ['ST PETERSBURG SPECIAL'],
     'Stuart, FL': ['STUART FL'],
     'Tampa, FL': ['TAMPA'],
     'Tarpon Springs, FL': ['TARPON SPRINGS'],
+    'The Villages, FL': ['THE VILLAGE', 'THE VILLAGES'],
     'Treasure Coast, FL': ['TREASURE COAST'],
     'Venice, FL': ['VENICE FL'],
     'Vero Beach, FL': ['VERO BEACH'],
@@ -175,10 +181,12 @@ DESTINATION_ALIASES = {
     
     # North Carolina
     'Atlantic Beach, NC': ['ATLANTIC BEACH'],
+    'Bald Head Island, NC': ['BALD HEAD ISLAND'],
     'Banner Elk, NC': ['BANNER ELK NC'],
     'Beaufort, NC': ['BEAUFORT NC'],
-    'Bodie Island, NC': ['BODIE ISLAND'],
+    'Biltmore Estate, NC': ['BILTMORE ESTATE'],
     'Blowing Rock, NC': ['BLOWING ROCK'],
+    'Bodie Island, NC': ['BODIE ISLAND'],
     'Cape Hatteras, NC': ['CAPE HATTERAS'],
     'Cape Lookout, NC': ['CAPE LOOKOUT'],
     'Carolina Beach, NC': ['CAROLINA BEACH'],
@@ -188,11 +196,13 @@ DESTINATION_ALIASES = {
     'Emerald Isle, NC': ['EMERALD ISLAND', 'EMERALD ISLE'],
     'Holden Beach, NC': ['HOLDEN BEACH'],
     'Kure Beach, NC': ['KURE BEACH'],
-    'New Bern, NC': ['NEW BERN NC', 'NEW BERN NC ANNIVERSARY'],
+    'New Bern, NC': ['NEW BERN NC'],
+    'New Bern Anniversary, NC': ['NEW BERN NC ANNIVERSARY'],
     'Oak Island, NC': ['OAK ISLAND'],
     'Ocean Isle Beach, NC': ['OCEAN ISLE BEACH'],
     'Ocracoke Island, NC': ['OCRACOKE ISLAND'],
     'Outer Banks, NC': ['OUTER BANKS', 'OBX'],
+    'Southport, NC': ['SOUTHPORT', 'SOUTH PORT', 'South Port'],
     'Sunset Beach, NC': ['SUNSET BEACH'],
     'Surf City, NC': ['SURF CITY'],
     'Topsail Island, NC': ['TOPSAIL ISLAND'],
@@ -210,9 +220,11 @@ DESTINATION_ALIASES = {
     'Myrtle Beach, SC': ['MYRTLE BEACH'],
     "Pawley's Island, SC": ["PAWLEY'S ISLAND"],
     'Seabrook Island, SC': ['SEABROOK ISLAND'],
+    'Sumter, SC': ['SUMTER'],
     
     # Georgia
     'Jekyll Island, GA': ['JEKYLL ISLAND'],
+    'Peachtree City, GA': ['PEACHTREE CITY'],
     'Savannah, GA': ['SAVANNAH', 'NEW SAVANNAH'],
     'St. Simons Island, GA': ['ST SIMONS'],
     
@@ -233,7 +245,9 @@ DESTINATION_ALIASES = {
     'Annapolis, MD': ['ANNAPOLIS MD'],
     'Assateague Island, MD': ['ASSATEAGUE ISLAND'],
     'Chestertown, MD': ['CHESTERTOWN MD'],
-    'Ocean City, MD': ['OCEAN CITY MD', 'OC MD ANNIVERSARY', "OC HENRY'S SPECIAL"],
+    'Ocean City, MD': ['OCEAN CITY MD'],
+    'OC MD Anniversary': ['OC MD ANNIVERSARY'],
+    "OC Henry's Special": ["OC HENRY'S SPECIAL"],
     'Ocean Pines, MD': ['OCEAN PINES'],
     'Rock Hall, MD': ['ROCK HALL MD'],
     "St. Mary's County, MD": ["ST MARY'S COUNTY"],
@@ -243,14 +257,26 @@ DESTINATION_ALIASES = {
     # New Jersey
     'Asbury Park, NJ': ['ASBURY PARK, NJ', 'ASBURY PARK NJ', 'ASBURY PARK'],
     'Atlantic City, NJ': ['ATLANTIC CITY'],
-    'Avalon, NJ': ['AVALON', 'AVALON II'],
-    'Long Beach Island, NJ': ['LONG BEACH ISLAND', 'LBI SPECIAL'],
+    'Avalon, NJ': ['AVALON'],
+    'Avalon II, NJ': ['AVALON II'],
+    'Cape May, NJ': ['CAPE MAY'],
+    'Cape May Anniversary, NJ': ['CAPE MAY ANI'],
+    'Cape May Special, NJ': ['CAPE MAY SPECIAL'],
+    'Long Beach Island, NJ': ['LONG BEACH ISLAND'],
+    'LBI Special, NJ': ['LBI SPECIAL'],
     'Longport, NJ': ['LONG PORT', 'LONGPORT'],
     'Margate, NJ': ['MARGATE'],
-    'Ocean City, NJ': ['OCEAN CITY NJ', 'OC NJ ANNIVERSARY', 'OC NJ BEACH TAG', 'OC NJ JH', 'OC NJ SPECIAL'],
+    'Ocean City, NJ': ['OCEAN CITY NJ'],
+    'OC NJ Anniversary': ['OC NJ ANNIVERSARY'],
+    'OC NJ Beach Tag': ['OC NJ BEACH TAG'],
+    'OC NJ JH': ['OC NJ JH'],
+    'OC NJ Special': ['OC NJ SPECIAL'],
+    'Sandy Hook, NJ': ['SANDY HOOK'],
     'Sea Isle City, NJ': ['SEA ISLE CITY'],
     'Seaside Heights, NJ': ['SEA SIDE HEIGHTS', 'SEASIDE HEIGHTS'],
-    'Stone Harbor, NJ': ['STONE HARBOR', 'STONE HARBOR II', 'STONE HARBOR BIRD SANCTUARY'],
+    'Stone Harbor, NJ': ['STONE HARBOR'],
+    'Stone Harbor II, NJ': ['STONE HARBOR II'],
+    'Stone Harbor Bird Sanctuary, NJ': ['STONE HARBOR BIRD SANCTUARY'],
     'Ventnor, NJ': ['VENTNOR'],
     'Wildwood, NJ': ['WILDWOOD'],
     
@@ -263,9 +289,10 @@ DESTINATION_ALIASES = {
     'South Bethany, DE': ['SOUTH BETHANY'],
     
     # Massachusetts
-    'Bar Harbor, ME': ['BAR HARBOR'],
     'Boston, MA': ['BOSTON MA'],
-    'Cape Cod, MA': ['CAPE COD', 'CAPE COD FISH', 'CAPE COD SHELL'],
+    'Cape Cod, MA': ['CAPE COD'],
+    'Cape Cod Fish, MA': ['CAPE COD FISH'],
+    'Cape Cod Shell, MA': ['CAPE COD SHELL'],
     'Harwich Port, MA': ['HARDWICH PORT MA', 'HARWICH PORT'],
     "Martha's Vineyard, MA": ["MARTHA'S VINEYARD"],
     'Nantucket, MA': ['NANTUCKET'],
@@ -273,13 +300,21 @@ DESTINATION_ALIASES = {
     'Plymouth, MA': ['PLYMOUTH'],
     'Provincetown, MA': ['PROVINCE TOWN', 'PROVINCETOWN'],
     
+    # Maine
+    'Bar Harbor, ME': ['BAR HARBOR'],
+    
     # Rhode Island
     'Block Island, RI': ['BLOCK ISLAND'],
     'Newport, RI': ['NEWPORT RI', 'NEW PORT RI', 'NEWPORT', 'NEW PORT'],
     
     # New York
+    'Adirondacks, NY': ['ADIRONDACK'],
     'Montauk, NY': ['MONTAUK NY'],
     'Port Jefferson, NY': ['PORT JEFFERSON'],
+    'Westchester, NY': ['WESTCHESTER'],
+    
+    # Pennsylvania
+    'Philadelphia, PA': ['PHILADELPHIA LIBERTY BELL', 'FISH TOWN'],
     
     # Texas
     'Austin, TX': ['AUSTIN TX'],
@@ -294,6 +329,7 @@ DESTINATION_ALIASES = {
     
     # Tennessee
     'Gatlinburg, TN': ['GATLINBURG TN'],
+    'Maryville, TN': ['MARYVILLE'],
     'Nashville, TN': ['NASHVILLE'],
     
     # Kentucky
@@ -302,7 +338,9 @@ DESTINATION_ALIASES = {
     'Louisville, KY': ['LOUISVILLE KY'],
     
     # Alabama
-    'Gulf Shores, AL': ['GULF SHORES', 'GULF SHORES II'],
+    'Gulf Shores, AL': ['GULF SHORES'],
+    'Gulf Shores II, AL': ['GULF SHORES II'],
+    'Muscle Shoals, AL': ['MUSCLE SHOALS'],
     'Orange Beach, AL': ['ORANGE BEACH'],
     
     # Mississippi
@@ -318,7 +356,6 @@ DESTINATION_ALIASES = {
     'Put-in-Bay, OH': ['PUT IN BAY OH'],
     
     # Michigan
-    'Fishtown, MI': ['FISH TOWN'],
     'Oscoda, MI': ['OSCODA, MICHIGAN', 'OSCODA MI'],
     'Tawas, MI': ['TAWAS MI'],
     'West Branch, MI': ['WEST BRANCH MI'],
@@ -326,9 +363,11 @@ DESTINATION_ALIASES = {
     # Wisconsin
     'Door County, WI': ['DOOR COUNTY WI'],
     'Green Bay, WI': ['GREEN BAY'],
+    'Madison, WI': ['MADISON'],
     
     # Minnesota
     'Nisswa, MN': ['NISSWA'],
+    'Twin Ports, MN': ['TWIN PORT'],
     
     # Colorado
     'Aspen, CO': ['ASPEN CO'],
@@ -336,13 +375,15 @@ DESTINATION_ALIASES = {
     'Vail, CO': ['VAIL CO'],
     
     # Wyoming
-    'Jackson Hole, WY': ['JACKSON HOLE WY', 'JACKSON WY'],
+    'Jackson Hole, WY': ['JACKSON HOLE WY'],
+    'Jackson, WY': ['JACKSON WY'],
     
     # Idaho
     'Sun Valley, ID': ['SUN VALLEY', 'SUN VALLEY ID'],
     
     # California
-    'Morro Bay, CA': ['MORRO BAY', 'MORRO ROCK'],
+    'Morro Bay, CA': ['MORRO BAY'],
+    'Morro Rock, CA': ['MORRO ROCK'],
     'Northern California': ['NORTHERN CALIFORNIA'],
     'San Francisco, CA': ['SAN FRANCISCO'],
     
@@ -385,20 +426,35 @@ DESTINATION_ALIASES = {
     'British Virgin Islands': ['BRITISH VIRGIN ISLAND'],
     'Cayman Islands': ['CAYMAN ISLAND'],
     'Curacao': ['CURACAO'],
+    'George Town, Cayman': ['GEORGE TOWN'],
+    'George Town Logo, Cayman': ['GEORGE TOWN LOGO'],
     'Grenada': ['GRENADA'],
-    'Jamaica': ['JAMAICA', 'CHULANI JAMAICA'],
+    'Jamaica': ['JAMAICA'],
+    'Chulani Jamaica': ['CHULANI JAMAICA'],
+    'Jost Van Dyke, BVI': ['JVD'],
     'Nassau, Bahamas': ['NASSAU'],
     'Puerto Rico': ['PUERTO RICO'],
     'St. Barts': ['ST BARTS'],
-    'St. Croix, USVI': ['ST CROIX', 'ST CROIX LIZARD', 'ST CROIX PALM'],
-    'St. John, USVI': ['ST JOHN', 'ST JOHN LIZARD', 'ST JOHN PALM', 'JD ST JOHN', 'JVD'],
+    'St. Croix, USVI': ['ST CROIX'],
+    'St. Croix Lizard, USVI': ['ST CROIX LIZARD'],
+    'St. Croix Palm, USVI': ['ST CROIX PALM'],
+    'St. John, USVI': ['ST JOHN'],
+    'St. John Lizard, USVI': ['ST JOHN LIZARD'],
+    'St. John Palm, USVI': ['ST JOHN PALM'],
+    'JD St. John, USVI': ['JD ST JOHN'],
     'St. Kitts': ['ST KITTS'],
     'St. Lucia': ['ST LUCIA'],
-    'St. Martin': ['ST MARTIN', 'ST MARTIN LIZARD', 'SXM HOOK'],
-    'St. Thomas, USVI': ['ST THOMAS', 'ST THOMAS LIZARD', 'ST THOMAS PALM'],
+    'St. Martin': ['ST MARTIN'],
+    'St. Martin Lizard': ['ST MARTIN LIZARD'],
+    'SXM Hook': ['SXM HOOK'],
+    'St. Thomas, USVI': ['ST THOMAS'],
+    'St. Thomas Lizard, USVI': ['ST THOMAS LIZARD'],
+    'St. Thomas Palm, USVI': ['ST THOMAS PALM'],
     'Tortola, BVI': ['TORTOLA'],
     'Turks and Caicos': ['TURKS AND CAICOS'],
-    'US Virgin Islands': ['US VIRGIN ISLANDS', 'USVI HOOK', 'VI HOOK'],
+    'US Virgin Islands': ['US VIRGIN ISLANDS'],
+    'USVI Hook': ['USVI HOOK'],
+    'VI Hook': ['VI HOOK'],
     'Virgin Gorda, BVI': ['VIRGIN GORDA'],
     
     # Mexico
@@ -416,14 +472,12 @@ DESTINATION_ALIASES = {
     
     # === SPECIAL/OTHER ===
     'ABC Islands': ['ABC ISLAND'],
-    'Adirondacks, NY': ['ADIRONDACK'],
     'B&O Railroad': ['B&O RAILROAD'],
-    'Bald Head Island, NC': ['BALD HEAD ISLAND'],
     'BBQ': ['BBQ'],
-    'Biltmore Estate, NC': ['BILTMORE ESTATE'],
     'Blue Ridge Mountains': ['BLUE RIDGE'],
-    'Cape May, NJ': ['CAPE MAY', 'CAPE MAY ANI', 'CAPE MAY SPECIAL'],
-    'George Town, Cayman': ['GEORGE TOWN', 'GEORGE TOWN LOGO'],
+    'Camp Le Jeune': ['CAMP LE JEUNE'],
+    'Cbc': ['CBC'],
+    'Custom Clasp Collection': ['CUSTOM CLASP COLLECTION'],
     'Island Packet': ['ISLAND PACKET'],
     'Keller Williams': ['KELLER WILLIAMS/REAL ESTATE CO'],
     'Lauderdale-by-the-Sea, FL': ['LAUDERDALE BY THE SEA', 'FT. LAUDERDALE'],
@@ -433,25 +487,9 @@ DESTINATION_ALIASES = {
     'Mar Azul Larimar': ['MAR AZUL LARIMAR'],
     'Navy': ['NAVY'],
     'Ocean City Shell': ['OCEAN CITY SHELL'],
-    'Philadelphia, PA': ['PHILADELPHIA LIBERTY BELL'],
-    'Sandy Hook, NJ': ['SANDY HOOK'],
     'Shag Dancing': ['SHAGGERS'],
     'South Beach, FL': ['SOUTH BEACH'],
-    'Southport, NC': ['SOUTHPORT', 'South Port', 'SOUTH PORT'],
     "St. Armand's Circle, FL": ['ST ARMAND CIRCLE'],
-    'The Village': ['THE VILLAGE'],
-    'University of Notre Dame': ['UNIVERSITY OF NOTRE DAME'],
-    'Custom Clasp Collection': ['CUSTOM CLASP COLLECTION'],
-    
-    # === AWAITING CUSTOMER CLARIFICATION ===
-    # These will be updated once customer responds
-    'Madison, WI': ['MADISON'],
-    'Maryville, TN': ['MARYVILLE'],
-    'Muscle Shoals, AL': ['MUSCLE SHOALS'],
-    'Peachtree City, GA': ['PEACHTREE CITY'],
-    'Sumter, SC': ['SUMTER'],
-    'Twin Ports, MN': ['TWIN PORT'],
-    'Westchester, NY': ['WESTCHESTER'],
 }
 
 # Build reverse lookup (variation -> canonical name)
@@ -623,7 +661,7 @@ def sync_catalog(pg_cursor):
         access_cursor.execute("SELECT [Category Group], [CBC/Cable Markup], [Special Markup] FROM [1 - Markup Adjustment]")
         markup_adj = {}
         for row in access_cursor.fetchall():
-            markup_adj[row[0]] = {'cbc_cable': nvl(row[1]), 'special': nvl(row[2])}
+            markup_adj[row[0].upper()] = {'cbc_cable': nvl(row[1]), 'special': nvl(row[2])}
         
         # Load SS costs
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Loading SS costs...")
@@ -667,7 +705,7 @@ def sync_catalog(pg_cursor):
         
         # Load Labor costs
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Loading Labor costs...")
-        access_cursor.execute("SELECT [Item Code], [Total Labor $], [Overhead $] FROM [Costing - Labor by Item]")
+        access_cursor.execute("SELECT [Item Code], [Total WS Labor $], [total WS OH $] FROM [Costing - Labor by Item]")
         labor_costs = {}
         for row in access_cursor.fetchall():
             if row[0]:
@@ -680,6 +718,7 @@ def sync_catalog(pg_cursor):
         # Process and insert items
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Processing and inserting items...")
         count = 0
+        rows = []
         for item_code, item in items.items():
             if not item_code:
                 continue
@@ -725,9 +764,14 @@ def sync_catalog(pg_cursor):
                     markup = adj['special']
                 else:
                     markup = adj['cbc_cable']
+            elif category_group in ('COMBO', 'TT'):
+                if cat and cat.upper().startswith('CBL'):
+                    markup = adj['special']
+                else:
+                    markup = adj['cbc_cable']
             else:
                 markup = adj['cbc_cable']
-            
+
             # Calculate Total WS $
             ws_mu = total_cost * markup
             total_ws = total_cost + ws_mu
@@ -750,13 +794,7 @@ def sync_catalog(pg_cursor):
             # Extract SKU
             sku = extract_sku(item_code)
             
-            # Insert into PostgreSQL
-            pg_cursor.execute("""
-                INSERT INTO inventory_items 
-                (item_code, sku, description, category, destination, total_ws_price, 
-                 is_catalog, inactive, cat_page, cat_page_order, last_updated)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
+            rows.append((
                 item_code,
                 sku,
                 description,
@@ -770,7 +808,14 @@ def sync_catalog(pg_cursor):
                 item['last_updated'],
             ))
             count += 1
-        
+
+        execute_values(pg_cursor, """
+            INSERT INTO inventory_items 
+            (item_code, sku, description, category, destination, total_ws_price, 
+             is_catalog, inactive, cat_page, cat_page_order, last_updated)
+            VALUES %s
+        """, rows)
+                
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
         print(f"[{end_time.strftime('%H:%M:%S')}] Imported {count} catalog items ({duration:.2f}s)")
@@ -833,7 +878,7 @@ def sync_destination_db(access_db_path, pg_cursor):
         access_cursor.execute("SELECT [Category Group], [Destination Markup], [Special Markup] FROM [1 - Markup Adjustment]")
         markup_adj = {}
         for row in access_cursor.fetchall():
-            markup_adj[row[0]] = {'destination': nvl(row[1]), 'special': nvl(row[2])}
+            markup_adj[row[0].upper()] = {'destination': nvl(row[1]), 'special': nvl(row[2])}
         
         # Load SS costs
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Loading SS costs...")
@@ -877,7 +922,7 @@ def sync_destination_db(access_db_path, pg_cursor):
         
         # Load Labor costs
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Loading Labor costs...")
-        access_cursor.execute("SELECT [Item Code], [Total Labor $], [Overhead $] FROM [Costing - Labor by Item]")
+        access_cursor.execute("SELECT [Item Code], [Total WS Labor $], [total WS OH $] FROM [Costing - Labor by Item]")
         labor_costs = {}
         for row in access_cursor.fetchall():
             if row[0]:
@@ -887,6 +932,7 @@ def sync_destination_db(access_db_path, pg_cursor):
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Processing and inserting items...")
         count = 0
         skipped = 0
+        rows = []
         for item_code, item in items.items():
             if not item_code:
                 continue
@@ -936,7 +982,6 @@ def sync_destination_db(access_db_path, pg_cursor):
                 else:
                     markup = adj['destination']
             elif category_group in ('COMBO', 'TT'):
-                # Check if category starts with CBL
                 if cat and cat.upper().startswith('CBL'):
                     markup = adj['special']
                 else:
@@ -966,13 +1011,7 @@ def sync_destination_db(access_db_path, pg_cursor):
             # Extract SKU
             sku = extract_sku(item_code)
             
-            # Insert into PostgreSQL
-            pg_cursor.execute("""
-                INSERT INTO inventory_items 
-                (item_code, sku, description, category, destination, total_ws_price, 
-                 is_catalog, inactive, last_updated)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
+            rows.append((
                 item_code,
                 sku,
                 description,
@@ -984,7 +1023,14 @@ def sync_destination_db(access_db_path, pg_cursor):
                 item['last_updated'],
             ))
             count += 1
-        
+
+        execute_values(pg_cursor, """
+            INSERT INTO inventory_items 
+            (item_code, sku, description, category, destination, total_ws_price, 
+             is_catalog, inactive, last_updated)
+            VALUES %s
+        """, rows)
+
         if skipped > 0:
             print(f"[{datetime.now().strftime('%H:%M:%S')}] Skipped {skipped} items (filtered destinations)")
         

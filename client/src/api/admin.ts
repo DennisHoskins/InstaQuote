@@ -131,16 +131,16 @@ export const api = {
   },
 
   // Sync operations
-  triggerDropboxCrawl: async (userName: string, dropboxToken: string) => {
-    return apiClient.post('/admin/sync/dropbox-crawl', { user_name: userName, dropbox_token: dropboxToken });
+  triggerDropboxCrawl: async (dropboxToken: string) => {
+    return apiClient.post('/admin/sync/dropbox-crawl', { dropbox_token: dropboxToken });
   },
 
-  triggerCreateLinks: async (userName: string, dropboxToken: string) => {
-    return apiClient.post('/admin/sync/create-links', { user_name: userName, dropbox_token: dropboxToken });
+  triggerCreateLinks: async (dropboxToken: string) => {
+    return apiClient.post('/admin/sync/create-links', { dropbox_token: dropboxToken });
   },
 
-  triggerGenerateMappings: async (userName: string) => {
-    return apiClient.post('/admin/sync/generate-mappings', { user_name: userName });
+  triggerGenerateMappings: async () => {
+    return apiClient.post('/admin/sync/generate-mappings');
   },
 
   deleteAllSkuImageMappings: async () => {

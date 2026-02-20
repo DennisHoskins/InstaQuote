@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { fetchNonce, getNonce } from '../api/apiClient';
 
 interface User {
   id: number;
@@ -26,8 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const rootEl = document.getElementById('root');
-        const nonce = rootEl?.getAttribute('data-wp-nonce');
+        await fetchNonce();
+        const nonce = getNonce();
 
         const response = await fetch('/wp-json/instaquote/v1/me', {
           headers: nonce ? { 'X-WP-Nonce': nonce } : {},

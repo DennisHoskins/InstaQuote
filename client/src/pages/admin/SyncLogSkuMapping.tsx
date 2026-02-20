@@ -285,7 +285,7 @@ export default function SyncLogSkuMapping() {
               title="Generate SKU Mappings"
               buttonText="Generate Matches"
               requiresToken={false}
-              apiCall={() => api.triggerGenerateMappings('Dennis')}
+              apiCall={() => api.triggerGenerateMappings()}
               onSuccess={() => {
                 queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_mapping'] });
                 queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });

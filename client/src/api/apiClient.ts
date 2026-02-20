@@ -1,13 +1,36 @@
 const API_BASE_URL = '/wp-json/instaquote/v1/proxy';
 
+let cachedNonce: string | null = null;
+
+export async function fetchNonce(): Promise<string | null> {
+  if ((window as any).instaquoteNonce) {
+    cachedNonce = (window as any).instaquoteNonce;
+    return cachedNonce;
+  }
+  try {
+    const response = await fetch('/wp-json/instaquote/v1/nonce', {
+      credentials: 'include',
+    });
+    if (response.ok) {
+      const data = await response.json();
+      cachedNonce = data.nonce;
+      return cachedNonce;
+    }
+  } catch (error) {
+    console.error('Failed to fetch nonce:', error);
+  }
+  return null;
+}
+
+export function getNonce(): string | null {
+  return cachedNonce;
+}
+
 class ApiClient {
   async request(url: string, options: RequestInit = {}): Promise<Response> {
-    // Get nonce from root element's data attribute
-    const rootEl = document.getElementById('root');
-    const nonce = rootEl?.getAttribute('data-wp-nonce');
+    const nonce = getNonce();
     
     console.log('ApiClient - nonce:', nonce);
-    console.log('ApiClient - rootEl:', rootEl);
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',

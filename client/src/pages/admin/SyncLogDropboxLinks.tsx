@@ -272,7 +272,7 @@ export default function SyncLogDropboxLinks() {
             title="Create Dropbox Links"
             buttonText={`Create Links (${missingLinks})`}
             requiresToken={true}
-            apiCall={(token) => api.triggerCreateLinks('Dennis', token!)}
+            apiCall={(token) => api.triggerCreateLinks(token!)}
             onSuccess={() => {
               queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'dropbox_links'] });
               queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });

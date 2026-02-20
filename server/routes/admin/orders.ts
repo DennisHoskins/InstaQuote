@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
+import { AuthRequest } from '../../middleware/auth.js';
 import { query, param, body, validationResult } from 'express-validator';
 import pool from '../../db/connection.js';
 
@@ -12,7 +13,7 @@ router.get('/', [
   query('status').optional().isIn(['pending', 'processing', 'completed', 'cancelled']),
   query('start_date').optional().isISO8601(),
   query('end_date').optional().isISO8601(),
-], async (req: Request, res: Response) => {
+], async (req: AuthRequest, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -92,7 +93,7 @@ router.get('/', [
 // Get single order with items (including images)
 router.get('/:id', [
   param('id').isInt().toInt(),
-], async (req: Request, res: Response) => {
+], async (req: AuthRequest, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -151,7 +152,7 @@ router.patch('/:id', [
   param('id').isInt().toInt(),
   body('status').optional().isIn(['pending', 'processing', 'completed', 'cancelled']),
   body('notes').optional().isString(),
-], async (req: Request, res: Response) => {
+], async (req: AuthRequest, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -196,6 +197,10 @@ router.patch('/:id', [
     updates.push(`updated_at = $${paramCount}`);
     values.push(new Date());
 
+    paramCount++;
+    updates.push(`updated_by = $${paramCount}`);
+    values.push(req.user!.id);    
+
     // Add id as last parameter
     paramCount++;
     values.push(id);
@@ -219,7 +224,7 @@ router.patch('/:id', [
 // Soft delete order
 router.delete('/:id', [
   param('id').isInt().toInt(),
-], async (req: Request, res: Response) => {
+], async (req: AuthRequest, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -230,10 +235,10 @@ router.delete('/:id', [
 
     const result = await pool.query(
       `UPDATE orders 
-       SET deleted_at = NOW()
+       SET deleted_at = NOW(), deleted_by = $2
        WHERE id = $1 AND deleted_at IS NULL
        RETURNING id`,
-      [id]
+      [id, req.user!.id]
     );
 
     if (result.rows.length === 0) {

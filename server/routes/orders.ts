@@ -59,7 +59,7 @@ router.post('/', [
       `INSERT INTO orders (order_number, user_id, user_name, user_email, total_amount, notes, updated_by)
        VALUES ($1, $2, $3, $4, $5, $6, $2)
        RETURNING id, order_number, total_amount, status, created_at`,
-      [orderNumber, user.id, user.username, `${user.username}@example.com`, totalAmount.toFixed(2), notes || null]
+      [orderNumber, user.id, user.username, user.email, totalAmount.toFixed(2), notes || null]
     );
 
     const order = orderResult.rows[0];
