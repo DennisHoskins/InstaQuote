@@ -48,3 +48,6 @@ client/.vite/
 
 # Misc
 todo.txt
+install.txt
+instructions.txt
+*.zip

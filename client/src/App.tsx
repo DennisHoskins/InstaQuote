@@ -15,6 +15,7 @@ import OrderConfirmation from './pages/OrderConfirmation';
 import Admin from './pages/admin/Admin';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminOrder from './pages/admin/AdminOrder';
+import Verify from './pages/admin/Verify';
 import Items from './pages/admin/Items';
 import SKUs from './pages/admin/SKUs';
 import SKU from './pages/admin/SKU';
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="sync-log/dropbox-crawl" element={<SyncLogDropboxCrawl />} />
             <Route path="sync-log/dropbox-links" element={<SyncLogDropboxLinks />} />
             <Route path="sync-log/sku-mapping" element={<SyncLogSkuMapping />} />
+            <Route path="verify" element={<Verify />} />
           </Route>
         </Route>
       </Routes>

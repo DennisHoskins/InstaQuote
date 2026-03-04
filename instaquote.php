@@ -9,6 +9,16 @@
 // Prevent direct access
 if (!defined('ABSPATH')) exit;
 
+add_action('init', function() {
+    if (strpos($_SERVER['REQUEST_URI'], '/wp-json/') !== false) {
+        error_log('=== INSTAQUOTE INIT DEBUG ===');
+        error_log('REQUEST_URI: ' . $_SERVER['REQUEST_URI']);
+        error_log('is_user_logged_in: ' . (is_user_logged_in() ? 'YES' : 'NO'));
+        error_log('current_user_id: ' . get_current_user_id());
+        error_log('cookies: ' . (empty($_COOKIE) ? 'NONE' : implode(', ', array_keys($_COOKIE))));
+    }
+}, 1);
+
 // API Proxy
 add_action('rest_api_init', function () {
     register_rest_route('instaquote/v1', '/nonce', array(
@@ -108,40 +118,6 @@ function instaquote_proxy_request($request) {
 function instaquote_app_shortcode() {
     $version = time();
     $plugin_url = plugin_dir_url(__FILE__);
-
-    // Enqueue scripts properly
-    wp_enqueue_script(
-        'instaquote-purify',
-        $plugin_url . 'purify.es-Bzr520pe.js',
-        array(),
-        $version,
-        true
-    );
-
-    wp_enqueue_script(
-        'instaquote-html2canvas',
-        $plugin_url . 'html2canvas.esm-DXEQVQnt.js',
-        array(),
-        $version,
-        true
-    );
-
-    wp_enqueue_script(
-        'instaquote-index-core',
-        $plugin_url . 'index.es-BtRmJq20.js',
-        array(),
-        $version,
-        true
-    );
-
-    wp_enqueue_script(
-        'instaquote-app',
-        $plugin_url . 'index-DSEglDFi.js',
-        array('wp-api'),
-        $version,
-        true
-    );
-
     ob_start();
     ?>
     <style>
@@ -152,9 +128,16 @@ function instaquote_app_shortcode() {
             min-height: 100vh;
         }        
     </style>
+    <script>
+        window.instaquoteNonce = "<?php echo wp_create_nonce('wp_rest'); ?>";
+    </script>
     <div id="instaquote-wrapper">
         <div id="root"></div>
     </div>
+    <script type="module" src="<?php echo $plugin_url; ?>purify.es-Bzr520pe.js?v=<?php echo $version; ?>"></script>
+    <script type="module" src="<?php echo $plugin_url; ?>html2canvas.esm-DXEQVQnt.js?v=<?php echo $version; ?>"></script>
+    <script type="module" src="<?php echo $plugin_url; ?>index.es-DzosunYE.js?v=<?php echo $version; ?>"></script>
+    <script type="module" src="<?php echo $plugin_url; ?>index-BYMBZRXH.js?v=<?php echo $version; ?>"></script>
     <?php
     return ob_get_clean();
 }

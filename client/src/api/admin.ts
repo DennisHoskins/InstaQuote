@@ -179,4 +179,12 @@ export const api = {
   deleteOrder: async (id: number) => {
     return apiClient.delete(`/admin/orders/${id}`);
   },
+
+  getVerifyCatalog: async () => {
+    return apiClient.get('/admin/verify/catalog');
+  },
+
+  getVerifyDestination: async (name: string) => {
+    return apiClient.get(`/admin/verify/destination?name=${encodeURIComponent(name)}`);
+  },
 };

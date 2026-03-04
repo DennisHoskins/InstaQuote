@@ -2,7 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Box, CircularProgress } from '@mui/material';
+import { Container, Box, CircularProgress, Button } from '@mui/material';
+import { Link } from 'react-router-dom';
 import PageHeader from '../../components/PageHeader';
 import SearchBar from '../../components/SearchBar';
 import ItemsTable from '../../components/admin/ItemsTable';
@@ -46,15 +47,26 @@ export default function AdminItems() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <PageHeader 
-        title="Inventory Items"
-        breadcrumbs={[
-          { label: 'Home', to: '/' },
-          { label: 'Admin', to: '/admin' },
-          { label: 'SKUs', to: '/admin/skus' }
-        ]}
-        showNavBar={false}
-      />
+    <PageHeader 
+      title="Inventory Items"
+      breadcrumbs={[
+        { label: 'Home', to: '/' },
+        { label: 'Admin', to: '/admin' },
+        { label: 'SKUs', to: '/admin/skus' }
+      ]}
+      showNavBar={false}
+      rightAction={
+        <Button
+          component={Link}
+          to='/admin/verify'
+          variant="text"
+          size="small"
+          sx={{ px: 2 }}
+        >
+          Verify Import
+        </Button>
+      }
+    />
 
       <SearchBar
         initialValue={search}

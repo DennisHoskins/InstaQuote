@@ -10,16 +10,30 @@ pg_config = {
     'dbname': 'instaquote',
     'user': 'instaquote_user',
     'password': '1nst4qu0t3',
-    'host': 'localhost',
-    'port': '5433'
+    'host': 'dennishoskins.com',
+    'port': '5432'
 }
 
-# Access database paths
-CBC_DB_PATH = r"T:\Costing - CBC.mdb"
+CBC_DB_PATH = r"D:\Shared Folders\Costing\Costing - CBC.mdb"
 DESTINATION_DBS = [
-    r"T:\Costing - Destination A-L.mdb",
-    r"T:\Costing - Destination M-Z.mdb",
+    r"D:\Shared Folders\Costing\Costing - Destination A-L.mdb",
+    r"D:\Shared Folders\Costing\Costing - Destination M-Z.mdb",
 ]
+
+#pg_config = {
+#    'dbname': 'instaquote',
+#    'user': 'postgres',
+#    'password': 'admin',
+#    'host': 'localhost',
+#    'port': '5432'
+#}
+
+# Access database paths
+#CBC_DB_PATH = r"T:\Costing - CBC.mdb"
+#DESTINATION_DBS = [
+#    r"T:\Costing - Destination A-L.mdb",
+#    r"T:\Costing - Destination M-Z.mdb",
+#]
 
 # Character substitutions
 CHAR_SUBSTITUTIONS = {
@@ -600,6 +614,34 @@ def log_sync_error(pg_cursor, sync_id, started_at, error_message):
         WHERE id = %s
     """, (completed_at, duration, error_message, sync_id))
 
+def import_metal_prices(pg_cursor):
+    """Import metal prices from Access to PostgreSQL"""
+    start_time = datetime.now()
+    print(f"[{start_time.strftime('%H:%M:%S')}] Importing metal prices...")
+    
+    cbc_conn_str = (
+        r"DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};"
+        f"DBQ={CBC_DB_PATH};"
+    )
+    cbc_conn = pyodbc.connect(cbc_conn_str)
+    cbc_cursor = cbc_conn.cursor()
+    
+    cbc_cursor.execute("SELECT [SS Price], [Gold Price] FROM [1 - Metal Prices]")
+    row = cbc_cursor.fetchone()
+    
+    if row:
+        pg_cursor.execute("""
+            INSERT INTO metal_prices (ss_price, gold_price, synced_at)
+            VALUES (%s, %s, %s)
+        """, (row[0], row[1], datetime.now()))
+        end_time = datetime.now()
+        duration = (end_time - start_time).total_seconds()
+        print(f"[{end_time.strftime('%H:%M:%S')}] Imported metal prices: SS=${row[0]}, Gold=${row[1]} ({duration:.2f}s)")
+    else:
+        print("No metal prices found")
+    
+    cbc_cursor.close()
+    cbc_conn.close()
 
 def sync_catalog(pg_cursor):
     """Sync catalog items from Access to PostgreSQL"""
@@ -616,6 +658,8 @@ def sync_catalog(pg_cursor):
     
     try:
         # Load catalog items from BOM Header
+        # Filter Destination = CBC to match the Access catalog report which joins to
+        # [Costing - BOM Pricing - CBC] (WHERE Destination = 'CBC') via INNER JOIN
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Loading BOM Header...")
         access_cursor.execute("""
             SELECT 
@@ -629,7 +673,8 @@ def sync_catalog(pg_cursor):
                 [6 - BOM Header].[LastUpdated]
             FROM [6 - BOM Header]
             WHERE 
-                [6 - BOM Header].[PO Cat] = 'Catalog' 
+                [6 - BOM Header].[PO Cat] = 'Catalog'
+                AND [6 - BOM Header].[Destination] = 'CBC'
                 AND ([6 - BOM Header].Inactive = False OR [6 - BOM Header].Inactive IS NULL)
             ORDER BY 
                 [6 - BOM Header].[Cat Page], 
@@ -724,6 +769,7 @@ def sync_catalog(pg_cursor):
                 continue
             
             # Clean destination
+            destination_raw = item['destination']
             destination = clean_destination(item['destination'])
             
             # Get category info
@@ -800,6 +846,7 @@ def sync_catalog(pg_cursor):
                 description,
                 category_group,
                 destination,
+                destination_raw,
                 round(total_ws, 2),
                 True,
                 item['inactive'] or False,
@@ -811,7 +858,7 @@ def sync_catalog(pg_cursor):
 
         execute_values(pg_cursor, """
             INSERT INTO inventory_items 
-            (item_code, sku, description, category, destination, total_ws_price, 
+            (item_code, sku, description, category, destination, destination_raw, total_ws_price, 
              is_catalog, inactive, cat_page, cat_page_order, last_updated)
             VALUES %s
         """, rows)
@@ -824,7 +871,6 @@ def sync_catalog(pg_cursor):
     finally:
         access_cursor.close()
         access_conn.close()
-
 
 def sync_destination_db(access_db_path, pg_cursor):
     """Sync destination items from a single Access database"""
@@ -938,6 +984,7 @@ def sync_destination_db(access_db_path, pg_cursor):
                 continue
             
             # Clean destination
+            destination_raw = item['destination']
             destination = clean_destination(item['destination'])
             if destination is None:
                 skipped += 1
@@ -1017,6 +1064,7 @@ def sync_destination_db(access_db_path, pg_cursor):
                 description,
                 category_group,
                 destination,
+                destination_raw,
                 round(total_ws, 2),
                 False,
                 item['inactive'] or False,
@@ -1026,7 +1074,7 @@ def sync_destination_db(access_db_path, pg_cursor):
 
         execute_values(pg_cursor, """
             INSERT INTO inventory_items 
-            (item_code, sku, description, category, destination, total_ws_price, 
+            (item_code, sku, description, category, destination, destination_raw, total_ws_price, 
              is_catalog, inactive, last_updated)
             VALUES %s
         """, rows)
@@ -1096,6 +1144,8 @@ if __name__ == '__main__':
     pg_conn.commit()
     
     try:
+        import_metal_prices(pg_cursor)
+
         total = 0
         if command == 'catalog':
             total = sync_catalog(pg_cursor)

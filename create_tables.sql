@@ -16,6 +16,7 @@ CREATE TABLE inventory_items (
     cat_page_order INTEGER,
     category VARCHAR(50),
     destination VARCHAR(50),
+    destination_raw VARCHAR(100),
     total_ws_price DECIMAL(10, 2) NOT NULL,
     is_catalog BOOLEAN NOT NULL,
     inactive BOOLEAN DEFAULT FALSE,
@@ -27,6 +28,7 @@ CREATE INDEX idx_item_code ON inventory_items(item_code);
 CREATE INDEX idx_sku ON inventory_items(sku);
 CREATE INDEX idx_is_catalog ON inventory_items(is_catalog);
 CREATE INDEX idx_destination ON inventory_items(destination);
+CREATE INDEX idx_destination_raw ON inventory_items(destination_raw);
 CREATE INDEX idx_category ON inventory_items(category);
 
 -- Dropbox files table

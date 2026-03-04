@@ -19,6 +19,7 @@ import adminSkusRouter from './routes/admin/skus.js';
 import adminSkuImagesRouter from './routes/admin/sku-images.js';
 import adminMetalsRouter from './routes/admin/metals.js';
 import adminOrdersRouter from './routes/admin/orders.js';
+import adminVerifyRouter from './routes/admin/verify.js';
 
 dotenv.config();
 
@@ -63,6 +64,7 @@ app.use('/api/admin/skus', requireAuth, requireAdmin, adminSkusRouter);
 app.use('/api/admin/sku-images', requireAuth, requireAdmin, adminSkuImagesRouter);
 app.use('/api/admin/metals', requireAuth, requireAdmin, adminMetalsRouter);
 app.use('/api/admin/orders', requireAuth, requireAdmin, adminOrdersRouter);
+app.use('/api/admin/verify', requireAuth, requireAdmin, adminVerifyRouter);
 
 // Don't start server if we're testing
 if (process.env.NODE_ENV !== 'test') {

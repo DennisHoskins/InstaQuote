@@ -163,21 +163,25 @@ router.get('/dashboard', async (req: Request, res: Response) => {
       access: {
         successRate: 0,
         averageSyncTime: 0,
+        totalRuns: 0,
         lastSync: null
       },
       dropbox_crawl: {
         successRate: 0,
         averageSyncTime: 0,
+        totalRuns: 0,
         lastSync: null
       },
       dropbox_links: {
         successRate: 0,
         averageSyncTime: 0,
+        totalRuns: 0,
         lastSync: null
       },
       sku_mapping: {
         successRate: 0,
         averageSyncTime: 0,
+        totalRuns: 0,
         lastSync: null
       }
     };
