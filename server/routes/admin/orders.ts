@@ -118,7 +118,7 @@ router.get('/:id', [
         ii.sku,
         CASE 
           WHEN df.shared_link IS NOT NULL THEN 
-            REPLACE(REPLACE(df.shared_link, '?dl=0', '?raw=1'), '?dl=1', '?raw=1')
+            REPLACE(REPLACE(df.shared_link, '&dl=0', '&raw=1'), '&dl=1', '&raw=1')
           ELSE NULL
         END as image_url
       FROM order_items oi
