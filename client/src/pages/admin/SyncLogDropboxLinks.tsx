@@ -6,7 +6,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
   Box,
-  CircularProgress,
   TextField,
   MenuItem,
   Select,
@@ -19,6 +18,7 @@ import PaginationControls from '../../components/PaginationControls';
 import SyncTriggerButton from '../../components/admin/SyncTriggerButton';
 import StatusMessage from '../../components/StatusMessage';
 import ErrorAlert from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function SyncLogDropboxLinks() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -247,11 +247,7 @@ export default function SyncLogDropboxLinks() {
   };
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {

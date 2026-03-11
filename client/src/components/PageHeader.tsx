@@ -5,7 +5,7 @@ import NavBar from './NavBar';
 
 interface PageHeaderProps {
   title: string | ReactNode;
-  breadcrumbs?: Array<{ label: string; to: string }>;
+  breadcrumbs?: Array<{ label: string; to?: string; onClick?: () => void }>;
   showNavBar?: boolean;
   rightAction?: ReactNode;
 }
@@ -25,14 +25,24 @@ export default function PageHeader({ title, breadcrumbs = [], showNavBar = true,
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, minWidth: 0 }}>
         {breadcrumbs.map((crumb, index) => (
-          <Button 
-            key={index}
-            variant="outlined"
-            component={Link}
-            to={crumb.to}
-          >
-            {crumb.label}
-          </Button>
+          crumb.to ? (
+            <Button 
+              key={index}
+              variant="outlined"
+              component={Link}
+              to={crumb.to}
+            >
+              {crumb.label}
+            </Button>
+          ) : (
+            <Button 
+              key={index}
+              variant="outlined"
+              onClick={crumb.onClick}
+            >
+              {crumb.label}
+            </Button>
+          )
         ))}
         <Typography 
           variant="h4"

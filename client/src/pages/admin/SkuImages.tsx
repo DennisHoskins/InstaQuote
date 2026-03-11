@@ -5,7 +5,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
   Box,
-  CircularProgress,
   FormControl,
   InputLabel,
   Select,
@@ -16,6 +15,7 @@ import SearchBar from '../../components/SearchBar';
 import SkuImagesTable from '../../components/admin/SkuImagesTable';
 import PaginationControls from '../../components/PaginationControls';
 import ErrorAlert from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function AdminSkuImages() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -73,11 +73,7 @@ export default function AdminSkuImages() {
   };
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {

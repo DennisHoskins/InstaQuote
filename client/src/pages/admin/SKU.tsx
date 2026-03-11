@@ -2,13 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Typography, Box, CircularProgress, Grid } from '@mui/material';
+import { Container, Typography, Box, Grid } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
 import Table from '../../components/Table';
 import type { Column } from '../../components/Table';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ErrorAlert from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function AdminSKU() {
   const { sku } = useParams<{ sku: string }>();
@@ -22,11 +23,7 @@ export default function AdminSKU() {
   });
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error || !data) {

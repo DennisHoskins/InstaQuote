@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Box, Grid, CircularProgress } from '@mui/material';
+import { Container, Grid } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
 import SyncStatusCard from '../../components/admin/SyncStatusCard';
 import MetalsPriceCard from '../../components/admin/MetalsPriceCard';
@@ -10,6 +10,7 @@ import ImagesStatsCard from '../../components/admin/ImagesStatsCard';
 import SkusStatsCard from '../../components/admin/SkusStatsCard';
 import DropboxSyncCard from '../../components/admin/DropboxSyncCard';
 import ErrorAlert from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function Admin() {
   const { isLoading: authLoading } = useAuth();
@@ -21,11 +22,7 @@ export default function Admin() {
   });
 
   if (authLoading || isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error || !data) {

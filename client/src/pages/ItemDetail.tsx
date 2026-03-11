@@ -4,14 +4,17 @@ import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useState } from 'react';
-import { Container, Typography, Box, CircularProgress, Grid, Button, Alert } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Container, Typography, Box, Grid, Button, Alert } from '@mui/material';
 import PageHeader from '../components/PageHeader';
 import ErrorAlert from '../components/ErrorAlert';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function ItemDetail() {
   const { itemCode } = useParams<{ itemCode: string }>();
   const { isAuthenticated } = useAuth();
   const { addItem } = useCart();
+  const navigate = useNavigate();
   const [showSuccess, setShowSuccess] = useState(false);
 
   const { data: item, isLoading, error } = useQuery({
@@ -37,11 +40,7 @@ export default function ItemDetail() {
   };
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error || !item) {
@@ -52,7 +51,7 @@ export default function ItemDetail() {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <PageHeader 
         title={item.item_code}
-        breadcrumbs={[{ label: 'Back', to: '..' }]}
+        breadcrumbs={[{ label: 'Back', onClick: () => navigate(-1) }]}
       />
 
       {showSuccess && (

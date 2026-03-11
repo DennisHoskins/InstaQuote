@@ -2,11 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Box, CircularProgress, TextField } from '@mui/material';
+import { Container, Box, TextField } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
 import MetalsTable from '../../components/admin/MetalsTable';
 import PaginationControls from '../../components/PaginationControls';
 import ErrorAlert from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function AdminMetals() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -44,11 +45,7 @@ export default function AdminMetals() {
   };
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {

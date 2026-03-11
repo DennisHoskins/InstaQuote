@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { sendErrorAlert } from '../services/email.js';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -26,6 +27,10 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
   // Verify API key
   const apiKey = req.headers['x-instaquote-key'] as string;
   if (!apiKey || apiKey !== process.env.INSTAQUOTE_API_KEY) {
+    sendErrorAlert(
+      'Invalid API Key',
+      `Invalid API key attempt\nIP: ${req.ip}\nPath: ${req.path}\nTime: ${new Date().toISOString()}`
+    ).catch(() => {});
     return res.status(401).json({ error: 'Invalid API key' });
   }
 
@@ -40,6 +45,10 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
     req.user = userData;
     next();
   } catch (error) {
+    sendErrorAlert(
+      'Invalid User Data',
+      `Failed to decode user data\nIP: ${req.ip}\nPath: ${req.path}\nTime: ${new Date().toISOString()}\nError: ${error}`
+    ).catch(() => {});
     return res.status(401).json({ error: 'Invalid user data' });
   }
 }

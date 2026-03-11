@@ -134,10 +134,7 @@ function instaquote_app_shortcode() {
     <div id="instaquote-wrapper">
         <div id="root"></div>
     </div>
-    <script type="module" src="<?php echo $plugin_url; ?>purify.es-Bzr520pe.js?v=<?php echo $version; ?>"></script>
-    <script type="module" src="<?php echo $plugin_url; ?>html2canvas.esm-DXEQVQnt.js?v=<?php echo $version; ?>"></script>
-    <script type="module" src="<?php echo $plugin_url; ?>index.es-DzosunYE.js?v=<?php echo $version; ?>"></script>
-    <script type="module" src="<?php echo $plugin_url; ?>index-BYMBZRXH.js?v=<?php echo $version; ?>"></script>
+    <script type="module" src="<?php echo $plugin_url; ?>index.js?v=<?php echo $version; ?>"></script>
     <?php
     return ob_get_clean();
 }

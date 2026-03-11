@@ -7,7 +7,6 @@ import {
   Container,
   Box,
   Button,
-  CircularProgress,
   TextField,
   MenuItem,
   Select,
@@ -20,6 +19,7 @@ import PaginationControls from '../../components/PaginationControls';
 import SyncTriggerButton from '../../components/admin/SyncTriggerButton';
 import StatusMessage from '../../components/StatusMessage';
 import ErrorAlert from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function SyncLogSkuMapping() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -60,14 +60,7 @@ export default function SyncLogSkuMapping() {
   });
 
   const deleteAllMutation = useMutation({
-    mutationFn: () => fetch(`http://localhost:3001/api/admin/sync/mappings/all`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_name: 'Dennis' }),
-    }).then(res => {
-      if (!res.ok) throw new Error('Failed to delete all mappings');
-      return res.json();
-    }),
+    mutationFn: () => api.deleteAllSkuImageMappings(),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin-sku-images'] });
       queryClient.invalidateQueries({ queryKey: ['admin-sku-images-stats'] });
@@ -250,11 +243,7 @@ export default function SyncLogSkuMapping() {
   };
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {

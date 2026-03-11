@@ -8,7 +8,6 @@ import {
   Typography,
   Box,
   Button,
-  CircularProgress,
   Grid,
   Divider,
   TextField,
@@ -23,6 +22,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Table from '../../components/Table';
 import ErrorAlert from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import type { Column } from '../../components/Table';
 import { exportOrderPdf } from '../../utils/exportPdf';
 
@@ -93,11 +93,7 @@ export default function AdminOrder() {
   };
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error || !order) {

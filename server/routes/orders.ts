@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { body, query, param, validationResult } from 'express-validator';
 import pool from '../db/connection.js';
 import type { AuthRequest } from '../middleware/auth.js';
+import { sendOrderConfirmation, sendOrderNotification } from '../services/email.js';
 
 const router = Router();
 
@@ -91,6 +92,38 @@ router.post('/', [
     }
 
     await client.query('COMMIT');
+
+    // Send order confirmation email
+    sendOrderConfirmation({
+      orderNumber: order.order_number,
+      customerName: user.username,
+      customerEmail: user.email,
+      items: items.map((item: any) => ({
+        item_code: item.item_code,
+        description: item.description ?? '',
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        line_total: item.unit_price * item.quantity,
+      })),
+      totalAmount,
+      notes: notes || undefined,
+    }).catch(err => console.error('Order confirmation email failed:', err));    
+
+    // Send order notification email
+    sendOrderNotification({
+      orderNumber: order.order_number,
+      customerName: user.username,
+      customerEmail: user.email,
+      items: items.map((item: any) => ({
+        item_code: item.item_code,
+        description: item.description ?? '',
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        line_total: item.unit_price * item.quantity,
+      })),
+      totalAmount,
+      notes: notes || undefined,
+    }).catch(err => console.error('Order notification email failed:', err));    
 
     res.json({
       order: {

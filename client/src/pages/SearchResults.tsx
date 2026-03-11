@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
-import { Container, Box, CircularProgress, Alert } from '@mui/material';
+import { Container, Alert } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import PageHeader from '../components/PageHeader';
 import SearchBar from '../components/SearchBar';
 import ItemsTable from '../components/ItemsTable';
 import PaginationControls from '../components/PaginationControls';
 import ErrorAlert from '../components/ErrorAlert';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function SearchResults() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,11 +42,7 @@ export default function SearchResults() {
   }
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {

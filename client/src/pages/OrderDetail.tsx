@@ -8,7 +8,6 @@ import {
   Typography,
   Box,
   Button,
-  CircularProgress,
   Paper,
   Grid,
   Alert,
@@ -19,6 +18,7 @@ import PageHeader from '../components/PageHeader';
 import ErrorAlert from '../components/ErrorAlert';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { exportOrderPdf } from '../utils/exportPdf';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
@@ -62,11 +62,7 @@ export default function OrderDetail() {
   };
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error || !data) {

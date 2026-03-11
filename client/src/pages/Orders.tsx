@@ -8,7 +8,6 @@ import {
   Typography,
   Box,
   Button,
-  CircularProgress,
   Chip,
   TextField,
   MenuItem,
@@ -23,6 +22,7 @@ import type { Column } from '../components/Table';
 import PaginationControls from '../components/PaginationControls';
 import ErrorAlert from '../components/ErrorAlert';
 import { exportOrdersListCsv } from '../utils/exportCsv';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Orders() {
   const navigate = useNavigate();
@@ -156,11 +156,7 @@ export default function Orders() {
   ];
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
@@ -196,12 +192,30 @@ export default function Orders() {
       {/* Filters */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <TextField
+          autoFocus
           placeholder="Search by order number..."
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
           onKeyPress={handleKeyPress}
           size="small"
-          sx={{ minWidth: 250 }}
+          sx={{
+            minWidth: 300,
+            flexGrow: 1,
+            '& .MuiOutlinedInput-root': {
+              '& input': {
+                boxSizing: 'content-box',
+                height: '1.4375em',
+                padding: '16.5px 14px',
+                border: 0,
+                background: 'none',
+              },
+              '& fieldset': {
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: 'rgba(0, 0, 0, 0.23)',
+              },
+            },
+          }}
         />
 
         <Button
@@ -217,6 +231,7 @@ export default function Orders() {
             value={status}
             label="Status"
             onChange={(e) => handleStatusChange(e.target.value)}
+            sx={{ height: '56px' }}
           >
             <MenuItem value="">All</MenuItem>
             <MenuItem value="pending">Pending</MenuItem>
@@ -232,7 +247,7 @@ export default function Orders() {
           value={startDate}
           onChange={(e) => handleDateChange('start_date', e.target.value)}
           slotProps={{ inputLabel: { shrink: true } }}
-          size="small"
+          sx={{ height: '56px' }}
         />
 
         <TextField
@@ -241,7 +256,7 @@ export default function Orders() {
           value={endDate}
           onChange={(e) => handleDateChange('end_date', e.target.value)}
           slotProps={{ inputLabel: { shrink: true } }}
-          size="small"
+          sx={{ height: '56px' }}
         />
 
         <Button

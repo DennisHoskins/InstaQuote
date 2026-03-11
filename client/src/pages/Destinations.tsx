@@ -3,10 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
-import { Container, Typography, Box, CircularProgress, Grid, Card, CardActionArea, CardContent } from '@mui/material';
+import { Container, Typography, Grid, Card, CardActionArea, CardContent } from '@mui/material';
 import PageHeader from '../components/PageHeader';
 import FilterInput from '../components/FilterInput';
 import ErrorAlert from '../components/ErrorAlert';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Destinations() {
   const [filterText, setFilterText] = useState('');
@@ -28,11 +29,7 @@ export default function Destinations() {
   }, [allDestinations, filterText]);
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {

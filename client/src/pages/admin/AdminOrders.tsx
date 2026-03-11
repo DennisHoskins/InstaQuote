@@ -8,7 +8,6 @@ import {
   Typography,
   Box,
   Button,
-  CircularProgress,
   Paper,
   Chip,
   TextField,
@@ -19,6 +18,7 @@ import {
 } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
 import DownloadIcon from '@mui/icons-material/Download';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import Table from '../../components/Table';
 import type { Column } from '../../components/Table';
 import ErrorAlert from '../../components/ErrorAlert';
@@ -159,11 +159,7 @@ export default function AdminOrders() {
   ];
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {

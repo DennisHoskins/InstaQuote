@@ -5,7 +5,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   Container,
   Box,
-  CircularProgress,
   TextField,
   MenuItem,
   Select,
@@ -16,6 +15,7 @@ import PageHeader from '../../components/PageHeader';
 import SyncLogTable from '../../components/admin/SyncLogTable';
 import PaginationControls from '../../components/PaginationControls';
 import ErrorAlert from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function SyncLogAccess() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -84,11 +84,7 @@ export default function SyncLogAccess() {
   };
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {

@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container, Box, Button, CircularProgress, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Container, Box, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import PageHeader from '../../components/PageHeader'; 
 import ImagesTable from '../../components/admin/ImagesTable';
 import SearchBar from '../../components/SearchBar';
 import PaginationControls from '../../components/PaginationControls';
 import ErrorAlert from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function AdminImages() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,11 +52,7 @@ export default function AdminImages() {
   };
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {

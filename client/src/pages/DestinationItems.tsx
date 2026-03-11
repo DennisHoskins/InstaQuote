@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, useParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
-import { Container, Box, CircularProgress } from '@mui/material';
+import { Container } from '@mui/material';
 import PageHeader from '../components/PageHeader';
 import SearchBar from '../components/SearchBar';
 import ItemsTable from '../components/ItemsTable';
 import PaginationControls from '../components/PaginationControls';
 import ErrorAlert from '../components/ErrorAlert';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function DestinationItems() {
   const { destination } = useParams<{ destination: string }>();
@@ -34,11 +35,7 @@ export default function DestinationItems() {
   };
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
