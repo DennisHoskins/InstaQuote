@@ -5,9 +5,10 @@ interface SearchBarProps {
   onSearch: (value: string) => void;
   placeholder?: string;
   initialValue?: string;
+  compact?: boolean;
 }
 
-export default function SearchBar({ onSearch, placeholder = 'Search...', initialValue = '' }: SearchBarProps) {
+export default function SearchBar({ onSearch, placeholder = 'Search...', initialValue = '', compact = false }: SearchBarProps) {
   const [value, setValue] = useState(initialValue);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -21,7 +22,7 @@ export default function SearchBar({ onSearch, placeholder = 'Search...', initial
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mb: 3, display: 'flex', gap: 2 }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ mb: compact ? 0 : 3, display: 'flex', gap: 2, alignItems: 'center' }}>
       <TextField
         fullWidth
         variant="outlined"
@@ -29,24 +30,9 @@ export default function SearchBar({ onSearch, placeholder = 'Search...', initial
         value={value}
         onChange={(e) => setValue(e.target.value)}
         inputRef={inputRef}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            '& input': {
-              boxSizing: 'content-box',
-              height: '1.4375em',
-              padding: '16.5px 14px',
-              border: 0,
-              background: 'none',
-            },
-            '& fieldset': {
-              borderWidth: '1px',
-              borderStyle: 'solid',
-              borderColor: 'rgba(0, 0, 0, 0.23)',
-            },
-          },
-        }}
+        slotProps={{ htmlInput: { style: { padding: '0 14px', height: compact ? '36px' : '54px' } } }}
       />
-      <Button variant="contained" type="submit" sx={{ px: 4 }}>
+      <Button variant="contained" type="submit" sx={{ px: compact ? undefined : 4, height: compact ? '37px' : '56px' }}>
         Search
       </Button>
     </Box>

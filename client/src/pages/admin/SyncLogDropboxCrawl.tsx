@@ -230,21 +230,40 @@ export default function SyncLogDropboxCrawl() {
         ]}
         showNavBar={false}
         rightAction={
-          <SyncTriggerButton
-            title="Crawl Dropbox"
-            buttonText="Crawl Dropbox"
-            requiresToken={true}
-            apiCall={(token) => api.triggerDropboxCrawl(token!)}
-            onSuccess={() => {
-              queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'dropbox_crawl'] });
-              queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-              queryClient.invalidateQueries({ queryKey: ['sync-status', 'dropbox_crawl'] });
-            }}
-            onStatusChange={handleSyncStatusChange}
-            disabled={isRunning}
-          />
+          <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+            <SyncTriggerButton
+              title="Crawl Dropbox"
+              buttonText="Crawl Dropbox"
+              requiresToken={true}
+              apiCall={(token) => api.triggerDropboxCrawl(token!)}
+              onSuccess={() => {
+                queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'dropbox_crawl'] });
+                queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+                queryClient.invalidateQueries({ queryKey: ['sync-status', 'dropbox_crawl'] });
+              }}
+              onStatusChange={handleSyncStatusChange}
+              disabled={isRunning}
+            />
+          </Box>
         }
       />
+
+      {/* Mobile actions */}
+      <Box sx={{ display: { xs: 'block', sm: 'none' }, mb: 4 }}>
+        <SyncTriggerButton
+          title="Crawl Dropbox"
+          buttonText="Crawl Dropbox"
+          requiresToken={true}
+          apiCall={(token) => api.triggerDropboxCrawl(token!)}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'dropbox_crawl'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+            queryClient.invalidateQueries({ queryKey: ['sync-status', 'dropbox_crawl'] });
+          }}
+          onStatusChange={handleSyncStatusChange}
+          disabled={isRunning}
+        />
+      </Box>      
 
       {statusMessage && (
         <StatusMessage
@@ -254,38 +273,47 @@ export default function SyncLogDropboxCrawl() {
         />
       )}
 
-      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={status || ''}
-            label="Status"
-            onChange={(e) => handleStatusChange(e.target.value)}
-            sx={{ height: '56px' }}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="success">Success</MenuItem>
-            <MenuItem value="failed">Failed</MenuItem>
-          </Select>
-        </FormControl>
+      <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
 
-        <TextField
-          label="Start Date"
-          type="date"
-          value={startDate}
-          onChange={(e) => handleDateChange('start_date', e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-          sx={{ height: '56px' }}
-        />
+        {/* Desktop */}
+        <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2, alignItems: 'center' }}>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Status</InputLabel>
+            <Select value={status || ''} label="Status" onChange={(e) => handleStatusChange(e.target.value)}>
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="success">Success</MenuItem>
+              <MenuItem value="failed">Failed</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField size="small" label="Start Date" type="date" value={startDate}
+            onChange={(e) => handleDateChange('start_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }} />
+          <TextField size="small" label="End Date" type="date" value={endDate}
+            onChange={(e) => handleDateChange('end_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }} />
+        </Box>
 
-        <TextField
-          label="End Date"
-          type="date"
-          value={endDate}
-          onChange={(e) => handleDateChange('end_date', e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-          sx={{ height: '56px' }}
-        />
+        {/* Mobile */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2 }}>
+          <TextField size="small" label="Start Date" type="date" value={startDate}
+            onChange={(e) => handleDateChange('start_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }} sx={{ flex: 1 }} />
+          <TextField size="small" label="End Date" type="date" value={endDate}
+            onChange={(e) => handleDateChange('end_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }} sx={{ flex: 1 }} />
+        </Box>
+
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2 }}>
+          <FormControl size="small" sx={{ flex: 1 }}>
+            <InputLabel>Status</InputLabel>
+            <Select value={status || ''} label="Status" onChange={(e) => handleStatusChange(e.target.value)}>
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="success">Success</MenuItem>
+              <MenuItem value="failed">Failed</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
       </Box>
 
       <SyncLogTable logs={data?.items || []} />

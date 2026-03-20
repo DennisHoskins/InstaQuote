@@ -69,42 +69,82 @@ export default function AdminImages() {
         ]}
         showNavBar={false}
         rightAction={
-          <Button
-            component={Link}
-            to='/admin/sku-images'
-            variant="text"
-            size="small"
-            sx={{ px: 2 }}
-          >
-            SKU-Image Matches
-          </Button>
+          <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+            <Button
+              component={Link}
+              to='/admin/sku-images'
+              variant="text"
+              size="small"
+            >
+              SKU-Image Matches
+            </Button>
+          </Box>
         }
       />
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <Box sx={{ flex: 1 }}>
-          <SearchBar
-            initialValue={search}
-            onSearch={handleSearch}
-            placeholder="Search by file name or folder path..."
-          />
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+
+        {/* Desktop: search + filter on one row */}
+        <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2, alignItems: 'center' }}>
+          <Box sx={{ flex: 1 }}>
+            <SearchBar
+              initialValue={search}
+              onSearch={handleSearch}
+              placeholder="Search by file name or folder path..."
+              compact
+            />
+          </Box>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>File Type</InputLabel>
+            <Select
+              value={fileType}
+              label="File Type"
+              onChange={(e) => handleFileTypeChange(e.target.value)}
+            >
+              <MenuItem value="">All</MenuItem>
+              {fileTypes?.map((type: string) => (
+                <MenuItem key={type} value={type}>
+                  {type.toUpperCase().replace('.', '')}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
 
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>File Type</InputLabel>
-          <Select
-            value={fileType}
-            label="File Type"
-            onChange={(e) => handleFileTypeChange(e.target.value)}
-            sx={{ height: '56px' }}
-          >
-            <MenuItem value="">All</MenuItem>
-            {fileTypes?.map((type: string) => (
-              <MenuItem key={type} value={type}>
-                {type.toUpperCase().replace('.', '')}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        {/* Mobile: search row */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2 }}>
+          <Box sx={{ flex: 1 }}>
+            <SearchBar
+              initialValue={search}
+              onSearch={handleSearch}
+              placeholder="Search by file name or folder path..."
+              compact
+            />
+          </Box>
+        </Box>
+
+        {/* Mobile: file type + link row */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2, alignItems: 'center' }}>
+          <FormControl size="small" sx={{ flex: 1 }}>
+            <InputLabel>File Type</InputLabel>
+            <Select
+              value={fileType}
+              label="File Type"
+              onChange={(e) => handleFileTypeChange(e.target.value)}
+            >
+              <MenuItem value="">All</MenuItem>
+              {fileTypes?.map((type: string) => (
+                <MenuItem key={type} value={type}>
+                  {type.toUpperCase().replace('.', '')}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button component={Link} to='/admin/sku-images' variant="text" size="small">
+            SKU Images
+          </Button>
+        </Box>
+
       </Box>
 
       <ImagesTable images={data?.items || []} />

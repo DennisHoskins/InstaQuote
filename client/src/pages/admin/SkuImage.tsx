@@ -55,16 +55,31 @@ export default function AdminSkuImage() {
         ]}
         showNavBar={false}
         rightAction={
-          <Button 
-            variant="contained"
-            color="error"
-            onClick={handleDelete}
-            disabled={deleteMutation.isPending}
-          >
-            {deleteMutation.isPending ? 'Deleting...' : 'Delete Mapping'}
-          </Button>
+          <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+            <Button 
+              variant="contained"
+              color="error"
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete Mapping'}
+            </Button>
+          </Box>
         }
       />
+
+      {/* Mobile actions */}
+      <Box sx={{ display: { xs: 'block', sm: 'none' }, mb: 2 }}>
+        <Button 
+          variant="contained"
+          color="error"
+          size="small"
+          onClick={handleDelete}
+          disabled={deleteMutation.isPending}
+        >
+          {deleteMutation.isPending ? 'Deleting...' : 'Delete Mapping'}
+        </Button>
+      </Box>
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>

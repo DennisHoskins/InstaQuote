@@ -63,23 +63,13 @@ export default function AdminMetals() {
         showNavBar={false}
       />
 
-      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
-        <TextField
-          label="Start Date"
-          type="date"
-          value={startDate}
+      <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
+        <TextField size="small" label="Start Date" type="date" value={startDate}
           onChange={(e) => handleDateChange('start_date', e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-          sx={{ height: '56px' }}
-        />
-        <TextField
-          label="End Date"
-          type="date"
-          value={endDate}
+          slotProps={{ inputLabel: { shrink: true } }} />
+        <TextField size="small" label="End Date" type="date" value={endDate}
           onChange={(e) => handleDateChange('end_date', e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-          sx={{ height: '56px' }}
-        />
+          slotProps={{ inputLabel: { shrink: true } }} />
       </Box>
 
       <MetalsTable prices={data?.items || []} />

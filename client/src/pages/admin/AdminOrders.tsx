@@ -176,86 +176,120 @@ export default function AdminOrders() {
         ]}
         showNavBar={false}
         rightAction={
-          <Button
-            variant="outlined"
-            startIcon={<DownloadIcon />}
-            onClick={handleExport}
-            disabled={!data || data.items.length === 0}
-          >
-            Export CSV
-          </Button>
+          <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+            <Button
+              variant="outlined"
+              startIcon={<DownloadIcon />}
+              onClick={handleExport}
+              disabled={!data || data.items.length === 0}
+            >
+              Export CSV
+            </Button>
+          </Box>
         }
       />
 
       {/* Filters */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <TextField
-          autoFocus
-          placeholder="Search by order number, customer, or email..."
-          value={localSearch}
-          onChange={(e) => setLocalSearch(e.target.value)}
-          onKeyPress={handleKeyPress}
-          size="small"
-          sx={{
-            minWidth: 300,
-            flexGrow: 1,
-            '& .MuiOutlinedInput-root': {
-              '& input': {
-                boxSizing: 'content-box',
-                height: '1.4375em',
-                padding: '16.5px 14px',
-                border: 0,
-                background: 'none',
-              },
-              '& fieldset': {
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                borderColor: 'rgba(0, 0, 0, 0.23)',
-              },
-            },
-          }}
-        />
+      <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
 
-        <Button
-          variant="contained"
-          onClick={handleSearch}
-        >
-          Search
-        </Button>
+        {/* Desktop: all controls on one row */}
+        <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2, alignItems: 'center' }}>
+          <TextField
+            autoFocus
+            placeholder="Search by order number, customer, or email..."
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            onKeyPress={handleKeyPress}
+            sx={{ flexGrow: 1 }}
+            slotProps={{ htmlInput: { style: { height: '33px', padding: '0 14px' } } }}
+          />
+          <Button variant="contained" onClick={handleSearch}>
+            Search
+          </Button>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Status</InputLabel>
+            <Select size="small" value={status} label="Status" onChange={(e) => handleStatusChange(e.target.value)}>
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="pending">Pending</MenuItem>
+              <MenuItem value="processing">Processing</MenuItem>
+              <MenuItem value="completed">Completed</MenuItem>
+              <MenuItem value="cancelled">Cancelled</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            size="small"
+            label="Start Date"
+            type="date"
+            value={startDate}
+            onChange={(e) => handleDateChange('start_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+          <TextField
+            size="small"
+            label="End Date"
+            type="date"
+            value={endDate}
+            onChange={(e) => handleDateChange('end_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        </Box>
 
-        <FormControl sx={{ minWidth: 100 }}>
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={status}
-            label="Status"
-            onChange={(e) => handleStatusChange(e.target.value)}
-            sx={{ height: '56px' }}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="pending">Pending</MenuItem>
-            <MenuItem value="processing">Processing</MenuItem>
-            <MenuItem value="completed">Completed</MenuItem>
-            <MenuItem value="cancelled">Cancelled</MenuItem>
-          </Select>
-        </FormControl>
+        {/* Mobile: search row */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2, alignItems: 'center' }}>
+          <TextField
+            autoFocus
+            placeholder="Search by order number, customer, or email..."
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            onKeyPress={handleKeyPress}
+            sx={{ flexGrow: 1 }}
+            slotProps={{ htmlInput: { style: { height: '33px' } } }}
+          />
+          <Button variant="contained" onClick={handleSearch}>
+            Search
+          </Button>
+        </Box>
 
-        <TextField
-          label="Start Date"
-          type="date"
-          value={startDate}
-          onChange={(e) => handleDateChange('start_date', e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-          sx={{ height: '56px' }}
-        />
+        {/* Mobile: dates row */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2 }}>
+          <TextField
+            size="small"
+            label="Start Date"
+            type="date"
+            value={startDate}
+            onChange={(e) => handleDateChange('start_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+            sx={{ flex: 1 }}
+          />
+          <TextField
+            size="small"
+            label="End Date"
+            type="date"
+            value={endDate}
+            onChange={(e) => handleDateChange('end_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+            sx={{ flex: 1 }}
+          />
+        </Box>
 
-        <TextField
-          label="End Date"
-          type="date"
-          value={endDate}
-          onChange={(e) => handleDateChange('end_date', e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-          sx={{ height: '56px' }}
-        />
+        {/* Mobile: status + export row */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2, alignItems: 'center' }}>
+          <FormControl size="small" sx={{ flex: 1 }}>
+            <InputLabel>Status</InputLabel>
+            <Select size="small" value={status} label="Status" onChange={(e) => handleStatusChange(e.target.value)}>
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="pending">Pending</MenuItem>
+              <MenuItem value="processing">Processing</MenuItem>
+              <MenuItem value="completed">Completed</MenuItem>
+              <MenuItem value="cancelled">Cancelled</MenuItem>
+            </Select>
+          </FormControl>
+          <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleExport}
+            disabled={!data || data.items.length === 0}>
+            Export
+          </Button>
+        </Box>
+
       </Box>
 
       {!data || data.items.length === 0 ? (

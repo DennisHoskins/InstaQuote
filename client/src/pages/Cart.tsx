@@ -104,6 +104,7 @@ export default function Cart() {
                   p: 2,
                   display: 'flex',
                   gap: 2,
+                  flexWrap: { xs: 'wrap', sm: 'nowrap' },
                   borderBottom: '1px solid',
                   borderColor: 'divider',
                   '&:last-child': { borderBottom: 'none' },
@@ -166,7 +167,13 @@ export default function Cart() {
                 </Box>
 
                 {/* Quantity & Price */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'flex-end', 
+                  gap: 1,
+                  width: { xs: '100%', sm: 'auto' },
+                }}>
                   <Typography variant="h6" sx={{ flexGrow: 1 }}>
                     ${(Number(item.unit_price) * item.quantity).toFixed(2)}
                   </Typography>

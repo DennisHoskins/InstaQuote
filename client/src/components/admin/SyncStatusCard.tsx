@@ -43,11 +43,11 @@ export default function SyncStatusCard({
       >
         <CardContent>
           <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid size={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Box sx={{ 
                 position: 'relative', 
                 width: '100%', 
-                height: 150,
+                height: { xs: 120, sm: 150 },
                 backgroundColor: '#f8f8f8',
                 borderRadius: 1,
                 display: 'flex',
@@ -60,8 +60,8 @@ export default function SyncStatusCard({
                   valueMax={100}
                   startAngle={0}
                   endAngle={360}
-                  width={150}
-                  height={150}
+                  width={120}
+                  height={120}
                 >
                   <GaugeReferenceArc />
                   <GaugeValueArc 
@@ -99,7 +99,7 @@ export default function SyncStatusCard({
               </Box>
             </Grid>
 
-            <Grid size={8}>
+            <Grid size={{ xs: 12, sm: 8 }}>
               <Box>
                 <Typography variant="h5" color="text.secondary">
                   {title}

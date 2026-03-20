@@ -192,7 +192,7 @@ export default function Orders() {
       <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
 
         {/* Search row - same on all devices */}
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <TextField
             autoFocus
             placeholder="Search by order number..."
@@ -200,17 +200,18 @@ export default function Orders() {
             onChange={(e) => setLocalSearch(e.target.value)}
             onKeyPress={handleKeyPress}
             sx={{ flexGrow: 1 }}
+            slotProps={{ htmlInput: { style: { height: '33px', padding: '0 14px' } } }}
           />
-          <Button variant="contained" onClick={handleSearch} sx={{ height: '56px' }}>
+          <Button variant="contained" onClick={handleSearch}>
             Search
           </Button>
         </Box>
 
         {/* Desktop: status + dates + export on one row */}
         <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2, alignItems: 'center' }}>
-          <FormControl sx={{ minWidth: 150 }}>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Status</InputLabel>
-            <Select value={status} label="Status" onChange={(e) => handleStatusChange(e.target.value)}>
+            <Select size="small" value={status} label="Status" onChange={(e) => handleStatusChange(e.target.value)}>
               <MenuItem value="">All</MenuItem>
               <MenuItem value="pending">Pending</MenuItem>
               <MenuItem value="processing">Processing</MenuItem>
@@ -219,6 +220,7 @@ export default function Orders() {
             </Select>
           </FormControl>
           <TextField
+            size="small"
             label="Start Date"
             type="date"
             value={startDate}
@@ -226,6 +228,7 @@ export default function Orders() {
             slotProps={{ inputLabel: { shrink: true } }}
           />
           <TextField
+            size="small"
             label="End Date"
             type="date"
             value={endDate}
@@ -240,6 +243,7 @@ export default function Orders() {
         {/* Mobile: dates row */}
         <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2 }}>
           <TextField
+            size="small"
             label="Start Date"
             type="date"
             value={startDate}
@@ -248,6 +252,7 @@ export default function Orders() {
             sx={{ flex: 1 }}
           />
           <TextField
+            size="small"
             label="End Date"
             type="date"
             value={endDate}
@@ -259,9 +264,9 @@ export default function Orders() {
 
         {/* Mobile: status + export row */}
         <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2, alignItems: 'center' }}>
-          <FormControl sx={{ flex: 1 }}>
+          <FormControl size="small" sx={{ flex: 1 }}>
             <InputLabel>Status</InputLabel>
-            <Select value={status} label="Status" onChange={(e) => handleStatusChange(e.target.value)}>
+            <Select size="small" value={status} label="Status" onChange={(e) => handleStatusChange(e.target.value)}>
               <MenuItem value="">All</MenuItem>
               <MenuItem value="pending">Pending</MenuItem>
               <MenuItem value="processing">Processing</MenuItem>

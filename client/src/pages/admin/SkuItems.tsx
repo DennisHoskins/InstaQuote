@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/admin';
 import { useAuth } from '../../contexts/AuthContext';
-import { Container } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import PageHeader from '../../components/PageHeader';
 import SearchBar from '../../components/SearchBar';
 import Table from '../../components/Table';
@@ -73,11 +73,14 @@ export default function AdminSkuItems() {
         showNavBar={false}
       />
 
-      <SearchBar
-        initialValue={search}
-        onSearch={handleSearch}
-        placeholder="Search by item code or SKU..."
-      />
+      <Box sx={{ mb: 2 }}>
+        <SearchBar
+          initialValue={search}
+          onSearch={handleSearch}
+          placeholder="Search by item code or SKU..."
+          compact
+        />
+      </Box>
 
       <Table
         columns={columns}

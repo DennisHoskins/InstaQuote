@@ -64,7 +64,7 @@ export default function AdminSKUs() {
         ]}
         showNavBar={false}
         rightAction={
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2 }}>
             <Button
               component={Link}
               to='/admin/sku-items'
@@ -87,28 +87,66 @@ export default function AdminSKUs() {
         }
       />
 
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <Box sx={{ flex: 1 }}>
-          <SearchBar
-            initialValue={search}
-            onSearch={handleSearch}
-            placeholder="Search by SKU..."
-          />
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+
+        {/* Desktop: search + filter on one row */}
+        <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2, alignItems: 'center' }}>
+          <Box sx={{ flex: 1 }}>
+            <SearchBar
+              initialValue={search}
+              onSearch={handleSearch}
+              placeholder="Search by SKU..."
+              compact
+            />
+          </Box>
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Image Status</InputLabel>
+            <Select
+              value={hasImage || ''}
+              label="Image Status"
+              onChange={(e) => handleFilterChange(e.target.value)}
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="true">With Images</MenuItem>
+              <MenuItem value="false">Without Images</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
 
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel>Image Status</InputLabel>
-          <Select
-            value={hasImage || ''}
-            label="Image Status"
-            onChange={(e) => handleFilterChange(e.target.value)}
-            sx={{ height: '56px' }}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="true">With Images</MenuItem>
-            <MenuItem value="false">Without Images</MenuItem>
-          </Select>
-        </FormControl>
+        {/* Mobile: search row */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2 }}>
+          <Box sx={{ flex: 1 }}>
+            <SearchBar
+              initialValue={search}
+              onSearch={handleSearch}
+              placeholder="Search by SKU..."
+              compact
+            />
+          </Box>
+        </Box>
+
+        {/* Mobile: image status + links row */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2, alignItems: 'center' }}>
+          <FormControl size="small" sx={{ flex: 1 }}>
+            <InputLabel>Image Status</InputLabel>
+            <Select
+              value={hasImage || ''}
+              label="Image Status"
+              onChange={(e) => handleFilterChange(e.target.value)}
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="true">With Images</MenuItem>
+              <MenuItem value="false">Without Images</MenuItem>
+            </Select>
+          </FormControl>
+          <Button component={Link} to='/admin/sku-items' variant="text" size="small">
+            SKU Items
+          </Button>
+          <Button component={Link} to='/admin/items' variant="text" size="small">
+            Items
+          </Button>
+        </Box>
+
       </Box>
 
       <SkusTable skus={data?.items || []} />

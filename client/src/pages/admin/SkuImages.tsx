@@ -92,42 +92,69 @@ export default function AdminSkuImages() {
         showNavBar={false}
       />
 
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <Box sx={{ flex: 1 }}>
-          <SearchBar
-            initialValue={search}
-            onSearch={handleSearch}
-            placeholder="Search by SKU..."
-          />
+      {/* Filters */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+
+        {/* Desktop */}
+        <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2, alignItems: 'center' }}>
+          <Box sx={{ flex: 1 }}>
+            <SearchBar
+              initialValue={search}
+              onSearch={handleSearch}
+              placeholder="Search by SKU..."
+              compact
+            />
+          </Box>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Match Type</InputLabel>
+            <Select value={matchType} label="Match Type" onChange={(e) => handleMatchTypeChange(e.target.value)}>
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="exact">Exact</MenuItem>
+              <MenuItem value="contains">Contains</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Primary</InputLabel>
+            <Select value={isPrimary || ''} label="Primary" onChange={(e) => handlePrimaryChange(e.target.value)}>
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="true">Primary Only</MenuItem>
+              <MenuItem value="false">Non-Primary</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
 
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Match Type</InputLabel>
-          <Select
-            value={matchType}
-            label="Match Type"
-            onChange={(e) => handleMatchTypeChange(e.target.value)}
-            sx={{ height: '56px' }}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="exact">Exact</MenuItem>
-            <MenuItem value="contains">Contains</MenuItem>
-          </Select>
-        </FormControl>
+        {/* Mobile: search */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' } }}>
+          <Box sx={{ flex: 1 }}>
+            <SearchBar
+              initialValue={search}
+              onSearch={handleSearch}
+              placeholder="Search by SKU..."
+              compact
+            />
+          </Box>
+        </Box>
 
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Primary</InputLabel>
-          <Select
-            value={isPrimary || ''}
-            label="Primary"
-            onChange={(e) => handlePrimaryChange(e.target.value)}
-            sx={{ height: '56px' }}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="true">Primary Only</MenuItem>
-            <MenuItem value="false">Non-Primary</MenuItem>
-          </Select>
-        </FormControl>
+        {/* Mobile: filters */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2 }}>
+          <FormControl size="small" sx={{ flex: 1 }}>
+            <InputLabel>Match Type</InputLabel>
+            <Select value={matchType} label="Match Type" onChange={(e) => handleMatchTypeChange(e.target.value)}>
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="exact">Exact</MenuItem>
+              <MenuItem value="contains">Contains</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ flex: 1 }}>
+            <InputLabel>Primary</InputLabel>
+            <Select value={isPrimary || ''} label="Primary" onChange={(e) => handlePrimaryChange(e.target.value)}>
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="true">Primary Only</MenuItem>
+              <MenuItem value="false">Non-Primary</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
       </Box>
 
       <SkuImagesTable mappings={data?.items || []} />
