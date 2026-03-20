@@ -31,6 +31,15 @@ CREATE INDEX idx_destination ON inventory_items(destination);
 CREATE INDEX idx_destination_raw ON inventory_items(destination_raw);
 CREATE INDEX idx_category ON inventory_items(category);
 
+CREATE TABLE item_sku_map (
+    item_code VARCHAR(50) PRIMARY KEY,
+    sku VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_item_sku_map_sku ON item_sku_map(sku);
+
 -- Dropbox files table
 CREATE TABLE dropbox_files (
     id SERIAL PRIMARY KEY,

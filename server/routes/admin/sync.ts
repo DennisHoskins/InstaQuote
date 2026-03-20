@@ -1,8 +1,9 @@
 import { Router, Response } from 'express';
 import { AuthRequest } from '../../middleware/auth.js';
-import { body, param, validationResult } from 'express-validator';
+import { body, param } from 'express-validator';
 import { crawlDropbox, createLinks, getMissingLinksCount } from '../../services/dropbox.js';
-import { generateMappings, deleteAllMappings } from '../../services/sku-mapping.js';
+import { mapSkus } from '../../services/sku-map.js';
+import { generateMappings, deleteAllMappings } from '../../services/image-map.js';
 import { startSync, completeSync, failSync } from '../../services/sync-log.js';
 import pool from '../../db/connection.js';
 
@@ -27,7 +28,7 @@ router.get('/status/:syncType', async (req: AuthRequest, res: Response) => {
       : req.params.syncType;
     
     // Validate sync type
-    const validTypes = ['dropbox_crawl', 'dropbox_links', 'sku_mapping'];
+    const validTypes = ['dropbox_crawl', 'dropbox_links', 'image_map', 'sku_map'];
     if (!validTypes.includes(syncType)) {
       return res.status(400).json({ error: 'Invalid sync type' });
     }
@@ -139,14 +140,75 @@ router.post('/create-links', [
   }
 });
 
-// Generate SKU image mappings
-router.post('/generate-mappings', async (req: AuthRequest, res: Response) => {
+// Delete all SKU mappings
+router.delete('/sku-map/all', async (req: AuthRequest, res: Response) => {
   const user_name = req.user!.username;
   const startedAt = new Date();
   let syncId: number | null = null;
 
   try {
-    syncId = await startSync(user_name, 'sku_mapping');
+    syncId = await startSync(user_name, 'sku_map');
+    const result = await pool.query('DELETE FROM item_sku_map RETURNING item_code');
+    const deleted = result.rowCount || 0;
+
+    await pool.query(
+      `UPDATE sync_log
+       SET status = 'success',
+           completed_at = NOW(),
+           duration_seconds = EXTRACT(EPOCH FROM (NOW() - $1)),
+           items_synced = $2,
+           error_message = 'Deleted all SKU mappings'
+       WHERE id = $3`,
+      [startedAt, -deleted, syncId]
+    );
+
+    res.json({ deleted: true, mappingsDeleted: deleted });
+  } catch (error: any) {
+    console.error('Error deleting SKU mappings:', error);
+    if (syncId) {
+      await failSync(syncId, startedAt, error.message);
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Map SKUs
+router.post('/map-skus', async (req: AuthRequest, res: Response) => {
+  const user_name = req.user!.username;
+  const startedAt = new Date();
+  let syncId: number | null = null;
+
+  try {
+    syncId = await startSync(user_name, 'sku_map');
+    const result = await mapSkus();
+    await completeSync(syncId, startedAt, result.mapped);
+
+    res.json({
+      message: 'SKU mapping completed successfully',
+      status: 'success',
+      mapped: result.mapped,
+      skipped: result.skipped
+    });
+  } catch (error: any) {
+    console.error('Error during SKU mapping:', error);
+    if (syncId) {
+      await failSync(syncId, startedAt, error.message);
+    }
+    res.status(500).json({
+      error: 'SKU mapping failed',
+      message: error.message
+    });
+  }
+});
+
+// Generate SKU image mappings
+router.post('/map-images', async (req: AuthRequest, res: Response) => {
+  const user_name = req.user!.username;
+  const startedAt = new Date();
+  let syncId: number | null = null;
+
+  try {
+    syncId = await startSync(user_name, 'image_map');
     const result = await generateMappings();
     await completeSync(syncId, startedAt, result.mappingsCreated);
     
@@ -175,7 +237,7 @@ router.delete('/mappings/all', async (req: AuthRequest, res: Response) => {
   let syncId: number | null = null;
 
   try {
-    syncId = await startSync(user_name, 'sku_mapping');
+    syncId = await startSync(user_name, 'image_map');
     const result = await deleteAllMappings();
     
     // Log as negative number to indicate deletion

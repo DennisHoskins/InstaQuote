@@ -64,15 +64,26 @@ export default function AdminSKUs() {
         ]}
         showNavBar={false}
         rightAction={
-          <Button
-            component={Link}
-            to='/admin/items'
-            variant="text"
-            size="small"
-            sx={{ px: 2 }}
-          >
-            Inventory Items
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              component={Link}
+              to='/admin/sku-items'
+              variant="text"
+              size="small"
+              sx={{ px: 2 }}
+            >
+              SKU Items
+            </Button>
+            <Button
+              component={Link}
+              to='/admin/items'
+              variant="text"
+              size="small"
+              sx={{ px: 2 }}
+            >
+              Inventory Items
+            </Button>
+          </Box>
         }
       />
 

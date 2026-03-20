@@ -52,7 +52,8 @@ export default function PageHeader({ title, breadcrumbs = [], showNavBar = true,
             whiteSpace: 'nowrap',
             m: 0,
             lineHeight: 1,
-            paddingBottom: '0 !important', 
+            paddingBottom: '0 !important',
+            fontSize: { xs: '1.25rem', sm: '2.125rem' },
           }}
         >
           {title}

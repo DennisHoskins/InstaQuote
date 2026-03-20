@@ -29,7 +29,8 @@ router.get('/', [
           ii.item_code as item_code_key,
           df.shared_link
         FROM inventory_items ii
-        JOIN sku_images si ON si.sku = ii.sku AND si.is_primary = true
+        JOIN item_sku_map m ON m.item_code = ii.item_code
+        JOIN sku_images si ON si.sku = m.sku AND si.is_primary = true
         JOIN dropbox_files df ON df.id = si.image_id
         ORDER BY ii.item_code
       )

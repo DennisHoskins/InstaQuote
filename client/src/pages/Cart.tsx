@@ -10,9 +10,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function Cart() {
   const navigate = useNavigate();
-  const { items, updateQuantity, removeItem, clearCart, total, itemCount } = useCart();
+  const { items, updateQuantity, removeItem, refreshPrices, clearCart, total, itemCount } = useCart();
   const { user } = useAuth();
   const [notes, setNotes] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   const submitOrderMutation = useMutation({
     mutationFn: api.submitOrder,
@@ -79,6 +80,12 @@ export default function Cart() {
       </Container>
     );
   }
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refreshPrices();
+    setRefreshing(false);
+  };  
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -237,6 +244,16 @@ export default function Cart() {
                 Failed to submit order. Please try again.
               </Alert>
             )}
+
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={handleRefresh}
+              disabled={refreshing}
+              sx={{ mb: 2 }}
+            >
+              {refreshing ? 'Refreshing...' : 'Refresh Prices'}
+            </Button>
 
             <Button
               variant="contained"

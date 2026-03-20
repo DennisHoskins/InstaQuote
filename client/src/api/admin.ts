@@ -15,7 +15,7 @@ export const api = {
     return apiClient.get('/admin/dashboard');
   },
 
-  getSyncLog: async (page: number, limit: number, type?: 'access' | 'dropbox' | 'dropbox_crawl' | 'dropbox_links' | 'sku_mapping', search?: string, status?: 'success' | 'failed', startDate?: string, endDate?: string) => {
+  getSyncLog: async (page: number, limit: number, type?: 'access' | 'dropbox' | 'dropbox_crawl' | 'dropbox_links' | 'sku_map' | 'image_map', search?: string, status?: 'success' | 'failed', startDate?: string, endDate?: string) => {
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
@@ -93,6 +93,15 @@ export const api = {
     return apiClient.get(`/admin/images/${id}`);
   },
 
+  getSkuItems: async (page: number, limit: number, search?: string) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    if (search) params.append('search', search);
+    return apiClient.get(`/admin/sku-items?${params}`);
+  },
+
   getSkuImagesStats: async () => {
     return apiClient.get('/admin/sku-images/stats');
   },
@@ -139,8 +148,16 @@ export const api = {
     return apiClient.post('/admin/sync/create-links', { dropbox_token: dropboxToken });
   },
 
-  triggerGenerateMappings: async () => {
-    return apiClient.post('/admin/sync/generate-mappings');
+  triggerMapSkus: async () => {
+    return apiClient.post('/admin/sync/map-skus');
+  },
+  
+  deleteAllSkuMappings: async () => {
+    return apiClient.delete('/admin/sync/sku-map/all');
+  },  
+
+  triggerMapImages: async () => {
+    return apiClient.post('/admin/sync/map-images');
   },
 
   deleteAllSkuImageMappings: async () => {

@@ -127,10 +127,8 @@ router.get('/stats', async (req: Request, res: Response) => {
 
     const skusWithoutQuery = `
       SELECT COUNT(DISTINCT sku) as skus_without_images
-      FROM inventory_items
-      WHERE sku IS NOT NULL 
-        AND sku != ''
-        AND sku NOT IN (SELECT DISTINCT sku FROM sku_images)
+      FROM item_sku_map
+      WHERE sku NOT IN (SELECT DISTINCT sku FROM sku_images)
     `;
 
     const multipleImagesQuery = `

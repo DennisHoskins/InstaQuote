@@ -5,7 +5,7 @@ async function cleanupOrphanedMappings(): Promise<number> {
   
   const result = await pool.query(
     `DELETE FROM sku_images
-     WHERE sku NOT IN (SELECT DISTINCT sku FROM inventory_items WHERE sku IS NOT NULL)
+     WHERE sku NOT IN (SELECT DISTINCT sku FROM item_sku_map)
         OR image_id NOT IN (SELECT id FROM dropbox_files)
      RETURNING id`
   );
@@ -20,11 +20,10 @@ export async function generateMappings(): Promise<{ mappingsCreated: number; orp
 
   const orphansDeleted = await cleanupOrphanedMappings();
 
-  // Get all unmatched SKUs
+  // Get all unmatched SKUs from item_sku_map
   const skuResult = await pool.query(`
-    SELECT DISTINCT sku FROM inventory_items
-    WHERE sku IS NOT NULL AND sku != '' AND LENGTH(sku) >= 3
-    AND sku NOT IN (SELECT DISTINCT sku FROM sku_images)
+    SELECT DISTINCT sku FROM item_sku_map
+    WHERE sku NOT IN (SELECT DISTINCT sku FROM sku_images)
   `);
 
   const skus: string[] = skuResult.rows.map((r: any) => r.sku);
@@ -39,29 +38,24 @@ export async function generateMappings(): Promise<{ mappingsCreated: number; orp
     const result = await pool.query(`
       INSERT INTO sku_images (sku, image_id, match_type, is_primary, confidence)
       SELECT DISTINCT
-        i.sku,
+        m.sku,
         df.id,
         CASE
-          WHEN UPPER(df.file_name_no_ext) = UPPER(i.sku) THEN 'exact'
+          WHEN UPPER(df.file_name_no_ext) = UPPER(m.sku) THEN 'exact'
           ELSE 'contains'
         END as match_type,
-        CASE
-          WHEN df.file_extension IN ('.jpg', '.jpeg', '.png', '.gif')
-            AND (UPPER(df.file_name_no_ext) LIKE '%6MM%' 
-              OR UPPER(df.file_name_no_ext) LIKE '%6 MM%')
-          THEN TRUE
-          ELSE FALSE
-        END as is_primary,
+        FALSE as is_primary,
         CASE
           WHEN df.file_extension NOT IN ('.jpg', '.jpeg', '.png', '.gif') THEN 0.3
-          WHEN UPPER(df.file_name_no_ext) = UPPER(i.sku) THEN 1.0
-          WHEN UPPER(df.file_name_no_ext) LIKE '%6MM%' OR UPPER(df.file_name_no_ext) LIKE '%6 MM%' THEN 0.8
+          WHEN UPPER(df.file_name_no_ext) = UPPER(m.sku) THEN 1.0
+          WHEN UPPER(df.file_name_no_ext) LIKE '%6MM%' OR UPPER(df.file_name_no_ext) LIKE '%6 MM%' THEN 0.9
+          WHEN df.file_name_no_ext ~ ('^' || m.sku || '6') THEN 0.8
           ELSE 0.5
         END as confidence
-      FROM inventory_items i
+      FROM item_sku_map m
       JOIN dropbox_files df ON 
-        UPPER(df.file_name_no_ext) ~ ('(^|[^A-Z0-9])' || UPPER(i.sku) || '([^A-Z0-9]|$)')
-      WHERE i.sku = ANY($1)
+        UPPER(df.file_name_no_ext) ~ ('(^|[^A-Z0-9])' || UPPER(m.sku) || '([^A-Z]|$)')
+      WHERE m.sku = ANY($1)
       ON CONFLICT (sku, image_id) DO NOTHING
     `, [batch]);
 
@@ -72,20 +66,20 @@ export async function generateMappings(): Promise<{ mappingsCreated: number; orp
     }
   }
 
-  console.log(`[${new Date().toLocaleTimeString()}] Setting primary images for new mappings...`);
+  console.log(`[${new Date().toLocaleTimeString()}] Setting primary images...`);
   await pool.query(`
-    UPDATE sku_images si1
+    UPDATE sku_images si
     SET is_primary = TRUE
-    WHERE id IN (
-      SELECT DISTINCT ON (sku) id
-      FROM sku_images
-      WHERE sku IN (
-        SELECT sku
-        FROM sku_images
-        GROUP BY sku
-        HAVING COUNT(*) > 1 AND SUM(CASE WHEN is_primary THEN 1 ELSE 0 END) = 0
-      )
-      ORDER BY sku, confidence DESC, id
+    WHERE si.id IN (
+      SELECT DISTINCT ON (si2.sku) si2.id
+      FROM sku_images si2
+      JOIN dropbox_files df ON df.id = si2.image_id
+      WHERE df.file_extension IN ('.jpg', '.jpeg', '.png', '.gif')
+      ORDER BY si2.sku,
+        CASE WHEN UPPER(df.file_name_no_ext) LIKE '%6MM%' OR UPPER(df.file_name_no_ext) LIKE '%6 MM%' THEN 0 ELSE 1 END,
+        CASE WHEN df.file_name_no_ext ~ ('^' || si2.sku || '6') THEN 0 ELSE 1 END,
+        si2.confidence DESC,
+        si2.id
     )
   `);
 

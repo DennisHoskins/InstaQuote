@@ -37,7 +37,6 @@ export default function Orders() {
 
   const [localSearch, setLocalSearch] = useState(search);
 
-  // Sync local search with URL param
   useEffect(() => {
     setLocalSearch(search);
   }, [search]);
@@ -190,82 +189,91 @@ export default function Orders() {
       />
 
       {/* Filters */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <TextField
-          autoFocus
-          placeholder="Search by order number..."
-          value={localSearch}
-          onChange={(e) => setLocalSearch(e.target.value)}
-          onKeyPress={handleKeyPress}
-          size="small"
-          sx={{
-            minWidth: 300,
-            flexGrow: 1,
-            '& .MuiOutlinedInput-root': {
-              '& input': {
-                boxSizing: 'content-box',
-                height: '1.4375em',
-                padding: '16.5px 14px',
-                border: 0,
-                background: 'none',
-              },
-              '& fieldset': {
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                borderColor: 'rgba(0, 0, 0, 0.23)',
-              },
-            },
-          }}
-        />
+      <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
 
-        <Button
-          variant="contained"
-          onClick={handleSearch}
-        >
-          Search
-        </Button>
+        {/* Search row - same on all devices */}
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <TextField
+            autoFocus
+            placeholder="Search by order number..."
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            onKeyPress={handleKeyPress}
+            sx={{ flexGrow: 1 }}
+          />
+          <Button variant="contained" onClick={handleSearch} sx={{ height: '56px' }}>
+            Search
+          </Button>
+        </Box>
 
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={status}
-            label="Status"
-            onChange={(e) => handleStatusChange(e.target.value)}
-            sx={{ height: '56px' }}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="pending">Pending</MenuItem>
-            <MenuItem value="processing">Processing</MenuItem>
-            <MenuItem value="completed">Completed</MenuItem>
-            <MenuItem value="cancelled">Cancelled</MenuItem>
-          </Select>
-        </FormControl>
+        {/* Desktop: status + dates + export on one row */}
+        <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2, alignItems: 'center' }}>
+          <FormControl sx={{ minWidth: 150 }}>
+            <InputLabel>Status</InputLabel>
+            <Select value={status} label="Status" onChange={(e) => handleStatusChange(e.target.value)}>
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="pending">Pending</MenuItem>
+              <MenuItem value="processing">Processing</MenuItem>
+              <MenuItem value="completed">Completed</MenuItem>
+              <MenuItem value="cancelled">Cancelled</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            label="Start Date"
+            type="date"
+            value={startDate}
+            onChange={(e) => handleDateChange('start_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+          <TextField
+            label="End Date"
+            type="date"
+            value={endDate}
+            onChange={(e) => handleDateChange('end_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+          <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleExport} sx={{ ml: 'auto' }}>
+            Export CSV
+          </Button>
+        </Box>
 
-        <TextField
-          label="Start Date"
-          type="date"
-          value={startDate}
-          onChange={(e) => handleDateChange('start_date', e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-          sx={{ height: '56px' }}
-        />
+        {/* Mobile: dates row */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2 }}>
+          <TextField
+            label="Start Date"
+            type="date"
+            value={startDate}
+            onChange={(e) => handleDateChange('start_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+            sx={{ flex: 1 }}
+          />
+          <TextField
+            label="End Date"
+            type="date"
+            value={endDate}
+            onChange={(e) => handleDateChange('end_date', e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+            sx={{ flex: 1 }}
+          />
+        </Box>
 
-        <TextField
-          label="End Date"
-          type="date"
-          value={endDate}
-          onChange={(e) => handleDateChange('end_date', e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-          sx={{ height: '56px' }}
-        />
+        {/* Mobile: status + export row */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2, alignItems: 'center' }}>
+          <FormControl sx={{ flex: 1 }}>
+            <InputLabel>Status</InputLabel>
+            <Select value={status} label="Status" onChange={(e) => handleStatusChange(e.target.value)}>
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="pending">Pending</MenuItem>
+              <MenuItem value="processing">Processing</MenuItem>
+              <MenuItem value="completed">Completed</MenuItem>
+              <MenuItem value="cancelled">Cancelled</MenuItem>
+            </Select>
+          </FormControl>
+          <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleExport}>
+            Export
+          </Button>
+        </Box>
 
-        <Button
-          variant="outlined"
-          startIcon={<DownloadIcon />}
-          onClick={handleExport}
-        >
-          Export CSV
-        </Button>
       </Box>
 
       <Table

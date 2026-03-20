@@ -27,7 +27,11 @@ export default function Home() {
       >
         <NavBar />
 
-        <Typography variant="h2" component="h1">
+        <Typography
+          variant="h2"
+          component="h1"
+          sx={{ fontSize: { xs: '2rem', sm: '3.75rem' }, textAlign: 'center' }}
+        >
           New! InstaQuote Ordering
         </Typography>
 
@@ -38,13 +42,13 @@ export default function Home() {
           up-to-date availability, accurate pricing, and a streamlined ordering experience from start to finish.
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 3 }}>
+        <Box sx={{ display: 'flex', gap: 3, width: '100%', px: { xs: 2, sm: 0 } }}>
           <Button
             variant="contained"
             size="large"
             component={Link}
             to='/catalog'
-            sx={{ minWidth: 200, py: 2 }}
+            sx={{ flex: 1, py: 2, textAlign: 'center' }}
           >
             Browse Catalog
           </Button>
@@ -54,7 +58,7 @@ export default function Home() {
             size="large"
             component={Link}
             to='/destinations'
-            sx={{ minWidth: 200, py: 2 }}
+            sx={{ flex: 1, py: 2, textAlign: 'center' }}
           >
             Choose Destination
           </Button>

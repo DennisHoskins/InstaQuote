@@ -22,17 +22,17 @@ router.get('/items', [
     const offset = (page - 1) * limit;
 
     // Build WHERE clause
-    let whereClause = 'WHERE is_catalog = true AND inactive = false';
+    let whereClause = 'WHERE i.is_catalog = true AND i.inactive = false';
     const params: any[] = [];
     
     if (search) {
-      whereClause += ` AND (LOWER(item_code) LIKE $1 OR LOWER(description) LIKE $1 OR LOWER(category) LIKE $1)`;
+      whereClause += ` AND (LOWER(i.item_code) LIKE $1 OR LOWER(i.description) LIKE $1 OR LOWER(i.category) LIKE $1)`;
       params.push(`%${search.toLowerCase()}%`);
     }
 
     // Get total count
     const countResult = await pool.query(
-      `SELECT COUNT(DISTINCT item_code) FROM inventory_items ${whereClause}`,
+      `SELECT COUNT(DISTINCT i.item_code) FROM inventory_items i ${whereClause}`,
       params
     );
     const total = parseInt(countResult.rows[0].count);
@@ -40,10 +40,11 @@ router.get('/items', [
     // Get paginated items
     const itemsResult = await pool.query(
       `SELECT * FROM (
-        SELECT DISTINCT ON (item_code) item_code, cat_page, cat_page_order, sku, description, category, destination, total_ws_price, inactive
-        FROM inventory_items 
+        SELECT DISTINCT ON (i.item_code) i.item_code, i.cat_page, i.cat_page_order, m.sku, i.description, i.category, i.destination, i.total_ws_price, i.inactive
+        FROM inventory_items i
+        LEFT JOIN item_sku_map m ON m.item_code = i.item_code
         ${whereClause}
-        ORDER BY item_code
+        ORDER BY i.item_code
       ) sub
       ORDER BY cat_page, cat_page_order, item_code
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,

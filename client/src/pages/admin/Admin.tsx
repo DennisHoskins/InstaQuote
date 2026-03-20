@@ -8,7 +8,7 @@ import MetalsPriceCard from '../../components/admin/MetalsPriceCard';
 import OrdersStatsCard from '../../components/admin/OrdersStatsCard';
 import ImagesStatsCard from '../../components/admin/ImagesStatsCard';
 import SkusStatsCard from '../../components/admin/SkusStatsCard';
-import DropboxSyncCard from '../../components/admin/DropboxSyncCard';
+import SyncCard from '../../components/admin/SyncCard';
 import ErrorAlert from '../../components/ErrorAlert';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
@@ -105,8 +105,18 @@ export default function Admin() {
 
             <Grid size={12}>
               <Grid container spacing={2}>
-                <Grid size={4}>
-                  <DropboxSyncCard
+                <Grid size={6}>
+                  <SyncCard
+                    title="Map SKUs"
+                    syncType="sku_map"
+                    lastSync={syncStats.sku_map.lastSync}
+                    lastSyncTime={syncStats.sku_map.lastSync ? getRelativeTime(syncStats.sku_map.lastSync.timestamp) : 'Never'}
+                    totalRuns={syncStats.sku_map.totalRuns}
+                  />
+                </Grid>
+
+                <Grid size={6}>
+                  <SyncCard
                     title="Crawl Dropbox"
                     syncType="dropbox_crawl"
                     lastSync={syncStats.dropbox_crawl.lastSync}
@@ -115,18 +125,18 @@ export default function Admin() {
                   />
                 </Grid>
 
-                <Grid size={4}>
-                  <DropboxSyncCard
-                    title="Match SKUs"
-                    syncType="sku_mapping"
-                    lastSync={syncStats.sku_mapping.lastSync}
-                    lastSyncTime={syncStats.sku_mapping.lastSync ? getRelativeTime(syncStats.sku_mapping.lastSync.timestamp) : 'Never'}
-                    totalRuns={syncStats.sku_mapping.totalRuns}
+                <Grid size={6}>
+                  <SyncCard
+                    title="Match Images"
+                    syncType="image_map"
+                    lastSync={syncStats.image_map.lastSync}
+                    lastSyncTime={syncStats.image_map.lastSync ? getRelativeTime(syncStats.image_map.lastSync.timestamp) : 'Never'}
+                    totalRuns={syncStats.image_map.totalRuns}
                   />
                 </Grid>
 
-                <Grid size={4}>
-                  <DropboxSyncCard
+                <Grid size={6}>
+                  <SyncCard
                     title="Create Links"
                     syncType="dropbox_links"
                     lastSync={syncStats.dropbox_links.lastSync}

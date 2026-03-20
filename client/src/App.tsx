@@ -21,13 +21,15 @@ import SKUs from './pages/admin/SKUs';
 import SKU from './pages/admin/SKU';
 import Images from './pages/admin/Images';
 import Image from './pages/admin/Image';
+import SkuItems from './pages/admin/SkuItems';
 import SkuImages from './pages/admin/SkuImages';
 import SkuImage from './pages/admin/SkuImage';
 import Metals from './pages/admin/Metals';
 import SyncLogAccess from './pages/admin/SyncLogAccess';
 import SyncLogDropboxCrawl from './pages/admin/SyncLogDropboxCrawl';
 import SyncLogDropboxLinks from './pages/admin/SyncLogDropboxLinks';
-import SyncLogSkuMapping from './pages/admin/SyncLogSkuMapping';
+import SyncLogSkuMap from './pages/admin/SyncLogSkuMap';
+import SyncLogImageMap from './pages/admin/SyncLogImageMap';
 
 export default function App() {
   return (
@@ -55,13 +57,15 @@ export default function App() {
             <Route path="skus" element={<SKUs />} />
             <Route path="images" element={<Images />} />
             <Route path="images/:id" element={<Image />} />
+            <Route path="sku-items" element={<SkuItems />} />
             <Route path="sku-images/:id" element={<SkuImage />} />
             <Route path="sku-images" element={<SkuImages />} />
             <Route path="metals" element={<Metals />} />
             <Route path="sync-log/access" element={<SyncLogAccess />} />
             <Route path="sync-log/dropbox-crawl" element={<SyncLogDropboxCrawl />} />
             <Route path="sync-log/dropbox-links" element={<SyncLogDropboxLinks />} />
-            <Route path="sync-log/sku-mapping" element={<SyncLogSkuMapping />} />
+            <Route path="sync-log/sku-map" element={<SyncLogSkuMap />} />
+            <Route path="sync-log/image-map" element={<SyncLogImageMap />} />
             <Route path="verify" element={<Verify />} />
           </Route>
         </Route>

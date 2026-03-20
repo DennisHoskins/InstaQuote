@@ -16,9 +16,9 @@ router.get('/:itemCode', [
     const { itemCode } = req.params;
 
     const result = await pool.query(
-      `SELECT DISTINCT ON (item_code) 
+      `SELECT DISTINCT ON (ii.item_code) 
         ii.item_code, 
-        ii.sku, 
+        m.sku, 
         ii.description, 
         ii.category, 
         ii.destination, 
@@ -26,13 +26,14 @@ router.get('/:itemCode', [
         ii.inactive, 
         ii.is_catalog, 
         ii.last_updated,
-      CASE 
-        WHEN df.shared_link IS NOT NULL THEN 
-          REPLACE(REPLACE(df.shared_link, '&dl=0', '&raw=1'), '&dl=1', '&raw=1')
-        ELSE NULL
-      END as image_url
+        CASE 
+          WHEN df.shared_link IS NOT NULL THEN 
+            REPLACE(REPLACE(df.shared_link, '&dl=0', '&raw=1'), '&dl=1', '&raw=1')
+          ELSE NULL
+        END as image_url
       FROM inventory_items ii
-      LEFT JOIN sku_images si ON si.sku = ii.sku AND si.is_primary = true
+      LEFT JOIN item_sku_map m ON m.item_code = ii.item_code
+      LEFT JOIN sku_images si ON si.sku = m.sku AND si.is_primary = true
       LEFT JOIN dropbox_files df ON df.id = si.image_id
       WHERE ii.item_code = $1 AND ii.inactive = false
       LIMIT 1`,

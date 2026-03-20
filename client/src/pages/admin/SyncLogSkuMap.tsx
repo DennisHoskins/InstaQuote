@@ -21,7 +21,7 @@ import StatusMessage from '../../components/StatusMessage';
 import ErrorAlert from '../../components/ErrorAlert';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
-export default function SyncLogSkuMapping() {
+export default function SyncLogSkuMap() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
@@ -32,26 +32,26 @@ export default function SyncLogSkuMapping() {
   const limit = 25;
 
   const [statusMessage, setStatusMessage] = useState<{ type: 'info' | 'success' | 'error'; message: string } | null>(null);
-  const syncStartedByUser = useRef(false);
   const wasRunning = useRef(false);
+  const syncStartedByUser = useRef(false);
   const syncStartTime = useRef<string | null>(null);
 
-  // Check if sync is running
   const { data: syncStatusData } = useQuery({
-    queryKey: ['sync-status', 'sku_mapping'],
-    queryFn: () => api.getSyncStatus('sku_mapping'),
+    queryKey: ['sync-status', 'sku_map'],
+    queryFn: () => api.getSyncStatus('sku_map'),
     enabled: isAuthenticated,
+    refetchInterval: 5000,
   });
 
   const isRunning = syncStatusData?.isRunning || false;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['admin-sync-log', 'sku_mapping', page, status, startDate, endDate],
+    queryKey: ['admin-sync-log', 'sku_map', page, status, startDate, endDate],
     queryFn: () =>
       api.getSyncLog(
         page,
         limit,
-        'sku_mapping',
+        'sku_map' as any,
         undefined,
         status,
         startDate || undefined,
@@ -60,128 +60,67 @@ export default function SyncLogSkuMapping() {
   });
 
   const deleteAllMutation = useMutation({
-    mutationFn: () => api.deleteAllSkuImageMappings(),
+    mutationFn: () => api.deleteAllSkuMappings(),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-sku-images'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-sku-images-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_map'] });
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_mapping'] });
-      setStatusMessage({ 
-        type: 'success', 
-        message: `Successfully deleted ${data.mappingsDeleted} SKU image mappings` 
+      setStatusMessage({
+        type: 'success',
+        message: `Successfully deleted ${data.mappingsDeleted} SKU mappings`
       });
     },
     onError: (error: Error) => {
-      setStatusMessage({ 
-        type: 'error', 
-        message: `Failed to delete mappings: ${error.message}` 
+      setStatusMessage({
+        type: 'error',
+        message: `Failed to delete mappings: ${error.message}`
       });
     },
   });
 
-  // Show running message on initial load if sync is running
+  const handleDeleteAll = () => {
+    if (window.confirm('Are you sure you want to delete ALL SKU mappings? This cannot be undone.')) {
+      deleteAllMutation.mutate();
+    }
+  };  
+
   useEffect(() => {
     if (isRunning && !statusMessage) {
-      setStatusMessage({ type: 'info', message: 'SKU mapping generation is running...' });
+      setStatusMessage({ type: 'info', message: 'SKU mapping is running...' });
       wasRunning.current = true;
     }
   }, [isRunning, statusMessage]);
 
-  // Auto-dismiss success messages after 10 seconds
   useEffect(() => {
     if (statusMessage?.type === 'success') {
-      const timer = setTimeout(() => {
-        setStatusMessage(null);
-      }, 10000);
+      const timer = setTimeout(() => setStatusMessage(null), 10000);
       return () => clearTimeout(timer);
     }
   }, [statusMessage]);
 
-  // Poll for status updates if sync is running
   useEffect(() => {
-    if (!isRunning) {
-      return;
+    if (!isRunning && wasRunning.current && syncStartedByUser.current) {
+      queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_map'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+      setStatusMessage({ type: 'success', message: 'SKU mapping completed successfully' });
+      wasRunning.current = false;
+      syncStartedByUser.current = false;
     }
-
-    wasRunning.current = true;
-
-    const interval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ['sync-status', 'sku_mapping'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_mapping'] });
-    }, 10000);
-
-    return () => clearInterval(interval);
   }, [isRunning, queryClient]);
 
-  // Detect completion: was running, now stopped, and we have a REAL completed entry
-  useEffect(() => {
-    if (!wasRunning.current || isRunning) {
-      return;
-    }
-
-    const realEntries = data?.items?.filter((item: any) => !String(item.id).startsWith('temp-')) || [];
-    const mostRecentEntry = realEntries[0];
-    
-    if (!mostRecentEntry || !mostRecentEntry.completed_at) {
-      return;
-    }
-    
-    // Only show success for entries that started AFTER we began watching
-    // If syncStartTime is null, we loaded into a running sync, so accept any completed entry
-    if (syncStartTime.current && mostRecentEntry.started_at < syncStartTime.current) {
-      return;
-    }
-    
-    wasRunning.current = false;
-    syncStartTime.current = null;
-    
-    if (mostRecentEntry.status === 'success') {
-      setStatusMessage({ 
-        type: 'success', 
-        message: `Generate SKU Mappings completed successfully (${mostRecentEntry.items_synced || 0} items)` 
-      });
-    } else if (mostRecentEntry.status === 'failed') {
-      setStatusMessage({ 
-        type: 'error', 
-        message: mostRecentEntry.error_message || 'Sync failed' 
-      });
-    }
-    
-    syncStartedByUser.current = false;
-  }, [isRunning, data]);
-
-  const totalPages = data ? Math.ceil(data.total / limit) : 0;
-
-  const updateParams = (updates: Record<string, string | undefined>) => {
+  const handleStatusChange = (value: string) => {
     const params: Record<string, string> = { page: '1' };
-
-    if (updates.status !== undefined) {
-      if (updates.status) params.status = updates.status;
-    } else if (status) {
-      params.status = status;
-    }
-
-    if (updates.start_date !== undefined) {
-      if (updates.start_date) params.start_date = updates.start_date;
-    } else if (startDate) {
-      params.start_date = startDate;
-    }
-
-    if (updates.end_date !== undefined) {
-      if (updates.end_date) params.end_date = updates.end_date;
-    } else if (endDate) {
-      params.end_date = endDate;
-    }
-
+    if (value) params.status = value;
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
     setSearchParams(params);
   };
 
-  const handleStatusChange = (value: string) => {
-    updateParams({ status: value });
-  };
-
   const handleDateChange = (field: 'start_date' | 'end_date', value: string) => {
-    updateParams({ [field]: value || undefined });
+    const params: Record<string, string> = { page: '1' };
+    if (status) params.status = status;
+    if (field === 'start_date') { if (value) params.start_date = value; if (endDate) params.end_date = endDate; }
+    if (field === 'end_date') { if (startDate) params.start_date = startDate; if (value) params.end_date = value; }
+    setSearchParams(params);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -195,65 +134,23 @@ export default function SyncLogSkuMapping() {
   const handleSyncStatusChange = (statusUpdate: { type: 'info' | 'success' | 'error'; message: string } | null) => {
     if (statusUpdate) {
       setStatusMessage(statusUpdate);
-      
-      // Mark that user started this sync
       if (statusUpdate.type === 'info') {
         syncStartedByUser.current = true;
         wasRunning.current = true;
         syncStartTime.current = new Date().toISOString();
       }
-      
-      // If starting a sync (info), add optimistic "running" entry to the table
-      if (statusUpdate.type === 'info') {
-        queryClient.setQueryData(
-          ['admin-sync-log', 'sku_mapping', page, status, startDate, endDate],
-          (oldData: any) => {
-            if (!oldData) return oldData;
-            
-            const optimisticEntry = {
-              id: 'temp-' + Date.now(),
-              sync_type: 'sku_mapping',
-              user_name: 'Dennis',
-              started_at: new Date().toISOString(),
-              completed_at: null,
-              duration_seconds: null,
-              items_synced: null,
-              status: 'running',
-              error_message: null,
-            };
-            
-            return {
-              ...oldData,
-              items: [optimisticEntry, ...oldData.items],
-              total: oldData.total + 1,
-            };
-          }
-        );
-      }
     }
   };
 
-  const handleDeleteAll = () => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete ALL SKU image mappings? This cannot be undone.'
-    );
-    if (confirmed) {
-      deleteAllMutation.mutate();
-    }
-  };
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorAlert message="Failed to load sync log" />;
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
-  if (error) {
-    return <ErrorAlert message="Failed to load sync log" />;
-  }
+  const totalPages = data ? Math.ceil(data.total / limit) : 0;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <PageHeader 
-        title="SKU Mapping Log"
+      <PageHeader
+        title="Map SKUs Log"
         breadcrumbs={[
           { label: 'Home', to: '/' },
           { label: 'Admin', to: '/admin' }
@@ -269,23 +166,23 @@ export default function SyncLogSkuMapping() {
             >
               {deleteAllMutation.isPending ? 'Deleting...' : 'Delete All Mappings'}
             </Button>
-            
+
             <SyncTriggerButton
-              title="Generate SKU Mappings"
-              buttonText="Generate Matches"
+              title="Map SKUs"
+              buttonText="Map SKUs"
               requiresToken={false}
-              apiCall={() => api.triggerGenerateMappings()}
+              apiCall={() => api.triggerMapSkus()}
               onSuccess={() => {
-                queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_mapping'] });
+                queryClient.invalidateQueries({ queryKey: ['admin-sync-log', 'sku_map'] });
                 queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-                queryClient.invalidateQueries({ queryKey: ['sync-status', 'sku_mapping'] });
+                queryClient.invalidateQueries({ queryKey: ['sync-status', 'sku_map'] });
               }}
               onStatusChange={handleSyncStatusChange}
               disabled={isRunning}
             />
           </Box>
         }
-      />
+        />
 
       {statusMessage && (
         <StatusMessage

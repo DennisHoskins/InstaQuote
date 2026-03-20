@@ -61,21 +61,21 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     const itemsStatsQuery = `
       SELECT 
         COUNT(*) as total_items,
-        COUNT(CASE WHEN sku IS NOT NULL THEN 1 END) as items_with_sku
-      FROM inventory_items
-      WHERE inactive = false
+        COUNT(m.sku) as items_with_sku
+      FROM inventory_items i
+      LEFT JOIN item_sku_map m ON m.item_code = i.item_code
+      WHERE i.inactive = false
     `;
 
     // Get SKU stats
     const skusStatsQuery = `
       WITH sku_image_counts AS (
         SELECT 
-          i.sku,
+          m.sku,
           COUNT(DISTINCT si.image_id) as image_count
-        FROM inventory_items i
-        LEFT JOIN sku_images si ON si.sku = i.sku
-        WHERE i.sku IS NOT NULL AND i.sku != ''
-        GROUP BY i.sku
+        FROM item_sku_map m
+        LEFT JOIN sku_images si ON si.sku = m.sku
+        GROUP BY m.sku
       )
       SELECT 
         COUNT(DISTINCT sku) as total_skus,
@@ -178,12 +178,18 @@ router.get('/dashboard', async (req: Request, res: Response) => {
         totalRuns: 0,
         lastSync: null
       },
-      sku_mapping: {
+      image_map: {
         successRate: 0,
         averageSyncTime: 0,
         totalRuns: 0,
         lastSync: null
-      }
+      },
+      sku_map: {
+        successRate: 0,
+        averageSyncTime: 0,
+        totalRuns: 0,
+        lastSync: null
+      },
     };
 
     syncStatsResult.rows.forEach((row: any) => {
@@ -205,8 +211,10 @@ router.get('/dashboard', async (req: Request, res: Response) => {
         syncStats.dropbox_crawl = stats;
       } else if (row.sync_type === 'dropbox_links') {
         syncStats.dropbox_links = stats;
-      } else if (row.sync_type === 'sku_mapping') {
-        syncStats.sku_mapping = stats;
+      } else if (row.sync_type === 'sku_map') {
+        syncStats.sku_map = stats;
+      } else if (row.sync_type === 'image_map') {
+        syncStats.image_map = stats;
       }
     });
 

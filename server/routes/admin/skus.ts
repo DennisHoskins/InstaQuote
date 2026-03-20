@@ -20,7 +20,6 @@ router.get('/', [
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 25;
     const search = req.query.search as string | undefined;
-    const hasImage = req.query.has_image as boolean | undefined;
     const offset = (page - 1) * limit;
 
     let queryText = `
@@ -42,22 +41,22 @@ router.get('/', [
         ORDER BY si.sku, si.confidence DESC
       )
       SELECT 
-        i.sku,
-        COUNT(DISTINCT i.item_code) as item_count,
+        m.sku,
+        COUNT(*) as item_count,
         COALESCE(sic.image_count, 0) as image_count,
         COALESCE(sic.has_primary_image, false) as has_primary_image,
         spi.shared_link as primary_image_url
-      FROM inventory_items i
-      LEFT JOIN sku_image_counts sic ON sic.sku = i.sku
-      LEFT JOIN sku_primary_images spi ON spi.sku = i.sku
-      WHERE i.sku IS NOT NULL AND i.sku != ''
+      FROM item_sku_map m
+      LEFT JOIN sku_image_counts sic ON sic.sku = m.sku
+      LEFT JOIN sku_primary_images spi ON spi.sku = m.sku
+      WHERE 1=1
     `;
     const queryParams: any[] = [];
     let paramCount = 0;
 
     if (search) {
       paramCount++;
-      queryText += ` AND i.sku ILIKE $${paramCount}`;
+      queryText += ` AND m.sku ILIKE $${paramCount}`;
       queryParams.push(`%${search}%`);
     }
 
@@ -76,13 +75,13 @@ router.get('/', [
       queryText += ` AND (sic.image_count IS NULL OR sic.image_count = 0)`;
     }
 
-    queryText += ` GROUP BY i.sku, sic.image_count, sic.has_primary_image, spi.shared_link`;
+    queryText += ` GROUP BY m.sku, sic.image_count, sic.has_primary_image, spi.shared_link`;
 
     const countQuery = `SELECT COUNT(*) FROM (${queryText}) as count_query`;
     const countResult = await pool.query(countQuery, queryParams);
     const total = parseInt(countResult.rows[0].count);
 
-    queryText += ` ORDER BY i.sku LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`;
+    queryText += ` ORDER BY m.sku LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`;
     queryParams.push(limit, offset);
 
     const result = await pool.query(queryText, queryParams);
@@ -119,10 +118,11 @@ router.get('/:sku', [
 
     // Get all items for this SKU
     const itemsResult = await pool.query(
-      `SELECT item_code, description, category, destination, total_ws_price, inactive
-       FROM inventory_items
-       WHERE sku = $1
-       ORDER BY item_code`,
+      `SELECT i.item_code, i.description, i.category, i.destination, i.total_ws_price, i.inactive
+       FROM inventory_items i
+       JOIN item_sku_map m ON m.item_code = i.item_code
+       WHERE m.sku = $1
+       ORDER BY i.item_code`,
       [sku]
     );
 

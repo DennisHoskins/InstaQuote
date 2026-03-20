@@ -15,7 +15,7 @@ export default function NavBar() {
       sx={{
         display: 'flex',
         alignSelf: 'flex-end',
-        gap: 1,
+        gap: 0.5,
       }}
     >
       <Button
@@ -23,14 +23,14 @@ export default function NavBar() {
         to='/cart'
         variant="text"
         size="small"
-        sx={{ px: 2 }}
-        startIcon={
-          <Badge badgeContent={itemCount} color="primary">
-            <ShoppingCartIcon />
-          </Badge>
-        }
+        sx={{ px: 1, minWidth: 'auto' }}
       >
-        Shopping Cart
+        <Badge badgeContent={itemCount} color="primary">
+          <ShoppingCartIcon />
+        </Badge>
+        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' }, ml: 1 }}>
+          Shopping Cart
+        </Box>
       </Button>
 
       <Button
@@ -38,14 +38,14 @@ export default function NavBar() {
         to='/orders'
         variant="text"
         size="small"
-        sx={{ px: 2 }}
-        startIcon={
-          <Badge badgeContent={0} color="primary">
-            <HistoryIcon />
-          </Badge>
-        }
+        sx={{ px: 1, minWidth: 'auto' }}
       >
-        Order History
+        <Badge badgeContent={0} color="primary">
+          <HistoryIcon />
+        </Badge>
+        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' }, ml: 1 }}>
+          Order History
+        </Box>
       </Button>
 
       {isAdmin && (
@@ -54,12 +54,15 @@ export default function NavBar() {
           to='/admin'
           variant="text"
           size="small"
-          sx={{ px: 2 }}
-          startIcon={<AdminPanelSettingsIcon />}
+          sx={{ px: 1, minWidth: 'auto' }}
         >
-          Admin
+          <AdminPanelSettingsIcon />
+          <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' }, ml: 1 }}>
+            Admin
+          </Box>
         </Button>
       )}
     </Box>
+
   );
 }

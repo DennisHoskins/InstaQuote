@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { api } from '../api/client';
 
 export interface CartItem {
   item_code: string;
@@ -16,6 +17,7 @@ interface CartContextType {
   addItem: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
   removeItem: (item_code: string) => void;
   updateQuantity: (item_code: string, quantity: number) => void;
+  refreshPrices: () => Promise<void>;
   clearCart: () => void;
   total: number;
   itemCount: number;
@@ -92,6 +94,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const refreshPrices = async () => {
+    const updated = await Promise.all(
+      items.map(async (item) => {
+        try {
+          const fresh = await api.getItem(item.item_code);
+          return { ...item, unit_price: fresh.total_ws_price };
+        } catch {
+          return item;
+        }
+      })
+    );
+    setItems(updated);
+  };  
+
   const clearCart = () => {
     setItems([]);
   };
@@ -105,7 +121,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         items, 
         addItem, 
         removeItem, 
-        updateQuantity, 
+        updateQuantity,
+        refreshPrices, 
         clearCart, 
         total, 
         itemCount 
