@@ -2,7 +2,16 @@ import Dropbox from 'dropbox';
 import pool from '../db/connection.js';
 import path from 'path';
 
-const START_PATHS = ['/DJB/DEST', '/DJB/CBC/All Catalog Items'];
+const START_PATHS = [
+  '/DJB/DEST', 
+  '/DJB/CBC', 
+  '/DJB/CCC', 
+  '/DJB/Image Library', 
+  '/DJB/Jost Van Dyke', 
+  '/DJB/Mar Azul-Larimar Mines', 
+  '/DJB/Photography'
+];
+
 const EXCLUDED_FOLDERS = [
   'BEACH TAGS',
   'OLD STYLES',
@@ -11,7 +20,6 @@ const EXCLUDED_FOLDERS = [
   'Marketing',
   'Generic Ad',
   'Prototypes',
-  'Photography',
   'Artwork',
   'web',
 ];

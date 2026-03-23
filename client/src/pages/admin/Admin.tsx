@@ -105,7 +105,7 @@ export default function Admin() {
 
             <Grid size={12}>
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6 }}>
+                <Grid size={{ xs: 12, lg: 6 }}>
                   <SyncCard
                     title="Map SKUs"
                     syncType="sku_map"
@@ -115,7 +115,7 @@ export default function Admin() {
                   />
                 </Grid>
 
-                <Grid size={{ xs: 12, sm: 6 }}>
+                <Grid size={{ xs: 12, lg: 6 }}>
                   <SyncCard
                     title="Crawl Dropbox"
                     syncType="dropbox_crawl"
@@ -125,7 +125,7 @@ export default function Admin() {
                   />
                 </Grid>
 
-                <Grid size={{ xs: 12, sm: 6 }}>
+                <Grid size={{ xs: 12, lg: 6 }}>
                   <SyncCard
                     title="Match Images"
                     syncType="image_map"
@@ -135,7 +135,7 @@ export default function Admin() {
                   />
                 </Grid>
 
-                <Grid size={{ xs: 12, sm: 6 }}>
+                <Grid size={{ xs: 12, lg: 6 }}>
                   <SyncCard
                     title="Create Links"
                     syncType="dropbox_links"

@@ -7,11 +7,11 @@ import sys
 
 # PostgreSQL connection
 pg_config = {
-    'dbname': '',
-    'user': '',
-    'password': '',
-    'host': '',
-    'port': ''
+    'dbname': 'instaquote',
+    'user': 'instaquote_user',
+    'password': '1nst4qu0t3',
+    'host': 'dennishoskins.com',
+    'port': '5432'
 }
 
 CBC_DB_PATH = r"D:\Shared Folders\Costing\Costing - CBC.mdb"
@@ -21,11 +21,11 @@ DESTINATION_DBS = [
 ]
 
 #pg_config = {
-#    'dbname': '',
-#    'user': '',
-#    'password': '',
-#    'host': '',
-#    'port': ''
+#    'dbname': 'instaquote',
+#    'user': 'postgres',
+#    'password': 'admin',
+#    'host': 'localhost',
+#    'port': '5432'
 #}
 
 # Access database paths
