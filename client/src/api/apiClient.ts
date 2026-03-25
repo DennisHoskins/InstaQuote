@@ -3,10 +3,6 @@ const API_BASE_URL = '/wp-json/instaquote/v1/proxy';
 let cachedNonce: string | null = null;
 
 export async function fetchNonce(): Promise<string | null> {
-  if ((window as any).instaquoteNonce) {
-    cachedNonce = (window as any).instaquoteNonce;
-    return cachedNonce;
-  }
   try {
     const response = await fetch('/wp-json/instaquote/v1/nonce', {
       credentials: 'include',
