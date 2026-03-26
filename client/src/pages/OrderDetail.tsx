@@ -19,6 +19,7 @@ import ErrorAlert from '../components/ErrorAlert';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { exportOrderPdf } from '../utils/exportPdf';
 import LoadingSpinner from '../components/LoadingSpinner';
+import PriceDisclaimer from '../components/PriceDisclaimer';
 
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
@@ -233,6 +234,7 @@ export default function OrderDetail() {
                 ${order.total_amount.toFixed(2)}
               </Typography>
             </Box>
+            <PriceDisclaimer variant="historical" />
 
             {order.notes && (
               <Box sx={{ mb: 3 }}>

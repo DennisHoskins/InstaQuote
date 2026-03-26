@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
@@ -10,11 +11,13 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ErrorAlert from '../../components/ErrorAlert';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import ImageLightbox from '../../components/ImageLightbox';
 
 export default function AdminImage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-image', id],
@@ -93,7 +96,9 @@ export default function AdminImage() {
               justifyContent: 'center',
               borderRadius: 1,
               overflow: 'hidden',
+              cursor: image.shared_link ? 'zoom-in' : 'default',
             }}
+            onClick={() => image.shared_link && setLightboxOpen(true)}
           >
             {image.shared_link ? (
               <img
@@ -111,6 +116,15 @@ export default function AdminImage() {
               </Typography>
             )}
           </Box>
+
+          {image.shared_link && (
+            <ImageLightbox
+              src={getDropboxRawLink(image.shared_link)}
+              alt={image.file_name}
+              open={lightboxOpen}
+              onClose={() => setLightboxOpen(false)}
+            />
+          )}
         </Grid>
 
         <Grid size={{ xs: 12, md: 6 }}>

@@ -25,10 +25,10 @@ describe('Admin Dashboard API', () => {
       expect(response.body.syncStats).toHaveProperty('access');
       expect(response.body.syncStats).toHaveProperty('dropbox_crawl');
       expect(response.body.syncStats).toHaveProperty('dropbox_links');
-      expect(response.body.syncStats).toHaveProperty('sku_mapping');
+      expect(response.body.syncStats).toHaveProperty('sku_map');
 
       // Check structure of each sync type
-      const syncTypes = ['access', 'dropbox_crawl', 'dropbox_links', 'sku_mapping'];
+      const syncTypes = ['access', 'dropbox_crawl', 'dropbox_links', 'sku_map'];
       
       syncTypes.forEach(syncType => {
         const stats = response.body.syncStats[syncType];

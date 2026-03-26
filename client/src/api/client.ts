@@ -11,6 +11,10 @@ export const queryClient = new QueryClient({
 });
 
 export const api = {
+  getPricesLastSync: async () => {
+    return apiClient.get('/prices/last-sync');
+  },
+
   getCatalogItems: async (page: number, limit: number, search?: string) => {
     const params = new URLSearchParams({
       page: page.toString(),

@@ -6,16 +6,21 @@ import { useCart } from '../contexts/CartContext';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Box, Grid, Button, Alert } from '@mui/material';
+import { usePricesLastSync } from '../hooks/usePricesLastSync';
 import PageHeader from '../components/PageHeader';
 import ErrorAlert from '../components/ErrorAlert';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ImageLightbox from '../components/ImageLightbox';
+import PriceDisclaimer from '../components/PriceDisclaimer';
 
 export default function ItemDetail() {
   const { itemCode } = useParams<{ itemCode: string }>();
   const { isAuthenticated } = useAuth();
   const { addItem } = useCart();
   const navigate = useNavigate();
+  const { syncedAtLabel } = usePricesLastSync();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const { data: item, isLoading, error } = useQuery({
     queryKey: ['item', itemCode],
@@ -74,11 +79,13 @@ export default function ItemDetail() {
               justifyContent: 'center',
               borderRadius: 1,
               overflow: 'hidden',
+              cursor: item.image_url ? 'zoom-in' : 'default',
             }}
+            onClick={() => item.image_url && setLightboxOpen(true)}
           >
             {item.image_url ? (
-              <img 
-                src={item.image_url} 
+              <img
+                src={item.image_url}
                 alt={item.description}
                 style={{
                   width: '100%',
@@ -92,6 +99,15 @@ export default function ItemDetail() {
               </Typography>
             )}
           </Box>
+
+          {item.image_url && (
+            <ImageLightbox
+              src={item.image_url}
+              alt={item.description}
+              open={lightboxOpen}
+              onClose={() => setLightboxOpen(false)}
+            />
+          )}
         </Grid>
 
         <Grid size={{ xs: 12, md: 6 }} sx={{ flexGrow: 1,  display: 'flex', flexDirection: 'column' }}>
@@ -113,6 +129,14 @@ export default function ItemDetail() {
           <Typography variant="h3" sx={{ mt: 3 }} color="primary" fontWeight="bold">
             ${Number(item.total_ws_price).toFixed(2)}
           </Typography>
+
+          {syncedAtLabel && (
+            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+              Prices last updated {syncedAtLabel}
+            </Typography>
+          )}          
+
+          <PriceDisclaimer variant="estimate" />
 
           <Button
             variant="contained"

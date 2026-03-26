@@ -9,15 +9,12 @@
 // Prevent direct access
 if (!defined('ABSPATH')) exit;
 
-add_action('init', function() {
-    if (strpos($_SERVER['REQUEST_URI'], '/wp-json/') !== false) {
-        error_log('=== INSTAQUOTE INIT DEBUG ===');
-        error_log('REQUEST_URI: ' . $_SERVER['REQUEST_URI']);
-        error_log('is_user_logged_in: ' . (is_user_logged_in() ? 'YES' : 'NO'));
-        error_log('current_user_id: ' . get_current_user_id());
-        error_log('cookies: ' . (empty($_COOKIE) ? 'NONE' : implode(', ', array_keys($_COOKIE))));
+add_filter('rest_authentication_errors', function($result) {
+    if (strpos($_SERVER['REQUEST_URI'], '/wp-json/instaquote/') !== false) {
+        return null;
     }
-}, 1);
+    return $result;
+}, 101);
 
 // API Proxy
 add_action('rest_api_init', function () {

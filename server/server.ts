@@ -10,6 +10,7 @@ import catalogRouter from './routes/catalog.js';
 import destinationsRouter from './routes/destinations.js';
 import itemsRouter from './routes/items.js';
 import ordersRouter from './routes/orders.js';
+import pricesRouter from './routes/prices.js';
 import adminRouter from './routes/admin/admin.js';
 import adminSyncRouter from './routes/admin/sync.js';
 import adminSyncLogRouter from './routes/admin/sync-log.js';
@@ -55,6 +56,7 @@ app.use('/api/catalog', requireAuth, catalogRouter);
 app.use('/api/destinations', requireAuth, destinationsRouter);
 app.use('/api/items', requireAuth, itemsRouter);
 app.use('/api/orders', requireAuth, ordersRouter);
+app.use('/api/prices', requireAuth, pricesRouter);
 
 app.use('/api/admin', requireAuth, requireAdmin, adminRouter);
 app.use('/api/admin/sync', requireAuth, requireAdmin, adminSyncRouter);

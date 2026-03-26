@@ -40,9 +40,9 @@ describe('Admin Sync API', () => {
       expect(typeof response.body.isRunning).toBe('boolean');
     });
 
-    it('should return status for sku_mapping', async () => {
+    it('should return status for sku_map', async () => {
       const response = await request(app)
-        .get('/api/admin/sync/status/sku_mapping');
+        .get('/api/admin/sync/status/sku_map');
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('isRunning');

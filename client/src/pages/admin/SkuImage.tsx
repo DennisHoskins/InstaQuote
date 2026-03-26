@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/admin';
@@ -8,12 +9,14 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ErrorAlert from '../../components/ErrorAlert';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import ImageLightbox from '../../components/ImageLightbox';
 
 export default function AdminSkuImage() {
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const { data: mapping, isLoading, error } = useQuery({
     queryKey: ['admin-sku-image', id],
@@ -83,39 +86,48 @@ export default function AdminSkuImage() {
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Link to={`/admin/images/${mapping.image_id}`} style={{ textDecoration: 'none' }}>
-            <Box
-              sx={{
-                width: '100%',
-                height: '100%',
-                minHeight: 400,
-                bgcolor: mapping.shared_link ? 'white' : 'grey.200',
-                border: '1px solid',
-                borderColor: 'grey.300',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 1,
-                overflow: 'hidden',
-              }}
-            >
-              {mapping.shared_link ? (
-                <img
-                  src={mapping.shared_link.replace(/(\?dl=0|\?dl=1)$/, '?raw=1').replace(/&dl=0|&dl=1/, '&raw=1')}
-                  alt={mapping.file_name}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '500px',
-                    objectFit: 'contain',
-                  }}
-                />
-              ) : (
-                <Typography variant="h6" color="text.secondary">
-                  No Preview Available
-                </Typography>
-              )}
-            </Box>
-          </Link>
+          <Box
+            sx={{
+              width: '100%',
+              height: '100%',
+              minHeight: 400,
+              bgcolor: mapping.shared_link ? 'white' : 'grey.200',
+              border: '1px solid',
+              borderColor: 'grey.300',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 1,
+              overflow: 'hidden',
+              cursor: mapping.shared_link ? 'zoom-in' : 'default',
+            }}
+            onClick={() => mapping.shared_link && setLightboxOpen(true)}
+          >
+            {mapping.shared_link ? (
+              <img
+                src={mapping.shared_link.replace(/(\?dl=0|\?dl=1)$/, '?raw=1').replace(/&dl=0|&dl=1/, '&raw=1')}
+                alt={mapping.file_name}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '500px',
+                  objectFit: 'contain',
+                }}
+              />
+            ) : (
+              <Typography variant="h6" color="text.secondary">
+                No Preview Available
+              </Typography>
+            )}
+          </Box>
+
+          {mapping.shared_link && (
+            <ImageLightbox
+              src={mapping.shared_link.replace(/(\?dl=0|\?dl=1)$/, '?raw=1').replace(/&dl=0|&dl=1/, '&raw=1')}
+              alt={mapping.file_name}
+              open={lightboxOpen}
+              onClose={() => setLightboxOpen(false)}
+            />
+          )}
         </Grid>
 
         <Grid size={{ xs: 12, md: 6 }}>

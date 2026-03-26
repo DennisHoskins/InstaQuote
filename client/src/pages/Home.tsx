@@ -1,10 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Typography } from '@mui/material';
+import { usePricesLastSync } from '../hooks/usePricesLastSync';
 import NavBar from '../components/NavBar';
 import SearchBar from '../components/SearchBar';
 
 export default function Home() {
   const navigate = useNavigate();
+  const { syncedAtLabel } = usePricesLastSync();
 
   const handleSearch = (value: string) => {
     if (value.trim()) {
@@ -70,6 +72,12 @@ export default function Home() {
             placeholder="Search by SKU, item code, description, or destination..."
           />
         </Box>
+
+        {syncedAtLabel && (
+          <Typography variant="caption" color="text.secondary">
+            Prices last updated {syncedAtLabel}
+          </Typography>
+        )}        
       </Box>
     </Container>
   );

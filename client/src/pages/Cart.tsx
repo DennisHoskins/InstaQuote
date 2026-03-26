@@ -5,8 +5,11 @@ import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
 import { Container, Typography, Box, Button, IconButton, TextField, Paper, Grid, Alert, CircularProgress } from '@mui/material';
+import { usePricesLastSync } from '../hooks/usePricesLastSync';
 import PageHeader from '../components/PageHeader';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PriceDisclaimer from '../components/PriceDisclaimer';
+import ImageLightbox from '../components/ImageLightbox';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -14,18 +17,18 @@ export default function Cart() {
   const { user } = useAuth();
   const [notes, setNotes] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [lightboxItem, setLightboxItem] = useState<{ src: string; alt: string } | null>(null);
+  const { syncedAtLabel, pricesStale } = usePricesLastSync();
 
   const submitOrderMutation = useMutation({
     mutationFn: api.submitOrder,
     onSuccess: (response) => {
-      console.log('Order submitted successfully:', response);
-      console.log('Mock email notification sent to:', user?.email);
       clearCart();
-      navigate(`/order-confirmation/${response.order.id}`, { 
-        state: { 
+      navigate(`/order-confirmation/${response.order.id}`, {
+        state: {
           orderNumber: response.order.order_number,
-          customerEmail: user?.email 
-        } 
+          customerEmail: user?.email
+        }
       });
     },
     onError: (error: any) => {
@@ -56,24 +59,24 @@ export default function Cart() {
     });
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refreshPrices();
+    setRefreshing(false);
+  };
+
   if (items.length === 0) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <PageHeader 
+        <PageHeader
           title={`Shopping Cart${itemCount > 0 ? ` (${itemCount})` : ''}`}
           breadcrumbs={[{ label: 'Home', to: '/' }]}
         />
-
         <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
             Your cart is empty
           </Typography>
-          <Button 
-            variant="contained" 
-            component={Link} 
-            to="/catalog"
-            sx={{ mt: 2 }}
-          >
+          <Button variant="contained" component={Link} to="/catalog" sx={{ mt: 2 }}>
             Browse Catalog
           </Button>
         </Paper>
@@ -81,15 +84,9 @@ export default function Cart() {
     );
   }
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await refreshPrices();
-    setRefreshing(false);
-  };  
-
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <PageHeader 
+      <PageHeader
         title={`Shopping Cart${itemCount > 0 ? ` (${itemCount})` : ''}`}
         breadcrumbs={[{ label: 'Home', to: '/' }]}
       />
@@ -131,11 +128,7 @@ export default function Cart() {
                       <img
                         src={item.image_url}
                         alt={item.description}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain',
-                        }}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                       />
                     ) : (
                       <Typography variant="caption" color="text.secondary">
@@ -147,8 +140,8 @@ export default function Cart() {
 
                 {/* Item Details */}
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography 
-                    variant="h6" 
+                  <Typography
+                    variant="h6"
                     component={Link}
                     to={`/item/${item.item_code}`}
                     sx={{ textDecoration: 'none', color: 'inherit', '&:hover': { color: 'primary.main' } }}
@@ -167,10 +160,10 @@ export default function Cart() {
                 </Box>
 
                 {/* Quantity & Price */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'flex-end', 
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
                   gap: 1,
                   width: { xs: '100%', sm: 'auto' },
                 }}>
@@ -179,8 +172,8 @@ export default function Cart() {
                   </Typography>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <IconButton 
-                      size="small" 
+                    <IconButton
+                      size="small"
                       color="error"
                       onClick={() => removeItem(item.item_code)}
                     >
@@ -192,9 +185,7 @@ export default function Cart() {
                       value={item.quantity}
                       onChange={(e) => {
                         const value = parseInt(e.target.value);
-                        if (value > 0) {
-                          updateQuantity(item.item_code, value);
-                        }
+                        if (value > 0) updateQuantity(item.item_code, value);
                       }}
                       inputProps={{ min: 1, style: { textAlign: 'center' } }}
                       sx={{ width: 80 }}
@@ -237,7 +228,7 @@ export default function Cart() {
               </Box>
             </Box>
 
-            <Box sx={{ borderTop: '2px solid', borderColor: 'divider', pt: 2, mb: 3 }}>
+            <Box sx={{ borderTop: '2px solid', borderColor: 'divider', pt: 2, mb: 1 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="h6">Total:</Typography>
                 <Typography variant="h4" color="primary">
@@ -246,41 +237,67 @@ export default function Cart() {
               </Box>
             </Box>
 
+            {syncedAtLabel && (
+              <Typography
+                variant="caption"
+                color={pricesStale ? 'error' : 'text.secondary'}
+                display="block"
+                sx={{ mt: 0.5, mb: 2 }}
+              >
+                {pricesStale
+                  ? `Prices are out of date (last updated ${syncedAtLabel}). Please refresh before ordering.`
+                  : `Prices last updated ${syncedAtLabel}`}
+              </Typography>
+            )}
+
+            <PriceDisclaimer variant="estimate" />
+
             {submitOrderMutation.isError && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 Failed to submit order. Please try again.
               </Alert>
             )}
 
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={handleRefresh}
-              disabled={refreshing}
-              sx={{ mb: 2 }}
-            >
-              {refreshing ? 'Refreshing...' : 'Refresh Prices'}
-            </Button>
-
-            <Button
-              variant="contained"
-              size="large"
-              fullWidth
-              onClick={handleSubmitOrder}
-              disabled={submitOrderMutation.isPending || items.length === 0}
-            >
-              {submitOrderMutation.isPending ? (
-                <>
-                  <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
-                  Submitting...
-                </>
-              ) : (
-                'Place Order'
-              )}
-            </Button>
+            {pricesStale ? (
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={handleRefresh}
+                disabled={refreshing}
+                sx={{ mb: 2 }}
+              >
+                {refreshing ? 'Refreshing...' : 'Refresh Prices'}
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                size="large"
+                fullWidth
+                onClick={handleSubmitOrder}
+                disabled={submitOrderMutation.isPending || items.length === 0}
+              >
+                {submitOrderMutation.isPending ? (
+                  <>
+                    <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                    Submitting...
+                  </>
+                ) : (
+                  'Place Order'
+                )}
+              </Button>
+            )}
           </Box>
         </Grid>
       </Grid>
+
+      {lightboxItem && (
+        <ImageLightbox
+          src={lightboxItem.src}
+          alt={lightboxItem.alt}
+          open={!!lightboxItem}
+          onClose={() => setLightboxItem(null)}
+        />
+      )}
     </Container>
   );
 }
