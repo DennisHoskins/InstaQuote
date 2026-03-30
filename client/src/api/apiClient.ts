@@ -25,9 +25,6 @@ export function getNonce(): string | null {
 class ApiClient {
   async request(url: string, options: RequestInit = {}): Promise<Response> {
     const nonce = getNonce();
-    
-    console.log('ApiClient - nonce:', nonce);
-    
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
@@ -36,8 +33,6 @@ class ApiClient {
     if (nonce) {
       headers['X-WP-Nonce'] = nonce;
     }
-    
-    console.log('ApiClient - headers:', headers);
 
     const response = await fetch(url, {
       ...options,

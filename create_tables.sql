@@ -10,7 +10,6 @@ CREATE TABLE metal_prices (
 CREATE TABLE inventory_items (
     id SERIAL PRIMARY KEY,
     item_code VARCHAR(50) NOT NULL,
-    sku VARCHAR(50),
     description VARCHAR(100) NOT NULL,
     cat_page INTEGER,
     cat_page_order INTEGER,
@@ -25,7 +24,6 @@ CREATE TABLE inventory_items (
 );
 
 CREATE INDEX idx_item_code ON inventory_items(item_code);
-CREATE INDEX idx_sku ON inventory_items(sku);
 CREATE INDEX idx_is_catalog ON inventory_items(is_catalog);
 CREATE INDEX idx_destination ON inventory_items(destination);
 CREATE INDEX idx_destination_raw ON inventory_items(destination_raw);

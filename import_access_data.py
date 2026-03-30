@@ -1,15 +1,15 @@
 import pyodbc
 import psycopg2
 from psycopg2.extras import execute_values
-from datetime import datetime
+from datetime import datetime, timezone
 
 import sys
 
 # PostgreSQL connection
 pg_config = {
     'dbname': 'instaquote',
-    'user': 'instaquote_user',
-    'password': '1nst4qu0t3',
+    'user': '',
+    'password': '',
     'host': 'dennishoskins.com',
     'port': '5432'
 }
@@ -20,13 +20,6 @@ DESTINATION_DBS = [
     r"D:\Shared Folders\Costing\Costing - Destination M-Z.mdb",
 ]
 
-#pg_config = {
-#    'dbname': 'instaquote',
-#    'user': 'postgres',
-#    'password': 'admin',
-#    'host': 'localhost',
-#    'port': '5432'
-#}
 
 # Access database paths
 #CBC_DB_PATH = r"T:\Costing - CBC.mdb"
@@ -544,31 +537,6 @@ def clean_destination(destination):
     # No match found - return as-is (title case)
     return destination.title()
 
-def extract_sku(item_code):
-    """Extract SKU from item_code using dash or digit logic"""
-    if not item_code:
-        return None
-    
-    # Skip 3-digit sizes
-    skip_sizes = ('100', '110', '120', '130', '160', '180', '500', '550', '600', '700', '750', '800', '850', '851', '900', '950')
-    for skip in skip_sizes:
-        if skip in item_code:
-            return item_code
-    
-    # Remove size suffixes
-    size_suffixes = ('105', '115', '125', '155', '50', '55', '40', '45', '60', '625', '65', '70', '75', '80', '85', '90', '95', '10', '11', '12', '13', '14', '15', '16', '17', '18')
-    for suffix in size_suffixes:
-        if suffix in item_code:
-            return item_code.replace(suffix, '', 1)
-    
-    # Remove size name suffixes (SM, MD, LG)
-    size_names = ('LG', 'MD', 'SM')
-    for suffix in size_names:
-        if suffix in item_code:
-            return item_code.replace(suffix, '', 1)
-    
-    return item_code
-
 
 def nvl(value, default=0.0):
     """Return default if value is None, otherwise return float"""
@@ -583,13 +551,13 @@ def log_sync_start(pg_cursor, sync_type):
         INSERT INTO sync_log (started_at, user_name, status, sync_type)
         VALUES (%s, 'schedule', 'running', %s)        
         RETURNING id
-    """, (datetime.now(), sync_type))
+    """, (datetime.now(timezone.utc), sync_type))
     return pg_cursor.fetchone()[0]
 
 
 def log_sync_complete(pg_cursor, sync_id, started_at, items_synced):
     """Log successful sync completion"""
-    completed_at = datetime.now()
+    completed_at = datetime.now(timezone.utc)
     duration = (completed_at - started_at).total_seconds()
     pg_cursor.execute("""
         UPDATE sync_log
@@ -603,7 +571,7 @@ def log_sync_complete(pg_cursor, sync_id, started_at, items_synced):
 
 def log_sync_error(pg_cursor, sync_id, started_at, error_message):
     """Log sync failure"""
-    completed_at = datetime.now()
+    completed_at = datetime.now(timezone.utc)
     duration = (completed_at - started_at).total_seconds()
     pg_cursor.execute("""
         UPDATE sync_log
@@ -837,12 +805,8 @@ def sync_catalog(pg_cursor):
             if description:
                 description = description.replace('INLAY BLANK', 'OPAL INLAY')
             
-            # Extract SKU
-            sku = extract_sku(item_code)
-            
             rows.append((
                 item_code,
-                sku,
                 description,
                 category_group,
                 destination,
@@ -858,7 +822,7 @@ def sync_catalog(pg_cursor):
 
         execute_values(pg_cursor, """
             INSERT INTO inventory_items 
-            (item_code, sku, description, category, destination, destination_raw, total_ws_price, 
+            (item_code, description, category, destination, destination_raw, total_ws_price, 
              is_catalog, inactive, cat_page, cat_page_order, last_updated)
             VALUES %s
         """, rows)
@@ -1055,12 +1019,8 @@ def sync_destination_db(access_db_path, pg_cursor):
             if description:
                 description = description.replace('INLAY BLANK', 'OPAL INLAY')
             
-            # Extract SKU
-            sku = extract_sku(item_code)
-            
             rows.append((
                 item_code,
-                sku,
                 description,
                 category_group,
                 destination,
@@ -1074,7 +1034,7 @@ def sync_destination_db(access_db_path, pg_cursor):
 
         execute_values(pg_cursor, """
             INSERT INTO inventory_items 
-            (item_code, sku, description, category, destination, destination_raw, total_ws_price, 
+            (item_code, description, category, destination, destination_raw, total_ws_price, 
              is_catalog, inactive, last_updated)
             VALUES %s
         """, rows)
@@ -1129,7 +1089,7 @@ if __name__ == '__main__':
         print_usage()
         sys.exit(1)
     
-    overall_start = datetime.now()
+    overall_start = datetime.now(timezone.utc)
     print(f"\n{'='*60}")
     print(f"SYNC STARTED: {overall_start.strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"Command: {command}")

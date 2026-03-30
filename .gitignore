@@ -47,6 +47,7 @@ coverage/
 client/.vite/
 
 # Misc
+db.txt
 todo.txt
 install.txt
 instructions.txt
