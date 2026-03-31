@@ -264,7 +264,7 @@ export default function Cart() {
                 fullWidth
                 onClick={handleRefresh}
                 disabled={refreshing}
-                sx={{ mb: 2 }}
+                sx={{ mb: 2, mt: 2 }}
               >
                 {refreshing ? 'Refreshing...' : 'Refresh Prices'}
               </Button>
@@ -275,6 +275,7 @@ export default function Cart() {
                 fullWidth
                 onClick={handleSubmitOrder}
                 disabled={submitOrderMutation.isPending || items.length === 0}
+                sx={{ mb: 2, mt: 2 }}
               >
                 {submitOrderMutation.isPending ? (
                   <>

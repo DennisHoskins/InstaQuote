@@ -601,7 +601,7 @@ def import_metal_prices(pg_cursor):
         pg_cursor.execute("""
             INSERT INTO metal_prices (ss_price, gold_price, synced_at)
             VALUES (%s, %s, %s)
-        """, (row[0], row[1], datetime.now()))
+        """, (row[0], row[1], datetime.now(timezone.utc)))
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
         print(f"[{end_time.strftime('%H:%M:%S')}] Imported metal prices: SS=${row[0]}, Gold=${row[1]} ({duration:.2f}s)")

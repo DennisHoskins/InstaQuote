@@ -7,8 +7,14 @@ export default defineConfig({
   ],
   build: {
     rollupOptions: {
+      input: {
+        main: 'index.html',
+        embed: 'src/embed/main.tsx',
+      },
       output: {
-        entryFileNames: 'index.js',
+        entryFileNames: (chunkInfo) => {
+          return chunkInfo.name === 'embed' ? 'embed.js' : 'index.js';
+        },
         chunkFileNames: 'chunks/[name].js',
         assetFileNames: 'assets/[name][extname]',
       },

@@ -137,4 +137,20 @@ function instaquote_app_shortcode() {
 }
 
 add_shortcode('instaquote_app', 'instaquote_app_shortcode');
+
+function instaquote_embed_shortcode() {
+    $version = time();
+    $plugin_url = plugin_dir_url(__FILE__);
+    ob_start();
+    ?>
+    <script>
+        window.instaquoteNonce = "<?php echo wp_create_nonce('wp_rest'); ?>";
+    </script>
+    <div id="root"></div>
+    <script type="module" src="<?php echo $plugin_url; ?>embed.js?v=<?php echo $version; ?>"></script>
+    <?php
+    return ob_get_clean();
+}
+
+add_shortcode('instaquote_embed', 'instaquote_embed_shortcode');
 ?>

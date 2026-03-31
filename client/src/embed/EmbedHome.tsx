@@ -1,16 +1,16 @@
-import { Link, useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Typography } from '@mui/material';
 import { usePricesLastSync } from '../hooks/usePricesLastSync';
-import NavBar from '../components/NavBar';
+import EmbedNavBar from './EmbedNavBar';
 import SearchBar from '../components/SearchBar';
 
-export default function Home() {
-  const navigate = useNavigate();
+const APP_BASE = 'https://destinationjewelry.com/instaquote/#';
+
+export default function EmbedHome() {
   const { syncedAtLabel } = usePricesLastSync();
 
   const handleSearch = (value: string) => {
     if (value.trim()) {
-      navigate(`/search?q=${encodeURIComponent(value)}`);
+      window.location.href = `${APP_BASE}/search?q=${encodeURIComponent(value)}`;
     }
   };
 
@@ -19,7 +19,6 @@ export default function Home() {
       <Box
         sx={{
           mt: '25px',
-          minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-start',
@@ -43,25 +42,25 @@ export default function Home() {
         </Typography>
 
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <NavBar />
+          <EmbedNavBar />
         </Box>        
 
         <Box sx={{ display: 'flex', gap: 3, width: '100%', px: { xs: 2, sm: 0 } }}>
           <Button
+            component="a"
+            href={`${APP_BASE}/catalog`}
             variant="contained"
             size="large"
-            component={Link}
-            to='/catalog'
             sx={{ flex: 1, py: 2, textAlign: 'center' }}
           >
             Browse Catalog
           </Button>
 
           <Button
+            component="a"
+            href={`${APP_BASE}/destinations`}
             variant="contained"
             size="large"
-            component={Link}
-            to='/destinations'
             sx={{ flex: 1, py: 2, textAlign: 'center' }}
           >
             Choose Destination
@@ -79,7 +78,7 @@ export default function Home() {
           <Typography variant="caption" color="text.secondary">
             Prices last updated {syncedAtLabel}
           </Typography>
-        )}        
+        )}
       </Box>
     </Container>
   );

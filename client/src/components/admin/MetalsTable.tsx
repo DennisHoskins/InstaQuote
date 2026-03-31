@@ -20,7 +20,6 @@ const columns: Column[] = [
     key: 'date', 
     label: 'Date',
     format: (value, row) => {
-      // Handle both 'date' and 'synced_at' field names
       const dateValue = value || row.synced_at;
       return new Date(dateValue).toLocaleString('en-US', {
         month: 'short',
@@ -28,7 +27,9 @@ const columns: Column[] = [
         year: 'numeric',
         hour: 'numeric',
         minute: '2-digit',
-        hour12: true
+        hour12: true,
+        timeZone: 'America/New_York',
+        timeZoneName: 'short',
       });
     }
   },

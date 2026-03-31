@@ -12,7 +12,9 @@ export function usePricesLastSync() {
 
   const syncedAtLabel = (() => {
     if (!data?.synced_at) return null;
-    return new Date(data.synced_at).toLocaleString('en-US', {
+    const date = new Date(data.synced_at);
+    date.setHours(date.getHours() + 4);
+    return date.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
