@@ -35,15 +35,14 @@ router.get('/', [
         ORDER BY ii.item_code
       )
       SELECT 
-      ci.*,
-      EXISTS (
-        SELECT 1 FROM dropbox_files 
-        WHERE file_name_no_ext = ci.item_code
-      ) as has_image,
-      ipi.shared_link as primary_image_url
-      FROM inventory_items ci
-      LEFT JOIN item_primary_images ipi ON ipi.item_code_key = ci.item_code
-      WHERE 1=1
+        ci.*,
+        m.sku,
+        EXISTS (...) as has_image,
+        ipi.shared_link as primary_image_url
+        FROM inventory_items ci
+        LEFT JOIN item_sku_map m ON m.item_code = ci.item_code
+        LEFT JOIN item_primary_images ipi ON ipi.item_code_key = ci.item_code
+        WHERE 1=1      
     `;
     const queryParams: any[] = [];
     let paramCount = 0;

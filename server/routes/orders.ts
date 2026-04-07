@@ -69,7 +69,10 @@ router.post('/', [
     for (const item of items) {
       // Get item details from inventory
       const itemResult = await client.query(
-        'SELECT sku, description FROM inventory_items WHERE item_code = $1 LIMIT 1',
+        `SELECT ii.description, m.sku
+        FROM inventory_items ii
+        LEFT JOIN item_sku_map m ON m.item_code = ii.item_code
+        WHERE ii.item_code = $1 LIMIT 1`,
         [item.item_code]
       );
 
@@ -266,16 +269,18 @@ router.get('/:id', [
     const itemsResult = await pool.query(
       `SELECT 
         oi.*,
+        m.sku,
         CASE 
           WHEN df.shared_link IS NOT NULL THEN 
             REPLACE(REPLACE(df.shared_link, '&dl=0', '&raw=1'), '&dl=1', '&raw=1')
           ELSE NULL
         END as image_url
-      FROM order_items oi
-      LEFT JOIN inventory_items ii ON ii.item_code = oi.item_code
-      LEFT JOIN sku_images si ON si.sku = ii.sku AND si.is_primary = true
-      LEFT JOIN dropbox_files df ON df.id = si.image_id
-      WHERE oi.order_id = $1 
+        FROM order_items oi
+        LEFT JOIN inventory_items ii ON ii.item_code = oi.item_code
+        LEFT JOIN item_sku_map m ON m.item_code = oi.item_code
+        LEFT JOIN sku_images si ON si.sku = m.sku AND si.is_primary = true
+        LEFT JOIN dropbox_files df ON df.id = si.image_id
+        WHERE oi.order_id = $1 
       ORDER BY oi.id`,
       [id]
     );
@@ -340,18 +345,19 @@ router.post('/:id/reorder', [
         `SELECT 
           ii.total_ws_price,
           ii.description,
-          ii.sku,
+          m.sku,
           ii.category,
           CASE 
             WHEN df.shared_link IS NOT NULL THEN 
               REPLACE(REPLACE(df.shared_link, '?dl=0', '?raw=1'), '?dl=1', '?raw=1')
             ELSE NULL
           END as image_url
-         FROM inventory_items ii
-         LEFT JOIN sku_images si ON si.sku = ii.sku AND si.is_primary = true
-         LEFT JOIN dropbox_files df ON df.id = si.image_id
-         WHERE ii.item_code = $1 AND ii.inactive = false
-         LIMIT 1`,
+        FROM inventory_items ii
+        LEFT JOIN item_sku_map m ON m.item_code = ii.item_code
+        LEFT JOIN sku_images si ON si.sku = m.sku AND si.is_primary = true
+        LEFT JOIN dropbox_files df ON df.id = si.image_id
+        WHERE ii.item_code = $1 AND ii.inactive = false
+        LIMIT 1`,
         [item.item_code]
       );
 

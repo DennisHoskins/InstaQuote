@@ -51,12 +51,12 @@ router.get('/:id', [
         si.is_primary,
         si.match_type,
         si.confidence,
-        COUNT(ii.item_code) as item_count
-       FROM sku_images si
-       LEFT JOIN inventory_items ii ON ii.sku = si.sku
-       WHERE si.image_id = $1
-       GROUP BY si.id, si.sku, si.is_primary, si.match_type, si.confidence
-       ORDER BY si.is_primary DESC, si.confidence DESC`,
+        COUNT(m.item_code) as item_count
+      FROM sku_images si
+      LEFT JOIN item_sku_map m ON m.sku = si.sku
+      WHERE si.image_id = $1
+      GROUP BY si.id, si.sku, si.is_primary, si.match_type, si.confidence
+      ORDER BY si.is_primary DESC, si.confidence DESC`,
       [id]
     );
 
