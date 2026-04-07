@@ -31,11 +31,11 @@ export default function EmbedHome() {
           component="h1"
           sx={{ fontSize: { xs: '2rem', sm: '3.75rem' }, textAlign: 'center' }}
         >
-          New! InstaQuote Ordering
+          New! InstaQuote<br />Pricing and Ordering
         </Typography>
 
         <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', maxWidth: 800 }}>
-          InstaQuote makes browsing and ordering from our full product catalog faster and easier than ever. 
+          InstaQuote makes browsing and ordering from our full product catalog and destination collections faster and easier than ever. 
           Search, filter, and view real-time pricing across thousands of items, build a quote in minutes, 
           and submit your order directly online. InstaQuote is fully integrated with your account, ensuring 
           up-to-date availability, accurate pricing, and a streamlined ordering experience from start to finish.

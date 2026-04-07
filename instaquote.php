@@ -145,6 +145,9 @@ function instaquote_embed_shortcode() {
     ?>
     <script>
         window.instaquoteNonce = "<?php echo wp_create_nonce('wp_rest'); ?>";
+        window.addEventListener('load', function() {
+            window.scrollTo(0, 0);
+        });
     </script>
     <div id="root"></div>
     <script type="module" src="<?php echo $plugin_url; ?>embed.js?v=<?php echo $version; ?>"></script>
