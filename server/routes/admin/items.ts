@@ -37,7 +37,7 @@ router.get('/', [
       SELECT 
         ci.*,
         m.sku,
-        EXISTS (...) as has_image,
+        EXISTS (SELECT 1 FROM dropbox_files WHERE file_name_no_ext = ci.item_code) as has_image,
         ipi.shared_link as primary_image_url
         FROM inventory_items ci
         LEFT JOIN item_sku_map m ON m.item_code = ci.item_code
@@ -49,7 +49,7 @@ router.get('/', [
 
     if (search) {
       paramCount++;
-      queryText += ` AND (item_code ILIKE $${paramCount} OR description ILIKE $${paramCount})`;
+      queryText += ` AND (ci.item_code ILIKE $${paramCount} OR ci.description ILIKE $${paramCount})`;
       queryParams.push(`%${search}%`);
     }
 
@@ -64,7 +64,7 @@ router.get('/', [
     const countResult = await pool.query(countQuery, queryParams);
     const total = parseInt(countResult.rows[0].count);
 
-    queryText += ` ORDER BY item_code LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`;
+    queryText += ` ORDER BY ci.item_code LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`;
     queryParams.push(limit, offset);
 
     const result = await pool.query(queryText, queryParams);
