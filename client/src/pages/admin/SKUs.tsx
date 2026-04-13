@@ -9,6 +9,7 @@ import SkusTable from '../../components/admin/SkusTable';
 import PaginationControls from '../../components/PaginationControls';
 import ErrorAlert from '../../components/ErrorAlert';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import * as XLSX from 'xlsx';
 
 export default function AdminSKUs() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -54,6 +55,41 @@ export default function AdminSKUs() {
     return <ErrorAlert message="Failed to load SKUs" />;
   }
 
+  const handleExport = async () => {
+    const exportData = await api.getSkusExport(
+      search || undefined,
+      hasImage === 'true' ? true : hasImage === 'false' ? false : undefined
+    );
+
+    const headers = ['SKU', 'Item Count', 'Image Count', 'Has Primary Image', 'Image URL'];
+    const ws: XLSX.WorkSheet = {};
+
+    // Write headers
+    headers.forEach((h, i) => {
+      ws[XLSX.utils.encode_cell({ r: 0, c: i })] = { v: h, t: 's' };
+    });
+
+    // Write rows
+    exportData.items.forEach((sku: any, rowIdx: number) => {
+      const r = rowIdx + 1;
+      ws[XLSX.utils.encode_cell({ r, c: 0 })] = { v: sku.sku, t: 's' };
+      ws[XLSX.utils.encode_cell({ r, c: 1 })] = { v: sku.item_count, t: 'n' };
+      ws[XLSX.utils.encode_cell({ r, c: 2 })] = { v: sku.image_count, t: 'n' };
+      ws[XLSX.utils.encode_cell({ r, c: 3 })] = { v: sku.has_primary_image ? 'Yes' : 'No', t: 's' };
+      if (sku.primary_image_url) {
+        ws[XLSX.utils.encode_cell({ r, c: 4 })] = { v: sku.primary_image_url, t: 's', l: { Target: sku.primary_image_url } };
+      } else {
+        ws[XLSX.utils.encode_cell({ r, c: 4 })] = { v: '', t: 's' };
+      }
+    });
+
+    ws['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: exportData.items.length, c: headers.length - 1 } });
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'SKUs');
+    XLSX.writeFile(wb, `skus-${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <PageHeader 
@@ -65,6 +101,9 @@ export default function AdminSKUs() {
         showNavBar={false}
         rightAction={
           <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2 }}>
+            <Button variant="outlined" size="small" onClick={handleExport}>
+              Export
+            </Button>            
             <Button
               component={Link}
               to='/admin/sku-items'

@@ -70,6 +70,13 @@ export const api = {
     return apiClient.get(`/admin/items?${params}`);
   },
 
+  getItemsExport: async (search?: string, hasImage?: boolean) => {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (hasImage !== undefined) params.append('has_image', hasImage.toString());
+    return apiClient.get(`/admin/items/export?${params}`);
+  },
+
   getImagesStats: async () => {
     return apiClient.get('/admin/images-stats');
   },
@@ -137,6 +144,13 @@ export const api = {
 
   getSkuDetail: async (sku: string) => {
     return apiClient.get(`/admin/skus/${sku}`);
+  },
+
+  getSkusExport: async (search?: string, hasImage?: boolean) => {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (hasImage !== undefined) params.append('has_image', hasImage.toString());
+    return apiClient.get(`/admin/skus/export?${params}`);
   },
 
   // Sync operations
