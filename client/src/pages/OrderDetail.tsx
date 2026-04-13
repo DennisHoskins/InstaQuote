@@ -228,6 +228,16 @@ export default function OrderDetail() {
 
             <Divider sx={{ my: 2 }} />
 
+            {(order.gold_price || order.ss_price) && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Metals at Time of Order<br />
+                  {order.gold_price && <>Gold: ${Number(order.gold_price).toFixed(2)}<br /></>}
+                  {order.ss_price && <>Silver: ${Number(order.ss_price).toFixed(2)}</>}
+                </Typography>
+              </Box>
+            )}
+
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
               <Typography variant="h6">Total:</Typography>
               <Typography variant="h6" color="primary">

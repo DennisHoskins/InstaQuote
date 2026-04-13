@@ -20,7 +20,6 @@ DESTINATION_DBS = [
     r"D:\Shared Folders\Costing\Costing - Destination M-Z.mdb",
 ]
 
-
 # Access database paths
 #CBC_DB_PATH = r"T:\Costing - CBC.mdb"
 #DESTINATION_DBS = [

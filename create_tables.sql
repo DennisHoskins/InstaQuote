@@ -101,6 +101,8 @@ CREATE TABLE orders (
     total_amount DECIMAL(10, 2) NOT NULL,
     status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'cancelled')),
     notes TEXT,
+    gold_price DECIMAL(10, 2),
+    ss_price DECIMAL(10, 2),    
     deleted_at TIMESTAMP,
     deleted_by INTEGER,
     updated_at TIMESTAMP DEFAULT NOW(),

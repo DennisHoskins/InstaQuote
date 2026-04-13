@@ -135,6 +135,8 @@ router.get('/:id', [
     res.json({
       ...order,
       total_amount: parseFloat(order.total_amount),
+      gold_price: order.gold_price ? parseFloat(order.gold_price) : null,
+      ss_price: order.ss_price ? parseFloat(order.ss_price) : null,      
       items: itemsResult.rows.map((item: any) => ({
         ...item,
         quantity: parseInt(item.quantity),

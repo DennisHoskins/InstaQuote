@@ -35,6 +35,12 @@ router.post('/', [
     const { items, notes } = req.body;
     const user = req.user!;
 
+    // Fetch current metal prices
+    const metalsResult = await pool.query(
+      `SELECT gold_price, ss_price FROM metal_prices ORDER BY synced_at DESC LIMIT 1`
+    );
+    const metals = metalsResult.rows[0] || null;    
+
     // Calculate total
     const totalAmount = items.reduce((sum: number, item: any) => {
       return sum + (item.unit_price * item.quantity);
@@ -57,10 +63,10 @@ router.post('/', [
 
     // Insert order
     const orderResult = await client.query(
-      `INSERT INTO orders (order_number, user_id, user_name, user_email, total_amount, notes, updated_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $2)
-       RETURNING id, order_number, total_amount, status, created_at`,
-      [orderNumber, user.id, user.username, user.email, totalAmount.toFixed(2), notes || null]
+      `INSERT INTO orders (order_number, user_id, user_name, user_email, total_amount, notes, gold_price, ss_price, updated_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $2)
+       RETURNING id, order_number, total_amount, status, gold_price, ss_price, created_at`,
+      [orderNumber, user.id, user.username, user.email, totalAmount.toFixed(2), notes || null, metals?.gold_price || null, metals?.ss_price || null]
     );
 
     const order = orderResult.rows[0];
@@ -133,6 +139,8 @@ router.post('/', [
         id: order.id,
         order_number: order.order_number,
         total_amount: parseFloat(order.total_amount),
+        gold_price: order.gold_price ? parseFloat(order.gold_price) : null,
+        ss_price: order.ss_price ? parseFloat(order.ss_price) : null,
         status: order.status,
         created_at: order.created_at
       }
@@ -292,6 +300,8 @@ router.get('/:id', [
         total_amount: parseFloat(order.total_amount),
         status: order.status,
         notes: order.notes,
+        gold_price: order.gold_price ? parseFloat(order.gold_price) : null,
+        ss_price: order.ss_price ? parseFloat(order.ss_price) : null,        
         created_at: order.created_at,
         user_name: order.user_name,
         user_email: order.user_email

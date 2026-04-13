@@ -93,10 +93,29 @@ export default function ItemDetail() {
                   objectFit: 'contain',
                 }}
               />
+
             ) : (
-              <Typography variant="h6" color="text.secondary">
-                No Image Available
-              </Typography>
+              <Box sx={{ textAlign: 'center', p: 3 }}>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Contact us for more information:
+                </Typography>
+                <Typography variant="body1" fontWeight="medium" gutterBottom>
+                  Destination Jewelry Brands
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  5944 Coral Ridge Drive, Box 314
+                  <br />
+                  Coral Springs, FL 33076
+                </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  sales@destinationjewelry.com
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Tel: (954) 767-6185
+                  <br />
+                  Fax: (954) 767-6186
+                </Typography>
+              </Box>
             )}
           </Box>
 

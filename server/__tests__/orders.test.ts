@@ -28,6 +28,8 @@ describe('User Orders API', () => {
       expect(response.body.order).toHaveProperty('id');
       expect(response.body.order).toHaveProperty('order_number');
       expect(response.body.order).toHaveProperty('total_amount', 100);
+      expect(response.body.order).toHaveProperty('gold_price');
+      expect(response.body.order).toHaveProperty('ss_price');      
       expect(response.body.order).toHaveProperty('status', 'pending');
     });
 
@@ -174,6 +176,8 @@ describe('User Orders API', () => {
       expect(response.body.order).toHaveProperty('id', orderId);
       expect(response.body.order).toHaveProperty('order_number');
       expect(response.body.order).toHaveProperty('status', 'pending');
+      expect(response.body.order).toHaveProperty('gold_price');
+      expect(response.body.order).toHaveProperty('ss_price');      
       expect(Array.isArray(response.body.items)).toBe(true);
       expect(response.body.items.length).toBe(1);
       expect(response.body.items[0]).toHaveProperty('item_code', 'AC10SIL');
