@@ -81,4 +81,67 @@ router.get('/', [
   }
 });
 
+// Export all items (no pagination)
+router.get('/export', [
+  query('search').optional().isString(),
+  query('has_image').optional().isString().isIn(['true', 'false']),
+], async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const search = req.query.search as string || '';
+    const hasImage = req.query.has_image === 'true' ? true : req.query.has_image === 'false' ? false : undefined;
+
+    let queryText = `
+      WITH item_primary_images AS (
+        SELECT DISTINCT ON (ii.item_code)
+          ii.item_code as item_code_key,
+          df.shared_link
+        FROM inventory_items ii
+        JOIN item_sku_map m ON m.item_code = ii.item_code
+        JOIN sku_images si ON si.sku = m.sku AND si.is_primary = true
+        JOIN dropbox_files df ON df.id = si.image_id
+        ORDER BY ii.item_code
+      )
+      SELECT 
+        ci.*,
+        m.sku,
+        ipi.shared_link as primary_image_url
+      FROM inventory_items ci
+      LEFT JOIN item_sku_map m ON m.item_code = ci.item_code
+      LEFT JOIN item_primary_images ipi ON ipi.item_code_key = ci.item_code
+      WHERE 1=1
+    `;
+    const queryParams: any[] = [];
+    let paramCount = 0;
+
+    if (search) {
+      paramCount++;
+      queryText += ` AND (ci.item_code ILIKE $${paramCount} OR ci.description ILIKE $${paramCount})`;
+      queryParams.push(`%${search}%`);
+    }
+
+    if (hasImage !== undefined) {
+      const imageCondition = hasImage
+        ? `EXISTS (SELECT 1 FROM dropbox_files WHERE file_name_no_ext = ci.item_code)`
+        : `NOT EXISTS (SELECT 1 FROM dropbox_files WHERE file_name_no_ext = ci.item_code)`;
+      queryText += ` AND ${imageCondition}`;
+    }
+
+    queryText += ` ORDER BY ci.item_code`;
+
+    const result = await pool.query(queryText, queryParams);
+
+    res.json({
+      items: result.rows,
+    });
+  } catch (error) {
+    console.error('Error exporting items:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

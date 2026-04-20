@@ -154,7 +154,7 @@ router.get('/:id', [
 router.patch('/:id', [
   param('id').isInt().toInt(),
   body('status').optional().isIn(['pending', 'processing', 'completed', 'cancelled']),
-  body('notes').optional().isString(),
+  body('notes').optional().isString().trim().isLength({ max: 2000 }),
 ], async (req: AuthRequest, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

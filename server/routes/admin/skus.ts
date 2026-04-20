@@ -104,6 +104,90 @@ router.get('/', [
   }
 });
 
+// Export all SKUs (no pagination)
+router.get('/export', [
+  query('search').optional().isString(),
+  query('has_image').optional().isString(),
+], async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const search = req.query.search as string | undefined;
+    const rawHasImage = req.query.has_image;
+
+    const hasImageBool =
+      rawHasImage === 'true'
+        ? true
+        : rawHasImage === 'false'
+        ? false
+        : undefined;
+
+    let queryText = `
+      WITH sku_image_counts AS (
+        SELECT 
+          sku,
+          COUNT(*) as image_count,
+          BOOL_OR(is_primary) as has_primary_image
+        FROM sku_images
+        GROUP BY sku
+      ),
+      sku_primary_images AS (
+        SELECT DISTINCT ON (si.sku)
+          si.sku,
+          df.shared_link
+        FROM sku_images si
+        JOIN dropbox_files df ON df.id = si.image_id
+        WHERE si.is_primary = true
+        ORDER BY si.sku, si.confidence DESC
+      )
+      SELECT 
+        m.sku,
+        COUNT(*) as item_count,
+        COALESCE(sic.image_count, 0) as image_count,
+        COALESCE(sic.has_primary_image, false) as has_primary_image,
+        spi.shared_link as primary_image_url
+      FROM item_sku_map m
+      LEFT JOIN sku_image_counts sic ON sic.sku = m.sku
+      LEFT JOIN sku_primary_images spi ON spi.sku = m.sku
+      WHERE 1=1
+    `;
+    const queryParams: any[] = [];
+    let paramCount = 0;
+
+    if (search) {
+      paramCount++;
+      queryText += ` AND m.sku ILIKE $${paramCount}`;
+      queryParams.push(`%${search}%`);
+    }
+
+    if (hasImageBool === true) {
+      queryText += ` AND sic.image_count > 0`;
+    } else if (hasImageBool === false) {
+      queryText += ` AND (sic.image_count IS NULL OR sic.image_count = 0)`;
+    }
+
+    queryText += ` GROUP BY m.sku, sic.image_count, sic.has_primary_image, spi.shared_link ORDER BY m.sku`;
+
+    const result = await pool.query(queryText, queryParams);
+
+    res.json({
+      items: result.rows.map((row: any) => ({
+        sku: row.sku,
+        item_count: parseInt(row.item_count),
+        image_count: parseInt(row.image_count),
+        has_primary_image: row.has_primary_image,
+        primary_image_url: row.primary_image_url,
+      })),
+    });
+  } catch (error) {
+    console.error('Error exporting SKUs:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get SKU details with all items and images
 router.get('/:sku', [
   param('sku').trim().notEmpty(),

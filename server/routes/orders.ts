@@ -22,7 +22,7 @@ router.post('/', [
   body('items.*.item_code').trim().notEmpty(),
   body('items.*.quantity').isInt({ min: 1 }),
   body('items.*.unit_price').isFloat({ min: 0 }),
-  body('notes').optional().isString(),
+  body('notes').optional().isString().trim().isLength({ max: 2000 }),
 ], async (req: AuthRequest, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
