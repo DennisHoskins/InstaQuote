@@ -35,68 +35,46 @@ router.post('/', [
     const { items, notes } = req.body;
     const user = req.user!;
 
-    // Fetch current metal prices
-    const metalsResult = await pool.query(
+    await client.query('BEGIN');
+
+    // Get current metal prices
+    const pricesResult = await client.query(
       `SELECT gold_price, ss_price FROM metal_prices ORDER BY synced_at DESC LIMIT 1`
     );
-    const metals = metalsResult.rows[0] || null;    
+    const prices = pricesResult.rows[0] || { gold_price: null, ss_price: null };
 
-    // Calculate total
     const totalAmount = items.reduce((sum: number, item: any) => {
       return sum + (item.unit_price * item.quantity);
     }, 0);
 
-    await client.query('BEGIN');
+    const orderNumber = generateOrderNumber();
 
-    // Generate unique order number
-    let orderNumber = generateOrderNumber();
-    let attempts = 0;
-    while (attempts < 10) {
-      const existing = await client.query(
-        'SELECT id FROM orders WHERE order_number = $1',
-        [orderNumber]
-      );
-      if (existing.rows.length === 0) break;
-      orderNumber = generateOrderNumber();
-      attempts++;
-    }
-
-    // Insert order
     const orderResult = await client.query(
-      `INSERT INTO orders (order_number, user_id, user_name, user_email, total_amount, notes, gold_price, ss_price, updated_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $2)
-       RETURNING id, order_number, total_amount, status, gold_price, ss_price, created_at`,
-      [orderNumber, user.id, user.username, user.email, totalAmount.toFixed(2), notes || null, metals?.gold_price || null, metals?.ss_price || null]
+      `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, notes, gold_price, ss_price, updated_by)
+       VALUES ($1, $2, $3, $4, 'pending', $5, $6, $7, $8, $1)
+       RETURNING *`,
+      [user.id, user.username, user.email, orderNumber, totalAmount, notes || null, prices.gold_price, prices.ss_price]
     );
 
     const order = orderResult.rows[0];
 
-    // Insert order items
     for (const item of items) {
-      // Get item details from inventory
-      const itemResult = await client.query(
-        `SELECT ii.description, m.sku
-        FROM inventory_items ii
-        LEFT JOIN item_sku_map m ON m.item_code = ii.item_code
-        WHERE ii.item_code = $1 LIMIT 1`,
+      const descResult = await client.query(
+        `SELECT description FROM inventory_items WHERE item_code = $1 LIMIT 1`,
         [item.item_code]
       );
+      const description = descResult.rows[0]?.description ?? item.description ?? '';
 
-      const itemData = itemResult.rows[0];
-      const lineTotal = item.unit_price * item.quantity;
+      const skuResult = await client.query(
+        `SELECT sku FROM item_sku_map WHERE item_code = $1 LIMIT 1`,
+        [item.item_code]
+      );
+      const sku = skuResult.rows[0]?.sku ?? item.sku ?? '';
 
       await client.query(
         `INSERT INTO order_items (order_id, item_code, sku, description, quantity, unit_price, line_total)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [
-          order.id,
-          item.item_code,
-          itemData?.sku || null,
-          itemData?.description || null,
-          item.quantity,
-          item.unit_price.toFixed(2),
-          lineTotal.toFixed(2)
-        ]
+        [order.id, item.item_code, sku, description, item.quantity, item.unit_price, item.unit_price * item.quantity]
       );
     }
 
@@ -185,7 +163,8 @@ router.get('/', [
         o.total_amount,
         o.status,
         o.created_at,
-        COUNT(oi.id) as item_count
+        COUNT(oi.id) as item_count,
+        SUM(oi.quantity) as total_qty
       FROM orders o
       LEFT JOIN order_items oi ON oi.order_id = o.id
       WHERE o.user_id = $1 AND o.deleted_at IS NULL
@@ -235,7 +214,8 @@ router.get('/', [
         total_amount: parseFloat(row.total_amount),
         status: row.status,
         created_at: row.created_at,
-        item_count: parseInt(row.item_count)
+        item_count: parseInt(row.item_count),
+        total_qty: parseInt(row.total_qty) || 0,
       })),
       total,
       page,

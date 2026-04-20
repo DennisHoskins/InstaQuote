@@ -31,7 +31,8 @@ router.get('/', [
     let queryText = `
       SELECT 
         o.*,
-        COUNT(oi.id) as item_count
+        COUNT(oi.id) as item_count,
+        SUM(oi.quantity) as total_qty
       FROM orders o
       LEFT JOIN order_items oi ON oi.order_id = o.id
       WHERE o.deleted_at IS NULL
@@ -78,6 +79,7 @@ router.get('/', [
       items: result.rows.map((row: any) => ({
         ...row,
         item_count: parseInt(row.item_count),
+        total_qty: parseInt(row.total_qty) || 0,
         total_amount: parseFloat(row.total_amount),
       })),
       total,

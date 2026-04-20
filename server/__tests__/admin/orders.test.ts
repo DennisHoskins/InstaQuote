@@ -59,6 +59,35 @@ describe('Admin Orders API', () => {
         expect(allInRange).toBe(true);
       }
     });
+
+    it('should return total_qty in list items', async () => {
+      const orderResult = await pool.query(
+        `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
+         VALUES (1, 'TestUser', 'TestUser@example.com', $1, 'pending', 150, 1)
+         RETURNING id`,
+        [uniqueOrderNumber()]
+      );
+      const orderId = orderResult.rows[0].id;
+
+      await pool.query(
+        `INSERT INTO order_items (order_id, item_code, sku, description, quantity, unit_price, line_total)
+         VALUES
+         ($1, 'AC10SIL', 'ACSIL', 'SS NAXO DIDRACHM (SILENO) W/14KY BAIL', 2, 50, 100),
+         ($1, 'ABC6', 'ABC6', 'Test Item', 3, 50, 150)`,
+        [orderId]
+      );
+
+      const response = await request(app)
+        .get('/api/admin/orders')
+        .query({ page: 1, limit: 25 });
+
+      expect(response.status).toBe(200);
+
+      const order = response.body.items.find((o: any) => o.id === orderId);
+      expect(order).toBeDefined();
+      expect(order).toHaveProperty('total_qty', 5);
+      expect(typeof order.total_qty).toBe('number');
+    });    
   });
 
   describe('GET /api/admin/orders/:id', () => {

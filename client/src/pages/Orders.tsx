@@ -128,6 +128,12 @@ export default function Orders() {
       format: (value) => value.toLocaleString()
     },
     { 
+      key: 'total_qty', 
+      label: 'Qty',
+      align: 'right',
+      format: (value) => value.toLocaleString()
+    },    
+    { 
       key: 'total_amount', 
       label: 'Total',
       align: 'right',
