@@ -9,6 +9,7 @@ import searchRouter from './routes/search.js';
 import catalogRouter from './routes/catalog.js';
 import destinationsRouter from './routes/destinations.js';
 import itemsRouter from './routes/items.js';
+import cartRouter from './routes/cart.js';
 import ordersRouter from './routes/orders.js';
 import pricesRouter from './routes/prices.js';
 import adminRouter from './routes/admin/admin.js';
@@ -20,6 +21,7 @@ import adminSkusRouter from './routes/admin/skus.js';
 import adminSkuItemsRouter from './routes/admin/sku-items.js';
 import adminSkuImagesRouter from './routes/admin/sku-images.js';
 import adminMetalsRouter from './routes/admin/metals.js';
+import adminCartsRouter from './routes/admin/carts.js';
 import adminOrdersRouter from './routes/admin/orders.js';
 import adminVerifyRouter from './routes/admin/verify.js';
 
@@ -55,6 +57,7 @@ app.use('/api/search', requireAuth, searchRouter);
 app.use('/api/catalog', requireAuth, catalogRouter);
 app.use('/api/destinations', requireAuth, destinationsRouter);
 app.use('/api/items', requireAuth, itemsRouter);
+app.use('/api/cart', requireAuth, cartRouter);
 app.use('/api/orders', requireAuth, ordersRouter);
 app.use('/api/prices', requireAuth, pricesRouter);
 
@@ -68,6 +71,7 @@ app.use('/api/admin/sku-items', requireAuth, requireAdmin, adminSkuItemsRouter);
 app.use('/api/admin/sku-images', requireAuth, requireAdmin, adminSkuImagesRouter);
 app.use('/api/admin/metals', requireAuth, requireAdmin, adminMetalsRouter);
 app.use('/api/admin/orders', requireAuth, requireAdmin, adminOrdersRouter);
+app.use('/api/admin/carts', requireAuth, requireAdmin, adminCartsRouter);
 app.use('/api/admin/verify', requireAuth, requireAdmin, adminVerifyRouter);
 
 // Don't start server if we're testing

@@ -91,6 +91,21 @@ CREATE INDEX idx_sync_log_user ON sync_log(user_name);
 CREATE INDEX idx_sync_log_status ON sync_log(status);
 CREATE INDEX idx_sync_log_started_at ON sync_log(started_at DESC);
 
+-- User shopping cart table
+CREATE TABLE user_cart (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  user_name VARCHAR(100) NOT NULL,
+  user_email VARCHAR(255) NOT NULL,
+  item_code VARCHAR(50) NOT NULL,
+  quantity INTEGER NOT NULL DEFAULT 1,
+  unit_price NUMERIC(10, 2) NOT NULL,
+  added_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, item_code)
+);
+
+CREATE INDEX idx_user_cart_user_id ON user_cart (user_id);
+
 -- User orders + items tables
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,

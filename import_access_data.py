@@ -20,6 +20,7 @@ DESTINATION_DBS = [
     r"D:\Shared Folders\Costing\Costing - Destination M-Z.mdb",
 ]
 
+
 # Access database paths
 #CBC_DB_PATH = r"T:\Costing - CBC.mdb"
 #DESTINATION_DBS = [
@@ -130,7 +131,6 @@ SKIP_DESTINATIONS = [
     'VIRGINIA TECH LOGO',
     'VIRINGIA TECH',
     'VIRGNIA TECH',
-    'W AND M UNIVERSITY',
     'WARE ACADEMY',
     'WEST VIRGINIA UNIVERSITY',
     'WEST VIRGINIA UNIVERSITY HOOK',

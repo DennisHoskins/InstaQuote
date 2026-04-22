@@ -13,6 +13,8 @@ import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';
 import OrderConfirmation from './pages/OrderConfirmation';
 import Admin from './pages/admin/Admin';
+import AdminCarts from './pages/admin/AdminCarts';
+import AdminCart from './pages/admin/AdminCart';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminOrder from './pages/admin/AdminOrder';
 import Verify from './pages/admin/Verify';
@@ -53,6 +55,8 @@ export default function App() {
             <Route path="items" element={<Items />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="orders/:id" element={<AdminOrder />} />
+            <Route path="carts" element={<AdminCarts />} />
+            <Route path="carts/:user_id" element={<AdminCart />} />
             <Route path="skus/:sku" element={<SKU />} />
             <Route path="skus" element={<SKUs />} />
             <Route path="images" element={<Images />} />

@@ -29,7 +29,7 @@ export default function Admin() {
     return <ErrorAlert message="Failed to load admin dashboard data" />;
   }
 
-  const { syncStats, itemsStats, imagesStats, metalsData, skuStats, ordersData } = data;
+  const { syncStats, itemsStats, imagesStats, metalsData, skuStats, ordersData, cartStats } = data;
 
   const getRelativeTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -62,6 +62,9 @@ export default function Admin() {
             totalOrders={ordersData.totalOrders}
             totalRevenue={ordersData.totalRevenue}
             linkTo="/admin/orders"
+            cartsCount={cartStats.usersWithCarts}
+            cartsValue={cartStats.totalValue}
+            cartsLinkTo="/admin/carts"
           />
         </Grid>
 

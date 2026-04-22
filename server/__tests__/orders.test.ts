@@ -2,11 +2,14 @@ import request from 'supertest';
 import app from '../server';
 import pool from '../db/connection';
 
-// Helper to generate unique order number
 const uniqueOrderNumber = () => `ORD-TEST-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
 describe('User Orders API', () => {
   describe('POST /api/orders', () => {
+    beforeEach(async () => {
+      await pool.query(`DELETE FROM user_cart WHERE user_id IN (1, 2)`);
+    });
+
     it('should create a new order', async () => {
       const orderData = {
         items: [
@@ -29,7 +32,7 @@ describe('User Orders API', () => {
       expect(response.body.order).toHaveProperty('order_number');
       expect(response.body.order).toHaveProperty('total_amount', 100);
       expect(response.body.order).toHaveProperty('gold_price');
-      expect(response.body.order).toHaveProperty('ss_price');      
+      expect(response.body.order).toHaveProperty('ss_price');
       expect(response.body.order).toHaveProperty('status', 'pending');
     });
 
@@ -85,11 +88,38 @@ describe('User Orders API', () => {
       // 3 * 25.50 + 2 * 10.25 = 76.50 + 20.50 = 97.00
       expect(response.body.order.total_amount).toBe(97);
     });
+
+    it('should clear the user cart after order is placed', async () => {
+      await pool.query(
+        `INSERT INTO user_cart (user_id, user_email, user_name, item_code, quantity, unit_price)
+         VALUES (1, 'test@example.com', 'TestUser', 'AC10SIL', 2, 50.00)`
+      );
+
+      const orderData = {
+        items: [
+          {
+            item_code: 'AC10SIL',
+            quantity: 2,
+            unit_price: 50.00,
+          },
+        ],
+      };
+
+      const response = await request(app)
+        .post('/api/orders')
+        .send(orderData);
+
+      expect(response.status).toBe(200);
+
+      const cartResult = await pool.query(
+        `SELECT * FROM user_cart WHERE user_id = 1`
+      );
+      expect(cartResult.rows.length).toBe(0);
+    });
   });
 
   describe('GET /api/orders', () => {
     it('should return paginated list of user orders', async () => {
-      // Create a test order first
       await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
          VALUES (1, 'TestUser', 'test@example.com', $1, 'pending', 100, 1)`,
@@ -145,8 +175,6 @@ describe('User Orders API', () => {
         .query({ page: 1, limit: 25 });
 
       expect(response.status).toBe(200);
-      
-      // Just verify we got results - user filtering handled by auth middleware
       expect(response.body.items).toBeDefined();
     });
 
@@ -177,12 +205,11 @@ describe('User Orders API', () => {
       expect(order).toBeDefined();
       expect(order).toHaveProperty('total_qty', 5);
       expect(typeof order.total_qty).toBe('number');
-    });    
+    });
   });
 
   describe('GET /api/orders/:id', () => {
     it('should return order detail with items', async () => {
-      // Create test order
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
          VALUES (1, 'TestUser', 'test@example.com', $1, 'pending', 100, 1)
@@ -206,7 +233,7 @@ describe('User Orders API', () => {
       expect(response.body.order).toHaveProperty('order_number');
       expect(response.body.order).toHaveProperty('status', 'pending');
       expect(response.body.order).toHaveProperty('gold_price');
-      expect(response.body.order).toHaveProperty('ss_price');      
+      expect(response.body.order).toHaveProperty('ss_price');
       expect(Array.isArray(response.body.items)).toBe(true);
       expect(response.body.items.length).toBe(1);
       expect(response.body.items[0]).toHaveProperty('item_code', 'AC10SIL');
@@ -220,7 +247,6 @@ describe('User Orders API', () => {
     });
 
     it('should not return other users orders', async () => {
-      // Create order for different user
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
          VALUES (999, 'OtherUser', 'other@example.com', $1, 'pending', 100, 999)
@@ -231,14 +257,12 @@ describe('User Orders API', () => {
 
       const response = await request(app).get(`/api/orders/${orderId}`);
 
-      // Should return 404 because the order belongs to a different user
       expect(response.status).toBe(404);
     });
   });
 
   describe('POST /api/orders/:id/reorder', () => {
     it('should create a new order from existing order', async () => {
-      // Create original order
       const originalOrderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
          VALUES (1, 'TestUser', 'test@example.com', $1, 'completed', 150, 1)
@@ -249,7 +273,7 @@ describe('User Orders API', () => {
 
       await pool.query(
         `INSERT INTO order_items (order_id, item_code, sku, description, quantity, unit_price, line_total)
-         VALUES 
+         VALUES
          ($1, 'AC10SIL', 'ACSIL', 'SS NAXO DIDRACHM (SILENO) W/14KY BAIL', 2, 50, 100),
          ($1, 'ABC6', 'ABC6', 'Test Item', 1, 50, 50)`,
         [originalOrderId]
@@ -261,8 +285,7 @@ describe('User Orders API', () => {
       expect(response.body).toHaveProperty('cart_items');
       expect(Array.isArray(response.body.cart_items)).toBe(true);
       expect(response.body.cart_items.length).toBeGreaterThan(0);
-      
-      // Verify cart items structure
+
       const item = response.body.cart_items[0];
       expect(item).toHaveProperty('item_code');
       expect(item).toHaveProperty('quantity');
@@ -278,7 +301,6 @@ describe('User Orders API', () => {
     });
 
     it('should not allow reordering other users orders', async () => {
-      // Create order for different user
       const orderResult = await pool.query(
         `INSERT INTO orders (user_id, user_name, user_email, order_number, status, total_amount, updated_by)
          VALUES (999, 'OtherUser', 'other@example.com', $1, 'completed', 100, 999)

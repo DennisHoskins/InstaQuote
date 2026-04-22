@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
@@ -64,6 +64,12 @@ export default function Cart() {
     await refreshPrices();
     setRefreshing(false);
   };
+
+  useEffect(() => {
+    if (items.length > 0) {
+      refreshPrices();
+    }
+  }, []);  
 
   if (items.length === 0) {
     return (

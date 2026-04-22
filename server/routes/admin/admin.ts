@@ -7,10 +7,9 @@ router.get('/dashboard', async (req: Request, res: Response) => {
   try {
     // Get sync stats for each type
     const syncStatsQuery = `
-      WITH sync_stats AS (
+      WITH recent_stats AS (
         SELECT 
           sync_type,
-          COUNT(*) as total_syncs,
           AVG(duration_seconds) as avg_duration,
           SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END)::float / COUNT(*) * 100 as success_rate
         FROM sync_log
@@ -35,17 +34,17 @@ router.get('/dashboard', async (req: Request, res: Response) => {
         ORDER BY sync_type, started_at DESC
       )
       SELECT 
-        ss.sync_type,
-        COALESCE(ss.success_rate, 0) as success_rate,
-        COALESCE(ss.avg_duration, 0) as avg_duration,
-        COALESCE(tr.total_runs, 0) as total_runs,
+        tr.sync_type,
+        COALESCE(rs.success_rate, 0) as success_rate,
+        COALESCE(rs.avg_duration, 0) as avg_duration,
+        tr.total_runs,
         ls.items_synced as last_items_synced,
         ls.duration_seconds as last_duration,
         ls.status as last_status,
         ls.started_at as last_started_at
-      FROM sync_stats ss
-      LEFT JOIN total_runs tr ON ss.sync_type = tr.sync_type
-      LEFT JOIN last_syncs ls ON ss.sync_type = ls.sync_type
+      FROM total_runs tr
+      LEFT JOIN recent_stats rs ON rs.sync_type = tr.sync_type
+      LEFT JOIN last_syncs ls ON ls.sync_type = tr.sync_type
     `;
 
     // Get orders stats
@@ -55,6 +54,15 @@ router.get('/dashboard', async (req: Request, res: Response) => {
         COALESCE(SUM(total_amount), 0) as total_revenue
       FROM orders
       WHERE deleted_at IS NULL
+    `;    
+
+    // Get carts stats
+    const cartStatsQuery = `
+      SELECT
+        COUNT(DISTINCT user_id) as users_with_carts,
+        COUNT(item_code) as total_items,
+        SUM(quantity * unit_price) as total_value
+      FROM user_cart
     `;    
 
     // Get items stats
@@ -137,6 +145,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     const [
       syncStatsResult,
       ordersStatsResult,
+      cartStatsResult,
       itemsStatsResult,
       skusStatsResult,
       imagesStatsResult,
@@ -148,6 +157,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     ] = await Promise.all([
       pool.query(syncStatsQuery),
       pool.query(ordersStatsQuery),
+      pool.query(cartStatsQuery),
       pool.query(itemsStatsQuery),
       pool.query(skusStatsQuery),
       pool.query(imagesStatsQuery),
@@ -222,6 +232,13 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     const ordersData = {
       totalOrders: parseInt(ordersStatsResult.rows[0].total_orders) || 0,
       totalRevenue: parseFloat(ordersStatsResult.rows[0].total_revenue) || 0,
+    };
+    
+    // Process carts stats
+    const cartStats = {
+      usersWithCarts: parseInt(cartStatsResult.rows[0].users_with_carts) || 0,
+      totalItems: parseInt(cartStatsResult.rows[0].total_items) || 0,
+      totalValue: parseFloat(cartStatsResult.rows[0].total_value) || 0,
     };    
 
     // Process items stats
@@ -289,6 +306,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     res.json({
       syncStats,
       ordersData,
+      cartStats,
       itemsStats,
       skuStats,
       imagesStats,

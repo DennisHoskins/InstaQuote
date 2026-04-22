@@ -40,9 +40,16 @@ router.get('/items', [
     // Get paginated items
     const itemsResult = await pool.query(
       `SELECT * FROM (
-        SELECT DISTINCT ON (i.item_code) i.item_code, i.cat_page, i.cat_page_order, m.sku, i.description, i.category, i.destination, i.total_ws_price, i.inactive
+        SELECT DISTINCT ON (i.item_code) i.item_code, i.cat_page, i.cat_page_order, m.sku, i.description, i.category, i.destination, i.total_ws_price, i.inactive,
+          CASE
+            WHEN df.shared_link IS NOT NULL THEN
+              REPLACE(REPLACE(df.shared_link, '?dl=0', '?raw=1'), '?dl=1', '?raw=1')
+            ELSE NULL
+          END as primary_image_url
         FROM inventory_items i
         LEFT JOIN item_sku_map m ON m.item_code = i.item_code
+        LEFT JOIN sku_images si ON si.sku = m.sku AND si.is_primary = true
+        LEFT JOIN dropbox_files df ON df.id = si.image_id
         ${whereClause}
         ORDER BY i.item_code
       ) sub

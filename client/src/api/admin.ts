@@ -211,6 +211,20 @@ export const api = {
     return apiClient.delete(`/admin/orders/${id}`);
   },
 
+  // Admin Carts
+  getCarts: async (page: number, limit: number, search?: string) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    if (search) params.append('search', search);
+    return apiClient.get(`/admin/carts?${params}`);
+  },
+
+  getCart: async (userId: number) => {
+    return apiClient.get(`/admin/carts/${userId}`);
+  },  
+
   getVerifyCatalog: async () => {
     return apiClient.get('/admin/verify/catalog');
   },
