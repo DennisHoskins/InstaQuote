@@ -35,20 +35,22 @@ export function exportOrdersListCsv(
     user_email?: string;
     created_at: string;
     item_count: number;
+    total_qty: number;
     total_amount: number;
     status: string;
   }>,
   includeCustomerInfo: boolean = false
 ): void {
   const headers = includeCustomerInfo
-    ? ['Order Number', 'Customer', 'Email', 'Date', 'Items', 'Total', 'Status']
-    : ['Order Number', 'Date', 'Items', 'Total', 'Status'];
+    ? ['Order Number', 'Customer', 'Email', 'Date', 'Items', 'Qty', 'Total', 'Status']
+    : ['Order Number', 'Date', 'Items', 'Qty', 'Total', 'Status'];
 
   const rows = orders.map((order) => {
     const baseRow = [
       order.order_number,
       new Date(order.created_at).toLocaleDateString(),
       order.item_count.toString(),
+      order.total_qty.toString(),
       `$${Number(order.total_amount).toFixed(2)}`,
       order.status,
     ];
@@ -60,6 +62,7 @@ export function exportOrdersListCsv(
         order.user_email || '',
         new Date(order.created_at).toLocaleDateString(),
         order.item_count.toString(),
+        order.total_qty.toString(),
         `$${Number(order.total_amount).toFixed(2)}`,
         order.status,
       ];
