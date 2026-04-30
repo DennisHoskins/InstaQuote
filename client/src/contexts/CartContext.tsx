@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { api } from '../api/client';
-import { apiClient, getNonce } from '../api/apiClient';
+import { apiClient, fetchNonce } from '../api/apiClient';
 
 export interface CartItem {
   item_code: string;
@@ -31,31 +31,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const nonce = getNonce();
-    if (!nonce) {
-      setLoaded(true);
-      return;
-    }
-
-    apiClient.get('/cart')
-      .then((data: any[]) => {
-        setItems(data.map((row: any) => ({
-          item_code: row.item_code,
-          sku: row.sku ?? '',
-          description: row.description ?? '',
-          category: row.category ?? '',
-          quantity: row.quantity,
-          unit_price: parseFloat(row.unit_price),
-          image_url: row.image_url ?? undefined,
-        })));
-      })
-      .catch(() => {
-        setItems([]);
-      })
-      .finally(() => {
-        localStorage.removeItem('instaquote_cart');
-        setLoaded(true);
-      });
+    fetchNonce().then(() => {
+      apiClient.get('/cart')
+        .then((data: any[]) => {
+          setItems(data.map((row: any) => ({
+            item_code: row.item_code,
+            sku: row.sku ?? '',
+            description: row.description ?? '',
+            category: row.category ?? '',
+            quantity: row.quantity,
+            unit_price: parseFloat(row.unit_price),
+            image_url: row.image_url ?? undefined,
+          })));
+        })
+        .catch(() => {
+          setItems([]);
+        })
+        .finally(() => {
+          localStorage.removeItem('instaquote_cart');
+          setLoaded(true);
+        });
+    });
   }, []);
 
   const addItem = (item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {

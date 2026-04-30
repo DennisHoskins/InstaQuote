@@ -209,6 +209,7 @@ router.post('/map-images', async (req: AuthRequest, res: Response) => {
 
   try {
     syncId = await startSync(user_name, 'image_map');
+    // const result = await generateMappings();
     const result = await generateMappings();
     await completeSync(syncId, startedAt, result.mappingsCreated);
     

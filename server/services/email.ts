@@ -68,7 +68,7 @@ export async function sendOrderConfirmation(data: OrderEmailData): Promise<void>
         </tfoot>
       </table>
       ${data.notes ? `<p><strong>Notes:</strong> ${data.notes}</p>` : ''}
-      <p>We'll be in touch shortly.</p>
+      <p>Please note that all prices are approximate wholesale prices and are subject to change based on current market rates. Orders received Monday through Friday by 5:00 p.m. EST will be processed the same day; all others will be processed on the next business day. Please allow up to three weeks for processing and shipping.</p>
     </div>
   `;
 

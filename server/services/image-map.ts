@@ -20,10 +20,13 @@ export async function generateMappings(): Promise<{ mappingsCreated: number; orp
 
   const orphansDeleted = await cleanupOrphanedMappings();
 
-  // Get all unmatched SKUs from item_sku_map
   const skuResult = await pool.query(`
     SELECT DISTINCT sku FROM item_sku_map
-    WHERE sku NOT IN (SELECT DISTINCT sku FROM sku_images)
+    WHERE sku NOT IN (
+      SELECT DISTINCT si.sku FROM sku_images si
+      JOIN dropbox_files df ON df.id = si.image_id
+      WHERE df.file_extension IN ('.jpg', '.jpeg', '.png', '.gif')
+    )
   `);
 
   const skus: string[] = skuResult.rows.map((r: any) => r.sku);
@@ -84,7 +87,83 @@ export async function generateMappings(): Promise<{ mappingsCreated: number; orp
   `);
 
   console.log(`[${new Date().toLocaleTimeString()}] Mappings generated`);
-  return { mappingsCreated, orphansDeleted };
+  const itemCodeResult = await generateMappingsByItemCode();
+  return { mappingsCreated: mappingsCreated + itemCodeResult.mappingsCreated, orphansDeleted };
+}
+
+async function generateMappingsByItemCode(): Promise<{ mappingsCreated: number }> {
+  console.log(`[${new Date().toLocaleTimeString()}] Generating SKU-Image mappings by item code...`);
+
+  // Process ALL SKUs that have item codes with exact filename matches
+  const skuResult = await pool.query(`
+    SELECT DISTINCT m.sku
+    FROM item_sku_map m
+    JOIN inventory_items i ON i.item_code = m.item_code
+    JOIN dropbox_files df ON UPPER(df.file_name_no_ext) = UPPER(i.item_code)
+    WHERE df.file_extension IN ('.jpg', '.jpeg', '.png', '.gif')
+  `);
+
+  const skus: string[] = skuResult.rows.map((r: any) => r.sku);
+  console.log(`[${new Date().toLocaleTimeString()}] Processing ${skus.length} SKUs with item code matches...`);
+
+  let mappingsCreated = 0;
+
+  for (const sku of skus) {
+    const result = await pool.query(`
+      INSERT INTO sku_images (sku, image_id, match_type, is_primary, confidence)
+      SELECT DISTINCT ON (df.id)
+        m.sku,
+        df.id,
+        'contains' as match_type,
+        FALSE as is_primary,
+        0.95 as confidence
+      FROM item_sku_map m
+      JOIN inventory_items i ON i.item_code = m.item_code
+      JOIN dropbox_files df ON UPPER(df.file_name_no_ext) = UPPER(i.item_code)
+      WHERE m.sku = $1
+      AND df.file_extension IN ('.jpg', '.jpeg', '.png', '.gif')
+      ORDER BY df.id
+      ON CONFLICT (sku, image_id) DO NOTHING
+    `, [sku]);
+
+    mappingsCreated += result.rowCount || 0;
+
+    if (mappingsCreated > 0 && mappingsCreated % 100 === 0) {
+      console.log(`[${new Date().toLocaleTimeString()}] ${mappingsCreated} mappings created so far...`);
+    }
+
+    // Clear existing primary for this SKU
+    await pool.query(`
+      UPDATE sku_images SET is_primary = FALSE WHERE sku = $1
+    `, [sku]);
+
+    // Set primary — prefer 8MM item code match, then 6MM, then best confidence
+    await pool.query(`
+      UPDATE sku_images si
+      SET is_primary = TRUE
+      WHERE si.sku = $1
+      AND si.id = (
+        SELECT si2.id
+        FROM sku_images si2
+        JOIN dropbox_files df ON df.id = si2.image_id
+        JOIN item_sku_map m ON m.sku = si2.sku
+        JOIN inventory_items i ON i.item_code = m.item_code
+        WHERE si2.sku = $1
+        AND df.file_extension IN ('.jpg', '.jpeg', '.png', '.gif')
+        AND UPPER(df.file_name_no_ext) = UPPER(i.item_code)
+        ORDER BY
+          CASE WHEN i.item_code ~ (m.sku || '8') THEN 0
+               WHEN i.item_code ~ (m.sku || '6') THEN 1
+               ELSE 2 END,
+          si2.confidence DESC,
+          si2.id
+        LIMIT 1
+      )
+    `, [sku]);
+  }
+
+  console.log(`[${new Date().toLocaleTimeString()}] Item code mappings generated — ${mappingsCreated} created`);
+  return { mappingsCreated };
 }
 
 export async function deleteAllMappings(): Promise<{ mappingsDeleted: number }> {

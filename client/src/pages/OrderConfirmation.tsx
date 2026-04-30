@@ -59,7 +59,7 @@ export default function OrderConfirmation() {
         </Alert>
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-          We'll process your order and contact you shortly with shipping details.
+          Orders received Monday through Friday by 5:00 p.m. EST will be processed the same day; all others will be processed on the next business day. Please allow up to three weeks for processing and shipping.
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
