@@ -46,7 +46,7 @@ export default function AdminItems() {
   const handleExport = async () => {
     const exportData = await api.getItemsExport(search || undefined);
 
-    const headers = ['Item Code', 'SKU', 'Description', 'Category', 'Destination', 'Page', 'Page Order', 'Price', 'Inactive', 'Image URL'];
+    const headers = ['Item Code', 'SKU', 'Description', 'Category', 'Destination', 'Price', 'Inactive', 'Image URL'];
     const ws: XLSX.WorkSheet = {};
 
     // Write headers
@@ -62,14 +62,12 @@ export default function AdminItems() {
       ws[XLSX.utils.encode_cell({ r, c: 2 })] = { v: item.description, t: 's' };
       ws[XLSX.utils.encode_cell({ r, c: 3 })] = { v: item.category, t: 's' };
       ws[XLSX.utils.encode_cell({ r, c: 4 })] = { v: item.destination, t: 's' };
-      ws[XLSX.utils.encode_cell({ r, c: 5 })] = { v: item.cat_page || '', t: 's' };
-      ws[XLSX.utils.encode_cell({ r, c: 6 })] = { v: item.cat_page_order || '', t: 's' };
-      ws[XLSX.utils.encode_cell({ r, c: 7 })] = { v: item.total_ws_price, t: 'n' };
-      ws[XLSX.utils.encode_cell({ r, c: 8 })] = { v: item.inactive ? 'Yes' : 'No', t: 's' };
+      ws[XLSX.utils.encode_cell({ r, c: 5 })] = { v: item.total_ws_price, t: 'n' };
+      ws[XLSX.utils.encode_cell({ r, c: 6 })] = { v: item.inactive ? 'Yes' : 'No', t: 's' };
       if (item.primary_image_url) {
-        ws[XLSX.utils.encode_cell({ r, c: 9 })] = { v: item.primary_image_url, t: 's', l: { Target: item.primary_image_url } };
+        ws[XLSX.utils.encode_cell({ r, c: 7 })] = { v: item.primary_image_url, t: 's', l: { Target: item.primary_image_url } };
       } else {
-        ws[XLSX.utils.encode_cell({ r, c: 9 })] = { v: '', t: 's' };
+        ws[XLSX.utils.encode_cell({ r, c: 7 })] = { v: '', t: 's' };
       }
     });
 

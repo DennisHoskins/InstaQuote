@@ -4,7 +4,7 @@ import pool from '../../db/connection';
 
 describe('Admin Carts API', () => {
   beforeEach(async () => {
-    await pool.query(`DELETE FROM user_cart WHERE user_id IN (1, 2, 99)`);
+    await pool.query(`DELETE FROM user_cart`);
   });
 
   describe('GET /api/admin/carts', () => {

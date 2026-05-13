@@ -6,7 +6,7 @@ interface PriceDisclaimerProps {
 
 export default function PriceDisclaimer({ variant }: PriceDisclaimerProps) {
   return (
-    <Typography variant="caption" color="text.secondary" display="block">
+    <Typography variant="caption" color="text.secondary" display="block" mt={2}>
       {variant === 'estimate' ? (
         <>
           Please note that all prices are approximate wholesale prices and are subject to change based on current market rates.

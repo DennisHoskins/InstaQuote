@@ -11,23 +11,20 @@ CREATE TABLE inventory_items (
     id SERIAL PRIMARY KEY,
     item_code VARCHAR(50) NOT NULL,
     description VARCHAR(100) NOT NULL,
-    cat_page INTEGER,
-    cat_page_order INTEGER,
     category VARCHAR(50),
+    sort_order INTEGER,
     destination VARCHAR(50),
-    destination_raw VARCHAR(100),
     total_ws_price DECIMAL(10, 2) NOT NULL,
     is_catalog BOOLEAN NOT NULL,
     inactive BOOLEAN DEFAULT FALSE,
-    last_updated TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE INDEX idx_item_code ON inventory_items(item_code);
 CREATE INDEX idx_is_catalog ON inventory_items(is_catalog);
 CREATE INDEX idx_destination ON inventory_items(destination);
-CREATE INDEX idx_destination_raw ON inventory_items(destination_raw);
 CREATE INDEX idx_category ON inventory_items(category);
+CREATE INDEX idx_catalog_sort ON inventory_items(sort_order) WHERE is_catalog = true AND inactive = false;
 
 CREATE TABLE item_sku_map (
     item_code VARCHAR(50) PRIMARY KEY,

@@ -57,13 +57,11 @@ const columns: Column[] = [
       );
     },
   },
-  { key: 'item_code', label: 'Item Code' },
+{ key: 'item_code', label: 'Item Code' },
   { key: 'sku', label: 'SKU' },
   { key: 'description', label: 'Description' },
   { key: 'category', label: 'Category', mobileHide: true },
   { key: 'destination', label: 'Destination', mobileHide: true },
-  { key: 'cat_page', label: 'Page', mobileHide: true },
-  { key: 'cat_page_order', label: 'Order', mobileHide: true },
   { 
     key: 'total_ws_price', 
     label: 'Price', 

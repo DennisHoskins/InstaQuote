@@ -1,0 +1,18 @@
+SELECT [6 - BOM Header].[Item Code], [6 - BOM Header].Description, [Costing - SS BOM Pricing].[SS GR], [Costing - SS BOM Pricing].[SS $], [Costing - 14K BOM Pricing].[14K GR], [Costing - 14K BOM Pricing].[14K $], [Costing - 10K BOM Pricing].[10K GR], [Costing - 10K BOM Pricing].[10K $], [Costing - Gemstones by Item].[GS $], [Costing - Diamonds by Item].[Diamond $], [Costing - Labor by Item].[Total WS Labor $], [Costing - Labor by Item].[total WS OH $], [Costing - Labor by Item].[Total Labor $] AS [Labor $], [Costing - Labor by Item].[Overhead $], [ss $]+[14k $]+[gs $]+[diamond $]+[LABOR $]+[overhead $]+[10k $] AS [Total $], [ss $]+[14k $]+[gs $]+[diamond $]+[LABOR $]+[overhead $]+[10k $] AS [WS WO MU $], ([ss $]+[14k $]+[gs $]+[diamond $]+[LABOR $]+[overhead $]+[10k $])*IIf([1 - Categories].[category group]="SS", 
+	IIf([SS GR] < 5, 
+		[1 - markup adjustment]![Special markup],
+		[1 - markup adjustment]![CBC/CABLE markup]),
+	IIf([1 - Categories].[category group] like "10K*",
+		IIf([10K GR] > 20, 
+			[1 - markup adjustment]![Special markup], 
+			[1 - markup adjustment]![CBC/CABLE markup]),
+		IIf([1 - Categories].[category group] like "14K*",
+			IIf([14K GR] > 20, 
+				[1 - markup adjustment]![Special markup], 
+				[1 - markup adjustment]![CBC/CABLE markup]),
+			IIf(([1 - Categories].[category group] like "COMBO" or [1 - Categories].[category group] like "TT") AND ([1 - Categories].[Category] LIKE "CBL*"),
+				[1 - markup adjustment]![Special markup], 
+				[1 - markup adjustment]![CBC/CABLE markup])
+		))) AS [WS MU $], 0 AS [Co-Op Markup], [ws wo mu $]+[ws mu $]+[Co-Op Markup] AS [Total WS $]
+FROM ((((((([6 - BOM Header] LEFT JOIN [Costing - 14K BOM Pricing] ON [6 - BOM Header].[Item Code]=[Costing - 14K BOM Pricing].[Item Code]) LEFT JOIN [Costing - SS BOM Pricing] ON [6 - BOM Header].[Item Code]=[Costing - SS BOM Pricing].[Item Code]) LEFT JOIN [Costing - Labor by Item] ON [6 - BOM Header].[Item Code]=[Costing - Labor by Item].[Item Code]) LEFT JOIN [Costing - Diamonds by Item] ON [6 - BOM Header].[Item Code]=[Costing - Diamonds by Item].[Item Code]) LEFT JOIN [Costing - Gemstones by Item] ON [6 - BOM Header].[Item Code]=[Costing - Gemstones by Item].[Item Code]) LEFT JOIN [1 - Categories] ON [6 - BOM Header].Cat=[1 - Categories].Category) LEFT JOIN [1 - Markup Adjustment] ON [1 - Categories].[Category Group]=[1 - Markup Adjustment].[Category Group]) LEFT JOIN [Costing - 10K BOM Pricing] ON [6 - BOM Header].[Item Code]=[Costing - 10K BOM Pricing].[Item Code]
+WHERE ((([6 - BOM Header].Destination)="CBC"));

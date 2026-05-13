@@ -25,7 +25,6 @@ router.get('/:itemCode', [
         ii.total_ws_price, 
         ii.inactive, 
         ii.is_catalog, 
-        ii.last_updated,
         CASE 
           WHEN df.shared_link IS NOT NULL THEN 
             REPLACE(REPLACE(df.shared_link, '&dl=0', '&raw=1'), '&dl=1', '&raw=1')

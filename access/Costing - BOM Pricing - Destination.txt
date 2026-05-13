@@ -1,0 +1,39 @@
+SELECT [6 - BOM Header].[Item Code], [6 - BOM Header].Description, [Costing - SS BOM Pricing].[SS HR GR], [Costing - SS BOM Pricing].[SS HR $], [Costing - SS BOM Pricing].[SS Wire GR], [Costing - SS BOM Pricing].[SS Wire $], [Costing - SS BOM Pricing].[SS Cable GR], [Costing - SS BOM Pricing].[SS Cable $], [Costing - SS BOM Pricing].[SS Accessories GR], [Costing - SS BOM Pricing].[SS Accessories $], [Costing - SS BOM Pricing].[SS Findings $], [Costing - SS BOM Pricing].[SS Casting GR], [Costing - SS BOM Pricing].[SS Cast $], [Costing - SS BOM Pricing].[SS Solder GR], [Costing - SS BOM Pricing].[SS Solder $], [Costing - SS BOM Pricing].[SS Other $], [Costing - SS BOM Pricing].[SS Chain GR], [Costing - SS BOM Pricing].[SS Chain $], [Costing - SS BOM Pricing].[SS GR], [Costing - SS BOM Pricing].[SS $], [Costing - SS BOM Pricing].[SS WS $], [Costing - 14K BOM Pricing].[14K HR GR], [Costing - 14K BOM Pricing].[14K HR $], [Costing - 14K BOM Pricing].[14K Wire GR], [Costing - 14K BOM Pricing].[14K Wire $], [Costing - 14K BOM Pricing].[14K Cable GR], [Costing - 14K BOM Pricing].[14K Cable $], [Costing - 14K BOM Pricing].[14K Accessories GR], [Costing - 14K BOM Pricing].[14k Accessories $], [Costing - 14K BOM Pricing].[14K Findings $], [Costing - 14K BOM Pricing].[14K Casting GR], [Costing - 14K BOM Pricing].[14K Cast $], [Costing - 14K BOM Pricing].[14K Solder GR], [Costing - 14K BOM Pricing].[14K Solder $], [Costing - 14K BOM Pricing].[14K Other $], [Costing - 14K BOM Pricing].[14K GR], [Costing - 14K BOM Pricing].[14K $], [Costing - 14K BOM Pricing].[14K WS $], [Costing - 10K BOM Pricing].[10K HR GR], [Costing - 10K BOM Pricing].[10K HR $], [Costing - 10K BOM Pricing].[10K Wire GR], [Costing - 10K BOM Pricing].[10K Wire $], [Costing - 10K BOM Pricing].[10K Cable GR], [Costing - 10K BOM Pricing].[10K Cable $], [Costing - 10K BOM Pricing].[10K Accessories GR], [Costing - 10K BOM Pricing].[10k Accessories $], [Costing - 10K BOM Pricing].[10K Findings $], [Costing - 10K BOM Pricing].[10K Casting GR], [Costing - 10K BOM Pricing].[10K Cast $], [Costing - 10K BOM Pricing].[10K Solder GR], [Costing - 10K BOM Pricing].[10K Solder $], [Costing - 10K BOM Pricing].[10K Other $], [Costing - 10K BOM Pricing].[10K GR], [Costing - 10K BOM Pricing].[10K $], [Costing - 10K BOM Pricing].[10K WS $], [Costing - Gemstones by Item].[GS $], [Costing - Diamonds by Item].[Diamond $], [Costing - Labor by Item].[Total Labor Minutes], [Costing - Labor by Item].[Total WS Labor $], [Costing - Labor by Item].[total WS OH $], [Costing - Labor by Item].[Total Labor $] AS [Labor $], [Costing - Labor by Item].[Overhead $], [ss $]+[14k $]+[gs $]+[diamond $]+[LABOR $]+[overhead $]+[10k $] AS [Total $], [ss ws $]+[14k ws $]+[gs $]+[diamond $]+[LABOR $]+[overhead $]+[10k ws $] AS [WS WO MU $], ([ss ws $]+[14k ws $]+[gs $]+[diamond $]+[LABOR $]+[overhead $]+[10k ws $])*IIf([1 - Categories].[category group]="SS",
+ 
+
+	IIf([SS GR] < 5,
+ 
+
+		[1 - markup adjustment]![Special markup],
+
+		[1 - markup adjustment]![destination markup]),
+
+	IIf([1 - Categories].[category group] like "10K*",
+
+		IIf([10K GR] > 20,
+ 
+
+			[1 - markup adjustment]![Special markup],
+ 
+
+			[1 - markup adjustment]![destination markup]),
+
+		IIf([1 - Categories].[category group] like "14K*",
+
+			IIf([14K GR] > 20,
+ 
+
+				[1 - markup adjustment]![Special markup],
+ 
+
+				[1 - markup adjustment]![destination markup]),
+
+			IIf(([1 - Categories].[category group] like "COMBO" or [1 - Categories].[category group] like "TT") AND ([1 - Categories].[Category] LIKE "CBL*"),
+
+				[1 - markup adjustment]![Special markup],
+ 
+
+				[1 - markup adjustment]![destination markup])
+		))) AS [WS MU $], 0 AS [Co-Op Markup], [ws wo mu $]+[ws mu $]+[Co-Op Markup] AS [Total WS $], [1 - Categories].[Category Group], [1 - Markup Adjustment].[Destination Markup], [6 - BOM Header].Destination
+FROM ((((((([6 - BOM Header] LEFT JOIN [Costing - 14K BOM Pricing] ON [6 - BOM Header].[Item Code]=[Costing - 14K BOM Pricing].[Item Code]) LEFT JOIN [Costing - SS BOM Pricing] ON [6 - BOM Header].[Item Code]=[Costing - SS BOM Pricing].[Item Code]) LEFT JOIN [Costing - Labor by Item] ON [6 - BOM Header].[Item Code]=[Costing - Labor by Item].[Item Code]) LEFT JOIN [Costing - Diamonds by Item] ON [6 - BOM Header].[Item Code]=[Costing - Diamonds by Item].[Item Code]) LEFT JOIN [Costing - Gemstones by Item] ON [6 - BOM Header].[Item Code]=[Costing - Gemstones by Item].[Item Code]) LEFT JOIN [1 - Categories] ON [6 - BOM Header].Cat=[1 - Categories].Category) LEFT JOIN [1 - Markup Adjustment] ON [1 - Categories].[Category Group]=[1 - Markup Adjustment].[Category Group]) LEFT JOIN [Costing - 10K BOM Pricing] ON [6 - BOM Header].[Item Code]=[Costing - 10K BOM Pricing].[Item Code]
+WHERE ((([6 - BOM Header].Destination)<>"CBC"));

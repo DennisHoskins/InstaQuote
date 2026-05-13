@@ -54,7 +54,7 @@ export default function Catalog() {
         placeholder="Search by item code or description..."
       />
 
-      <ItemsTable items={data?.items || []} showPageColumn={true} />
+      <ItemsTable items={data?.items || []} />
 
       <PaginationControls
         page={page}

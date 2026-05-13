@@ -45,12 +45,18 @@ function parseCatalogXls(buffer: ArrayBuffer): XlsItem[] {
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
-  const items: XlsItem[] = [];
   // Row 0 is metadata, Row 1 is headers, data starts at Row 2
+  const headerRow = rows[1] || [];
+  const itemCodeCol = headerRow.findIndex(h => String(h).trim() === 'Item Code');
+  const priceCol = headerRow.findIndex(h => String(h).trim() === 'Total WS $');
+
+  if (itemCodeCol === -1 || priceCol === -1) return [];
+
+  const items: XlsItem[] = [];
   for (let i = 2; i < rows.length; i++) {
     const row = rows[i];
-    const item_code = row[0] ? String(row[0]).trim() : '';
-    const price = row[4];
+    const item_code = row[itemCodeCol] ? String(row[itemCodeCol]).trim() : '';
+    const price = row[priceCol];
     if (item_code && item_code !== 'Item Code' && price !== '' && price != null) {
       const parsed = parseFloat(String(price));
       if (!isNaN(parsed)) {
@@ -61,22 +67,27 @@ function parseCatalogXls(buffer: ArrayBuffer): XlsItem[] {
   return items;
 }
 
-function parseDestinationXls(buffer: ArrayBuffer): { destination: string; items: XlsItem[] } {
+function parseDestinationXls(buffer: ArrayBuffer): { destinationName: string; items: XlsItem[] } {
   const wb = XLSX.read(buffer, { type: 'array' });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
-  const destination = rows[0]?.[0] ? String(rows[0][0]).trim() : '';
+  const destinationName = rows[0]?.[0] ? String(rows[0][0]).trim() : '';
+
+  // Row 1 is headers, data starts at Row 2
+  const headerRow = rows[1] || [];
+  const itemCodeCol = headerRow.findIndex(h => String(h).trim() === 'Item Code');
+  const priceCol = headerRow.findIndex(h => String(h).trim() === 'Total WS $');
+
+  if (itemCodeCol === -1 || priceCol === -1) return { destinationName, items: [] };
 
   const seen = new Set<string>();
   const items: XlsItem[] = [];
 
-  // Row 1 is headers, data starts at Row 2
-  // Col 1 = Item Code, Col 3 = price, skip rows where col 1 is empty (section headers)
   for (let i = 2; i < rows.length; i++) {
     const row = rows[i];
-    const item_code = row[1] ? String(row[1]).trim() : '';
-    const price = row[3];
+    const item_code = row[itemCodeCol] ? String(row[itemCodeCol]).trim() : '';
+    const price = row[priceCol];
     if (item_code && price !== '' && price != null) {
       const parsed = parseFloat(String(price));
       if (!isNaN(parsed) && !seen.has(item_code)) {
@@ -85,10 +96,11 @@ function parseDestinationXls(buffer: ArrayBuffer): { destination: string; items:
       }
     }
   }
-  return { destination, items };
+  return { destinationName, items };
 }
 
-function compare(xlsItems: XlsItem[], sqlItems: SqlItem[]): VerifyResult {
+// Catalog and single-destination compare: 1:1 lookup
+function compareSimple(xlsItems: XlsItem[], sqlItems: SqlItem[]): VerifyResult {
   const xlsMap = new Map<string, number>();
   for (const item of xlsItems) xlsMap.set(item.item_code, item.price);
 
@@ -122,6 +134,77 @@ function compare(xlsItems: XlsItem[], sqlItems: SqlItem[]): VerifyResult {
     missingFromXls: missingFromXls.sort(),
     priceMismatches: priceMismatches.sort((a, b) => a.item_code.localeCompare(b.item_code)),
   };
+}
+
+// All-destinations compare: SQL has duplicates per item_code; XLS price must match one of them.
+function compareAll(xlsItems: XlsItem[], sqlItems: SqlItem[]): VerifyResult {
+  const xlsMap = new Map<string, number>();
+  for (const item of xlsItems) xlsMap.set(item.item_code, item.price);
+
+  const sqlMap = new Map<string, number[]>();
+  for (const item of sqlItems) {
+    const existing = sqlMap.get(item.item_code);
+    if (existing) {
+      existing.push(item.price);
+    } else {
+      sqlMap.set(item.item_code, [item.price]);
+    }
+  }
+
+  const missingFromSql: string[] = [];
+  for (const code of xlsMap.keys()) {
+    if (!sqlMap.has(code)) missingFromSql.push(code);
+  }
+
+  const missingFromXls: string[] = [];
+  for (const code of sqlMap.keys()) {
+    if (!xlsMap.has(code)) missingFromXls.push(code);
+  }
+
+  const priceMismatches: { item_code: string; xls_price: number; sql_price: number }[] = [];
+  for (const [code, xlsPrice] of xlsMap.entries()) {
+    const sqlPrices = sqlMap.get(code);
+    if (sqlPrices) {
+      const matched = sqlPrices.some(p => Math.abs(xlsPrice - p) <= 0.02);
+      if (!matched) {
+        priceMismatches.push({ item_code: code, xls_price: xlsPrice, sql_price: sqlPrices[0] });
+      }
+    }
+  }
+
+  return {
+    xlsCount: xlsMap.size,
+    sqlCount: sqlMap.size,
+    missingFromSql: missingFromSql.sort(),
+    missingFromXls: missingFromXls.sort(),
+    priceMismatches: priceMismatches.sort((a, b) => a.item_code.localeCompare(b.item_code)),
+  };
+}
+
+// Probe two items in the XLS to determine if it's a single-destination file.
+// Returns the destination name if single, or null if all-destinations.
+async function detectDestination(xlsItems: XlsItem[], statedName: string): Promise<string | null> {
+  if (xlsItems.length === 0 || !statedName) return null;
+
+  const lastIdx = xlsItems.length - 1;
+  const midIdx = Math.floor(xlsItems.length / 2);
+
+  const probeCodes = lastIdx === midIdx
+    ? [xlsItems[lastIdx].item_code]
+    : [xlsItems[lastIdx].item_code, xlsItems[midIdx].item_code];
+
+  const probes = await Promise.all(
+    probeCodes.map(code => api.getVerifyItem(code).catch(() => []))
+  );
+
+  // For each probe, the item must have at least one row whose destination matches statedName.
+  for (const rows of probes) {
+    if (!Array.isArray(rows) || rows.length === 0) return null;
+    const matches = rows.some((r: any) => r.destination === statedName);
+    if (!matches) return null;
+  }
+
+  return statedName;
 }
 
 function SummaryChips({ result }: { result: VerifyResult }) {
@@ -217,7 +300,7 @@ function VerifyPanel({ type }: { type: 'catalog' | 'destination' }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<VerifyResult | null>(null);
-  const [detectedDestination, setDetectedDestination] = useState<string>('');
+  const [mode, setMode] = useState<string>('');
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -226,7 +309,7 @@ function VerifyPanel({ type }: { type: 'catalog' | 'destination' }) {
     setFileName(file.name);
     setError(null);
     setResult(null);
-    setDetectedDestination('');
+    setMode('');
     setLoading(true);
 
     try {
@@ -240,22 +323,27 @@ function VerifyPanel({ type }: { type: 'catalog' | 'destination' }) {
           return;
         }
         const sqlItems: SqlItem[] = await api.getVerifyCatalog();
-        setResult(compare(xlsItems, sqlItems));
+        setResult(compareSimple(xlsItems, sqlItems));
+        setMode('Catalog');
       } else {
-        const { destination, items: xlsItems } = parseDestinationXls(buffer);
-        if (!destination) {
-          setError('Could not read destination name from file.');
-          setLoading(false);
-          return;
-        }
+        const { destinationName, items: xlsItems } = parseDestinationXls(buffer);
         if (xlsItems.length === 0) {
           setError('No items found in file. Check that this is a valid Destination export.');
           setLoading(false);
           return;
         }
-        setDetectedDestination(destination);
-        const data = await api.getVerifyDestination(destination);
-        setResult(compare(xlsItems, data.items));
+
+        const detected = await detectDestination(xlsItems, destinationName);
+
+        if (detected) {
+          const sqlItems: SqlItem[] = await api.getVerifyDestinationByName(detected);
+          setResult(compareSimple(xlsItems, sqlItems));
+          setMode(`Destination: ${detected}`);
+        } else {
+          const sqlItems: SqlItem[] = await api.getVerifyDestination();
+          setResult(compareAll(xlsItems, sqlItems));
+          setMode('All Destinations');
+        }
       }
     } catch (err: any) {
       setError(err?.message || 'Failed to process file.');
@@ -296,9 +384,9 @@ function VerifyPanel({ type }: { type: 'catalog' | 'destination' }) {
 
       {result && (
         <>
-          {detectedDestination && (
+          {mode && (
             <Typography variant="h6" gutterBottom>
-              Destination: {detectedDestination}
+              {mode}
             </Typography>
           )}
           <SummaryChips result={result} />

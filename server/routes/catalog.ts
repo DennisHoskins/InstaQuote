@@ -40,7 +40,7 @@ router.get('/items', [
     // Get paginated items
     const itemsResult = await pool.query(
       `SELECT * FROM (
-        SELECT DISTINCT ON (i.item_code) i.item_code, i.cat_page, i.cat_page_order, m.sku, i.description, i.category, i.destination, i.total_ws_price, i.inactive,
+        SELECT DISTINCT ON (i.item_code) i.item_code, i.sort_order, m.sku, i.description, i.category, i.destination, i.total_ws_price, i.inactive,
           CASE
             WHEN df.shared_link IS NOT NULL THEN
               REPLACE(REPLACE(df.shared_link, '?dl=0', '?raw=1'), '?dl=1', '?raw=1')
@@ -53,7 +53,7 @@ router.get('/items', [
         ${whereClause}
         ORDER BY i.item_code
       ) sub
-      ORDER BY cat_page, cat_page_order, item_code
+      ORDER BY sort_order, item_code
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset]
     );

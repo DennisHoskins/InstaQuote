@@ -4,7 +4,7 @@ import pool from '../db/connection';
 
 describe('Cart API', () => {
   beforeEach(async () => {
-    await pool.query(`DELETE FROM user_cart WHERE user_id = 1`);
+    await pool.query(`DELETE FROM user_cart`);
   });
 
   describe('GET /api/cart', () => {

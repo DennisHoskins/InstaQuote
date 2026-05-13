@@ -225,11 +225,19 @@ export const api = {
     return apiClient.get(`/admin/carts/${userId}`);
   },  
 
-  getVerifyCatalog: async () => {
+getVerifyCatalog: async () => {
     return apiClient.get('/admin/verify/catalog');
   },
 
-  getVerifyDestination: async (name: string) => {
-    return apiClient.get(`/admin/verify/destination?name=${encodeURIComponent(name)}`);
+  getVerifyDestination: async () => {
+    return apiClient.get('/admin/verify/destination');
+  },
+
+  getVerifyDestinationByName: async (name: string) => {
+    return apiClient.get(`/admin/verify/destination/${encodeURIComponent(name)}`);
+  },
+
+  getVerifyItem: async (itemCode: string) => {
+    return apiClient.get(`/admin/verify/items/${encodeURIComponent(itemCode)}`);
   },
 };

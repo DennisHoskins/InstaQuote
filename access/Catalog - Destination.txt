@@ -1,0 +1,8 @@
+SELECT [1 - Destination Catalog Order].ORDER, [1 - Categories].Sub, [Item List].[Item Code], [1 - Categories].[Category Group], IIf([Item List].[Item Code] Like "*IBLS*",Replace([Item List].[Description],"INLAY BLANK","OPAL INLAY"),[Item List].[Description]) AS Description, IIf([Item List].[Description] Like "*TITANIUM*",[discount_]+14.5,IIf([Item List].[Item Code] Like "*IBLS6*",17.5+[discount_],IIf([Item List].[Item Code] Like "*IBLS4*",16.5+[discount_],IIf([Item List].[Item Code] Like "*IBLS*",16.5+[discount_],[discount_])))) AS [Total WS$], IIf([Total WS $] Between 25 And 49.99,[Total WS $]*1,IIf([Total WS $] Between 50 And 99.99,[Total WS $]*1,IIf([Total WS $] Between 100 And 199.99,[Total WS $]*1,IIf([Total WS $]>199.99,[Total WS $]*1,[Total WS $])))) AS discount_, CostingData.[Distrbutor $], IIf([Item List]![Destination]="Mar Azul Larimar","MAR AZUL by LARIMAR MINES®",IIf([Item List]![Destination]="CUSTOM CLASP COLLECTION","CUSTOM CLASP COLLECTION®",[Item List]![Destination])) AS banner1, IIf([Item List]![Destination] In ("Mar Azul Larimar","Custom Clasp Collection"),"","Destination Bracelet Collection®") AS banner2, [Item List].[Destination]
+FROM (([Item List] INNER JOIN CostingData ON [Item List].[Item Code] = CostingData.[Item Code]) INNER JOIN [1 - Categories] ON [Item List].Cat = [1 - Categories].Category) INNER JOIN [1 - Destination Catalog Order] ON [1 - Categories].[Category Group] = [1 - Destination Catalog Order].CAT
+WHERE ([Item List].Destination<>"CBC") AND ([Item List].Inactive<>Yes)
+ORDER BY [1 - Destination Catalog Order].ORDER, [1 - Categories].Sub;
+
+
+
+[Forms]![Catalog - Destination]![Destination] Is Null Or [Destination]=[Forms]![Catalog - Destination]![Destination]
